@@ -1,0 +1,13 @@
+{
+  "mode": "local-extractive-service",
+  "requests": 50,
+  "concurrency": 5,
+  "errors": 0,
+  "passed": true,
+  "throughput": 245.08587385306086,
+  "successful_throughput": 245.08587385306086,
+  "p50_ms": 18.11066098161973,
+  "p95_ms": 25.551072001690045,
+  "p99_ms": 38.775763008743525,
+  "limitations": "Closed-loop workload; latency includes failed attempts. Does not measure live provider TTFT and can exhibit coordinated omission."
+}

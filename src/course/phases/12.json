@@ -1,0 +1,674 @@
+[
+  {
+    "id": "p12-schema",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Structured outputs: syntax, schema and business invariants",
+    "minutes": 35,
+    "objectives": [
+      "Structured outputs",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects structured outputs: syntax, schema and business invariants with test contracts, failure triage, and evidence for release. Gate the classifier on all three validation layers and record their separate failure rates.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "JSON validity means a parser accepts the text. Schema validity means fields and types satisfy a contract. Business validity means the values are permitted by application rules. These are separate checks: {\"category\":\"PRODUCT_DEFECT\",\"evidence_ids\":[]} can parse and satisfy basic types while violating an evidence requirement.",
+          "Provider schema-constrained generation improves structural reliability but does not establish truth, authorization or citation correctness. Refusal and incomplete output must be handled as explicit alternatives to a parsed result."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Define a strict Pydantic result with a closed category enum, forbidden extra fields and bounded strings. Validate again at the service boundary even if the provider claims schema enforcement. Then resolve evidence IDs against authorized records and apply UNKNOWN/escalation rules.",
+          "The local live adapter uses the Responses API parse interface with a declared response model, checks output_parsed, refusal/incomplete status and usage. It never falls back to treating arbitrary text as a trusted result."
+        ],
+        "code": "allowed={'PRODUCT_DEFECT','AUTOMATION_DEFECT','ENVIRONMENT','TEST_DATA','UNKNOWN'}\nassert 'TIMEOUT' not in allowed",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A repair loop repeatedly asks the model to rewrite an unauthorized request until it fits the schema. That changes syntax without fixing permission. Another parser strips everything before the first brace, silently accepting an unrelated object from a longer response.",
+          "Test extra fields, wrong enum casing, boolean-to-integer coercion, empty evidence and unresolved citations. Bound repairs and retain the initial failure for diagnosis rather than hiding it."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Gate the classifier on all three validation layers and record their separate failure rates. A deterministic fixture can prove that the service rejects malformed values; a live dataset measures how often the provider produces them.",
+          "For a release, demonstrate that valid-looking malicious outputs cannot bypass domain rules. The same evidence rules should apply to baseline classifiers, LLM adapters and generated reports."
+        ]
+      }
+    ],
+    "mistake": "A repair loop repeatedly asks the model to rewrite an unauthorized request until it fits the schema. That changes syntax without fixing permission. Another parser strips everything before the first brace, silently accepting an unrelated object from a longer response.",
+    "takeaway": "Gate the classifier on all three validation layers and record their separate failure rates.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def valid_result(r):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def valid_result(r):\n    allowed={'PRODUCT_DEFECT','AUTOMATION_DEFECT','ENVIRONMENT','TEST_DATA','UNKNOWN'}\n    return set(r)=={'category','evidence_ids'} and r['category'] in allowed and isinstance(r['evidence_ids'],list) and all(isinstance(x,str) for x in r['evidence_ids']) and (r['category']=='UNKNOWN' or bool(r['evidence_ids']))",
+      "starter": "def valid_result(r):\n    return False",
+      "tests": "assert valid_result({'category':'UNKNOWN','evidence_ids':[]})\nassert not valid_result({'category':'PRODUCT_DEFECT','evidence_ids':[]})\nassert not valid_result({'category':'UNKNOWN','evidence_ids':[],'secret':'x'})",
+      "id": "p12-schema-exercise",
+      "hints": [
+        "JSON validity means a parser accepts the text.",
+        "A repair loop repeatedly asks the model to rewrite an unauthorized request until it fits the schema.",
+        "Define a strict Pydantic result with a closed category enum, forbidden extra fields and bounded strings.",
+        "Gate the classifier on all three validation layers and record their separate failure rates."
+      ],
+      "explanation": "def valid_result(r):\n    allowed={'PRODUCT_DEFECT','AUTOMATION_DEFECT','ENVIRONMENT','TEST_DATA','UNKNOWN'}\n    return set(r)=={'category','evidence_ids'} and r['category'] in allowed and isinstance(r['evidence_ids'],list) and all(isinstance(x,str) for x in r['evidence_ids']) and (r['category']=='UNKNOWN' or bool(r['evidence_ids']))"
+    },
+    "quiz": {
+      "question": "Does a schema prove a cited root cause is correct?",
+      "options": [
+        "No: evidence and business checks are separate",
+        "Yes: JSON guarantees truth",
+        "Only for required fields"
+      ],
+      "answer": 0,
+      "explanation": "Schemas constrain structure, not the factual relationship between a claim and its source."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Does a schema prove a cited root cause is correct?",
+      "options": [
+        "No: evidence and business checks are separate",
+        "Yes: JSON guarantees truth",
+        "Only for required fields"
+      ],
+      "answer": 0,
+      "explanation": "Schemas constrain structure, not the factual relationship between a claim and its source."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/function-calling",
+      "https://developers.openai.com/api/docs/guides/structured-outputs",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p11-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "JSON Schema",
+      "Structured output",
+      "Business invariant"
+    ],
+    "interviewIds": [
+      "bridge-prompt-engineering-006",
+      "bridge-prompt-engineering-007",
+      "bridge-prompt-engineering-008",
+      "bridge-phase-12-3",
+      "bridge-phase-12-4",
+      "bridge-phase-12-5",
+      "bridge-phase-12-6",
+      "bridge-phase-12-7"
+    ]
+  },
+  {
+    "id": "p12-tools",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Tool calling: proposal, authorization and execution",
+    "minutes": 35,
+    "objectives": [
+      "Tool calling",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects tool calling: proposal, authorization and execution with test contracts, failure triage, and evidence for release. The safe automation assistant reads synthetic logs, searches approved history and prepares a draft.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A tool call is a model proposal containing a name and arguments. Your application decides whether to execute it. The model cannot grant itself permissions. A complete loop supplies tool definitions, validates a proposed call, authorizes it, executes within a budget, sends the result associated with its call ID and obtains a final answer.",
+          "Multiple calls may be proposed, but parallel execution is safe only when operations are independent and permitted. Writes need approval and idempotency; reads still need tenant and path restrictions."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use an allowlisted registry of typed functions. Inject principal and tenant from the authenticated session rather than accepting them from model arguments. Separate read_failure, search_history and propose_patch from apply_patch. The latter requires a human-approved action record.",
+          "Limit total calls, wall time and output size. Keep a trace with proposal, validation, authorization, execution result and final summary. Preserve call IDs so results cannot be attached to the wrong request."
+        ],
+        "code": "registry={'read_failure':lambda failure_id: {'id':failure_id}}\nname='read_failure'\nif name not in registry: raise ValueError('unknown tool')",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A generic run_shell tool turns a natural-language request into unrestricted execution. A supposedly read-only tool follows a user-provided path outside the fixture directory. Both failures occur below the prompt layer.",
+          "Test unknown tool names, extra arguments, cross-tenant IDs, path traversal, duplicate write IDs and exhausted budgets. Denied calls should be visible in the trace and should not execute a fallback with broader privileges."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The safe automation assistant reads synthetic logs, searches approved history and prepares a draft. Its acceptance suite asserts zero writes without approval and termination within the call budget.",
+          "Evaluate tool-name accuracy, argument accuracy and goal completion separately. A correct final explanation does not excuse an unauthorized intermediate action; trajectory safety is a hard release gate."
+        ]
+      }
+    ],
+    "mistake": "A generic run_shell tool turns a natural-language request into unrestricted execution. A supposedly read-only tool follows a user-provided path outside the fixture directory. Both failures occur below the prompt layer.",
+    "takeaway": "The safe automation assistant reads synthetic logs, searches approved history and prepares a draft.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def permitted(tool,approved,calls,limit):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def permitted(tool,approved,calls,limit):\n    return calls<limit and (tool in {'read_failure','search_history','propose_patch'} or (tool=='apply_patch' and approved))",
+      "starter": "def permitted(tool,approved,calls,limit):\n    return False",
+      "tests": "assert permitted('read_failure',False,0,3)\nassert not permitted('apply_patch',False,0,3)\nassert not permitted('read_failure',True,3,3)\nassert not permitted('run_shell',True,0,3)",
+      "id": "p12-tools-exercise",
+      "hints": [
+        "A tool call is a model proposal containing a name and arguments.",
+        "A generic run_shell tool turns a natural-language request into unrestricted execution.",
+        "Use an allowlisted registry of typed functions.",
+        "The safe automation assistant reads synthetic logs, searches approved history and prepares a draft."
+      ],
+      "explanation": "def permitted(tool,approved,calls,limit):\n    return calls<limit and (tool in {'read_failure','search_history','propose_patch'} or (tool=='apply_patch' and approved))"
+    },
+    "quiz": {
+      "question": "Where should tenant authorization be enforced?",
+      "options": [
+        "In the application before tool execution",
+        "Only in the prompt",
+        "After the write completes"
+      ],
+      "answer": 0,
+      "explanation": "The application owns the authenticated identity and the permission boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Where should tenant authorization be enforced?",
+      "options": [
+        "In the application before tool execution",
+        "Only in the prompt",
+        "After the write completes"
+      ],
+      "answer": 0,
+      "explanation": "The application owns the authenticated identity and the permission boundary."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/function-calling",
+      "https://developers.openai.com/api/docs/guides/structured-outputs",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p12-schema"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Tool calling",
+      "Allowlist",
+      "Human approval"
+    ],
+    "interviewIds": [
+      "bridge-prompt-engineering-006",
+      "bridge-prompt-engineering-007",
+      "bridge-prompt-engineering-008",
+      "bridge-phase-12-3",
+      "bridge-phase-12-4",
+      "bridge-phase-12-5",
+      "bridge-phase-12-6",
+      "bridge-phase-12-7"
+    ]
+  },
+  {
+    "id": "p12-domain",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Schema validity versus business correctness",
+    "minutes": 35,
+    "objectives": [
+      "Schema validity versus business correctness",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects schema validity versus business correctness with test contracts, failure triage, and evidence for release. Acceptance records schema pass, invariant pass and classification correctness separately.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A JSON schema constrains types and vocabulary. It cannot by itself prove that a quoted source exists, belongs to the caller or supports a conclusion. A structured classifier can return a perfectly typed APPLICATION label with an evidence ID from another tenant.",
+          "Separate parsing, domain validation and quality scoring. Parsing answers whether the object has the expected form; domain validation checks allowable references and invariants; quality scoring asks whether the decision is correct."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Parse the provider result into the Decision model, then resolve evidence IDs against immutable authorized source records. UNKNOWN requires review; supported labels require evidence. Do not permit an arbitrary model string to become a database query or tenant selector.",
+          "Return safe validation errors and retain the failed case for diagnosis. A repair retry must use the same authorized evidence and deadline. Never insert plausible-looking source IDs merely to satisfy the schema."
+        ],
+        "code": "from quality.provider import validate_decision\n# Resolve IDs only within the authorized source set",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "An enum label passes validation but points to a nonexistent incident. A source ID exists globally but is outside the authenticated tenant. A syntactically valid decision contradicts the actual log.",
+          "Test each layer independently with malformed JSON, valid-but-inconsistent objects and factually wrong valid objects. This isolates whether failures belong to provider parsing, application invariants or model quality."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance records schema pass, invariant pass and classification correctness separately. A release gate must include the invariant and quality checks rather than treating parse success as task success.",
+          "For SDETs, typed outputs offer stable assertion surfaces while leaving semantic judgment explicit. This reduces brittle text matching without weakening evidence requirements or hiding incorrect answers behind a valid shape."
+        ]
+      }
+    ],
+    "mistake": "An enum label passes validation but points to a nonexistent incident. A source ID exists globally but is outside the authenticated tenant. A syntactically valid decision contradicts the actual log.",
+    "takeaway": "Acceptance records schema pass, invariant pass and classification correctness separately.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def domain_valid(d,allowed):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def domain_valid(d,allowed):\n    ids=d.get('evidence_ids',[])\n    return set(ids)<=set(allowed) and (d.get('needs_review') is True if d.get('category')=='UNKNOWN' else bool(ids))",
+      "starter": "def domain_valid(d,allowed):\n    return False",
+      "tests": "assert domain_valid({'category':'UNKNOWN','needs_review':True,'evidence_ids':[]},[])\nassert not domain_valid({'category':'APPLICATION','evidence_ids':['B1']},['A1'])",
+      "id": "p12-domain-exercise",
+      "hints": [
+        "A JSON schema constrains types and vocabulary.",
+        "An enum label passes validation but points to a nonexistent incident.",
+        "Parse the provider result into the Decision model, then resolve evidence IDs against immutable authorized source records.",
+        "Acceptance records schema pass, invariant pass and classification correctness separately."
+      ],
+      "explanation": "def domain_valid(d,allowed):\n    ids=d.get('evidence_ids',[])\n    return set(ids)<=set(allowed) and (d.get('needs_review') is True if d.get('category')=='UNKNOWN' else bool(ids))"
+    },
+    "quiz": {
+      "question": "What does a valid response schema establish?",
+      "options": [
+        "Shape, not factual correctness or authorization",
+        "That every source supports the answer",
+        "That the task is complete"
+      ],
+      "answer": 0,
+      "explanation": "Domain and semantic checks remain necessary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What does a valid response schema establish?",
+      "options": [
+        "Shape, not factual correctness or authorization",
+        "That every source supports the answer",
+        "That the task is complete"
+      ],
+      "answer": 0,
+      "explanation": "Domain and semantic checks remain necessary."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/function-calling",
+      "https://developers.openai.com/api/docs/guides/structured-outputs",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p12-tools"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Business invariant",
+      "Schema validation"
+    ],
+    "interviewIds": [
+      "bridge-prompt-engineering-006",
+      "bridge-prompt-engineering-007",
+      "bridge-prompt-engineering-008",
+      "bridge-phase-12-3",
+      "bridge-phase-12-4",
+      "bridge-phase-12-5",
+      "bridge-phase-12-6",
+      "bridge-phase-12-7"
+    ]
+  },
+  {
+    "id": "p12-dispatch",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Tool dispatch: validate arguments before effects",
+    "minutes": 35,
+    "objectives": [
+      "Tool dispatch",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects tool dispatch: validate arguments before effects with test contracts, failure triage, and evidence for release. Acceptance demonstrates that only registered, authorized proposals execute and that effects match the approved action exactly.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A tool call is a proposal consisting of a name and structured arguments. The host chooses whether to execute it. Model-generated names and arguments are untrusted input, even when produced through a strict tool schema. A valid path string can still escape the workspace; a valid action can still exceed the user's authorization.",
+          "Keep a registry of allowlisted tools with independent read/write policies. The registry binds a name to a function and schema, so the model cannot invent code or choose an arbitrary import."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Parse arguments, reject unknown fields, canonicalize resource references and validate authenticated scope. Apply a deadline and call budget, then execute the registered function. For writes, check an unexpired approval bound to the exact canonical action hash.",
+          "Feed a typed tool result back to the model as data. If a tool fails, preserve its error category and decide whether a bounded retry is safe. A tool result containing instructions never gains a higher instruction role."
+        ],
+        "code": "# local-labs/quality/policy.py checks tool allowlist and exact action hash",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A dispatcher uses eval on the proposed tool name. A read-file schema allows ../../secrets. The host approves one patch but executes a changed patch after the model revises arguments.",
+          "Test unknown names, malformed arguments, traversal, mismatched approval hashes and tool-returned injection. Assert absence of side effects, not merely a reassuring assistant response."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance demonstrates that only registered, authorized proposals execute and that effects match the approved action exactly. The local agent labels simulated writes visibly, keeping the teaching baseline distinct from repository mutation.",
+          "SDETs can treat tool dispatch as an adversarial API boundary. Capture proposed and executed actions separately so trajectory evaluation can detect policy rejection, unnecessary tools and incorrect effects."
+        ]
+      }
+    ],
+    "mistake": "A dispatcher uses eval on the proposed tool name. A read-file schema allows ../../secrets. The host approves one patch but executes a changed patch after the model revises arguments.",
+    "takeaway": "Acceptance demonstrates that only registered, authorized proposals execute and that effects match the approved action exactly.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def dispatch_allowed(name,args,registry):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def dispatch_allowed(name,args,registry):\n    spec=registry.get(name)\n    return spec is not None and set(args)==set(spec)",
+      "starter": "def dispatch_allowed(name,args,registry):\n    return False",
+      "tests": "assert dispatch_allowed('read',{'id':'F1'},{'read':['id']})\nassert not dispatch_allowed('write',{}, {'read':['id']})\nassert not dispatch_allowed('read',{'id':'F1','tenant':'b'},{'read':['id']})",
+      "id": "p12-dispatch-exercise",
+      "hints": [
+        "A tool call is a proposal consisting of a name and structured arguments.",
+        "A dispatcher uses eval on the proposed tool name.",
+        "Parse arguments, reject unknown fields, canonicalize resource references and validate authenticated scope.",
+        "Acceptance demonstrates that only registered, authorized proposals execute and that effects match the approved action exactly."
+      ],
+      "explanation": "def dispatch_allowed(name,args,registry):\n    spec=registry.get(name)\n    return spec is not None and set(args)==set(spec)"
+    },
+    "quiz": {
+      "question": "Who authorizes a model-proposed tool call?",
+      "options": [
+        "The host\u2019s independent policy",
+        "The model\u2019s explanation",
+        "The tool schema alone"
+      ],
+      "answer": 0,
+      "explanation": "Schema validity and permission are separate checks."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Who authorizes a model-proposed tool call?",
+      "options": [
+        "The host\u2019s independent policy",
+        "The model\u2019s explanation",
+        "The tool schema alone"
+      ],
+      "answer": 0,
+      "explanation": "Schema validity and permission are separate checks."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/function-calling",
+      "https://developers.openai.com/api/docs/guides/structured-outputs",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p12-domain"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Tool dispatch",
+      "Approval hash"
+    ],
+    "interviewIds": [
+      "bridge-prompt-engineering-006",
+      "bridge-prompt-engineering-007",
+      "bridge-prompt-engineering-008",
+      "bridge-phase-12-3",
+      "bridge-phase-12-4",
+      "bridge-phase-12-5",
+      "bridge-phase-12-6",
+      "bridge-phase-12-7"
+    ]
+  },
+  {
+    "id": "p12-repair",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Bounded repair, refusals and incomplete structured output",
+    "minutes": 35,
+    "objectives": [
+      "Bounded repair, refusals and incomplete structured output",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects bounded repair, refusals and incomplete structured output with test contracts, failure triage, and evidence for release. Acceptance includes bounded attempts and honest first-pass/eventual rates.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Structured generation can fail through malformed content, refusal, token exhaustion or domain inconsistency. These failures need distinct handling. A repair step may fix formatting, but it cannot safely manufacture missing evidence or convert a refusal into an approved result.",
+          "Retries increase latency and cost. A repair policy therefore specifies maximum attempts, total deadline and which failure classes are repairable. Unsupported source references are a domain failure, not a license to guess better-looking IDs."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Retain the original failed envelope and safe validation feedback. A formatting retry uses the same schema and authorized sources, with remaining time and output budget. Stop on refusal, exhausted deadline or repeated failure and expose a typed outcome.",
+          "Validate repaired output through the same domain checks as the first attempt. Track first-pass validity separately from eventual validity so a fragile prompt cannot appear as robust simply because retries conceal its failures."
+        ],
+        "code": "# A formatting retry remains inside the original deadline and source scope",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A repair function strips text until json.loads succeeds but removes essential fields. A retry changes the evidence set and makes benchmark comparison invalid. A refused request is rephrased indefinitely until safety is bypassed.",
+          "Test malformed, incomplete and refused outputs with deterministic fixtures. Assert retry counts, final status and unchanged source scope. Make sure partial objects never enter caches or project evidence."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes bounded attempts and honest first-pass/eventual rates. Evaluate repaired semantic correctness, not only parse success, and count all attempts in latency and cost reports.",
+          "For SDETs, failure injection at the adapter boundary gives repeatable coverage without a paid call. Credentialed model experiments then estimate how often those paths actually occur on representative inputs."
+        ]
+      }
+    ],
+    "mistake": "A repair function strips text until json.loads succeeds but removes essential fields. A retry changes the evidence set and makes benchmark comparison invalid. A refused request is rephrased indefinitely until safety is bypassed.",
+    "takeaway": "Acceptance includes bounded attempts and honest first-pass/eventual rates.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def may_repair(reason,attempt,limit,remaining):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def may_repair(reason,attempt,limit,remaining):\n    return reason=='format' and attempt<limit and remaining>0",
+      "starter": "def may_repair(reason,attempt,limit,remaining):\n    return False",
+      "tests": "assert may_repair('format',0,1,2)\nassert not may_repair('refusal',0,1,2)\nassert not may_repair('format',1,1,2)\nassert not may_repair('format',0,1,0)",
+      "id": "p12-repair-exercise",
+      "hints": [
+        "Structured generation can fail through malformed content, refusal, token exhaustion or domain inconsistency.",
+        "A repair function strips text until json.loads succeeds but removes essential fields.",
+        "Retain the original failed envelope and safe validation feedback.",
+        "Acceptance includes bounded attempts and honest first-pass/eventual rates."
+      ],
+      "explanation": "def may_repair(reason,attempt,limit,remaining):\n    return reason=='format' and attempt<limit and remaining>0"
+    },
+    "quiz": {
+      "question": "Can a repair step invent missing source evidence?",
+      "options": [
+        "No: it must preserve authorized evidence",
+        "Yes: if JSON parses",
+        "Only after two retries"
+      ],
+      "answer": 0,
+      "explanation": "Repair changes representation, not the facts or permissions."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Can a repair step invent missing source evidence?",
+      "options": [
+        "No: it must preserve authorized evidence",
+        "Yes: if JSON parses",
+        "Only after two retries"
+      ],
+      "answer": 0,
+      "explanation": "Repair changes representation, not the facts or permissions."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/function-calling",
+      "https://developers.openai.com/api/docs/guides/structured-outputs",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p12-dispatch"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Repair policy",
+      "Incomplete output"
+    ],
+    "interviewIds": [
+      "bridge-prompt-engineering-006",
+      "bridge-prompt-engineering-007",
+      "bridge-prompt-engineering-008",
+      "bridge-phase-12-3",
+      "bridge-phase-12-4",
+      "bridge-phase-12-5",
+      "bridge-phase-12-6",
+      "bridge-phase-12-7"
+    ]
+  },
+  {
+    "id": "p12-checkpoint",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Phase 12 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 12 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 12 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance includes bounded attempts and honest first-pass/eventual rates.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects bounded repair, refusals and incomplete structured output to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Retain the original failed envelope and safe validation feedback. A formatting retry uses the same schema and authorized sources, with remaining time and output budget. Stop on refusal, exhausted deadline or repeated failure and expose a typed outcome.",
+          "Validate repaired output through the same domain checks as the first attempt. Track first-pass validity separately from eventual validity so a fragile prompt cannot appear as robust simply because retries conceal its failures.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "# A formatting retry remains inside the original deadline and source scope",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A repair function strips text until json.loads succeeds but removes essential fields. A retry changes the evidence set and makes benchmark comparison invalid. A refused request is rephrased indefinitely until safety is bypassed.",
+          "Test malformed, incomplete and refused outputs with deterministic fixtures. Assert retry counts, final status and unchanged source scope. Make sure partial objects never enter caches or project evidence.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes bounded attempts and honest first-pass/eventual rates. Evaluate repaired semantic correctness, not only parse success, and count all attempts in latency and cost reports.",
+          "For SDETs, failure injection at the adapter boundary gives repeatable coverage without a paid call. Credentialed model experiments then estimate how often those paths actually occur on representative inputs.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A repair function strips text until json.loads succeeds but removes essential fields. A retry changes the evidence set and makes benchmark comparison invalid. A refused request is rephrased indefinitely until safety is bypassed.",
+    "takeaway": "Acceptance includes bounded attempts and honest first-pass/eventual rates.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Bounded repair, refusals and incomplete structured output to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance includes bounded attempts and honest first-pass/eventual rates.",
+      "id": "p12-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects bounded repair, refusals and incomplete structured output to the shared CI quality platform.",
+        "A repair function strips text until json.loads succeeds but removes essential fields.",
+        "Retain the original failed envelope and safe validation feedback.",
+        "Acceptance includes bounded attempts and honest first-pass/eventual rates."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance includes bounded attempts and honest first-pass/eventual rates."
+    },
+    "quiz": {
+      "question": "A candidate for bounded repair, refusals and incomplete structured output meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for bounded repair, refusals and incomplete structured output meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/function-calling",
+      "https://developers.openai.com/api/docs/guides/structured-outputs",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p12-repair"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-prompt-engineering-006",
+      "bridge-prompt-engineering-007",
+      "bridge-prompt-engineering-008",
+      "bridge-phase-12-3",
+      "bridge-phase-12-4",
+      "bridge-phase-12-5",
+      "bridge-phase-12-6",
+      "bridge-phase-12-7"
+    ]
+  }
+]

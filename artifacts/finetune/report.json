@@ -1,0 +1,63 @@
+{
+  "stage": "fine-tuned-and-heldout-evaluated",
+  "base_model": "prajjwal1/bert-tiny",
+  "classes": [
+    "PRODUCT_DEFECT",
+    "AUTOMATION_DEFECT",
+    "ENVIRONMENT",
+    "TEST_DATA",
+    "UNKNOWN"
+  ],
+  "dataset": "synthetic-ci-v1",
+  "epochs": 3,
+  "loss": [
+    14.185967683792114,
+    12.850657105445862,
+    11.519498229026794
+  ],
+  "heldout_accuracy": 0.4000000059604645,
+  "trainable_parameters": 4741,
+  "total_parameters": 4391306,
+  "train_groups": [
+    "incident-0",
+    "incident-1",
+    "incident-10",
+    "incident-11",
+    "incident-13",
+    "incident-15",
+    "incident-16",
+    "incident-17",
+    "incident-18",
+    "incident-19",
+    "incident-2",
+    "incident-21",
+    "incident-22",
+    "incident-25",
+    "incident-26",
+    "incident-27",
+    "incident-28",
+    "incident-29",
+    "incident-3",
+    "incident-33",
+    "incident-34",
+    "incident-36",
+    "incident-4",
+    "incident-5",
+    "incident-6",
+    "incident-7",
+    "incident-9"
+  ],
+  "test_groups": [
+    "incident-12",
+    "incident-14",
+    "incident-20",
+    "incident-23",
+    "incident-24",
+    "incident-30",
+    "incident-31",
+    "incident-32",
+    "incident-35",
+    "incident-8"
+  ],
+  "limitations": "Synthetic fixture training only; no production quality or safety guarantee. Base model/license and revision must be recorded for a reproducible release."
+}

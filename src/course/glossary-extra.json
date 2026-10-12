@@ -1,0 +1,1362 @@
+[
+  {
+    "term": "Probabilistic system",
+    "simple": "A system whose outputs can vary or express uncertainty even for similar inputs.",
+    "deep": "Track A uses AI to improve software testing: generating API test candidates, classifying CI failures, or proposing missing edge cases. The generated artifacts still need review and deterministic execution.",
+    "example": "",
+    "lesson": "orientation",
+    "phase": 0
+  },
+  {
+    "term": "AI engineering",
+    "simple": "Building usable applications around models, data, APIs, tools and evaluation.",
+    "deep": "Track A uses AI to improve software testing: generating API test candidates, classifying CI failures, or proposing missing edge cases. The generated artifacts still need review and deterministic execution.",
+    "example": "",
+    "lesson": "orientation",
+    "phase": 0
+  },
+  {
+    "term": "AI quality engineering",
+    "simple": "Testing and enforcing model/application behavior with evidence and release contracts.",
+    "deep": "Track A uses AI to improve software testing: generating API test candidates, classifying CI failures, or proposing missing edge cases. The generated artifacts still need review and deterministic execution.",
+    "example": "",
+    "lesson": "orientation",
+    "phase": 0
+  },
+  {
+    "term": "Dataclass",
+    "simple": "A Python class whose common data methods are generated from declared fields.",
+    "deep": "Names bind to objects; they are not storage boxes with fixed types. Integers, floats, strings, booleans, and None represent distinct meanings. The string \"false\" is truthy because it is non-empty. Never convert an API flag with bool(raw) when raw might be a string.",
+    "example": "original = [{\"status\": \"failed\"}]\ncopy = original.copy()\ncopy[0][\"status\"] = \"passed\"\nprint(original[0][\"status\"])  # passed",
+    "lesson": "python-values",
+    "phase": 1
+  },
+  {
+    "term": "Type hint",
+    "simple": "A declaration of expected types used by readers and static tools; it does not itself validate runtime values.",
+    "deep": "Names bind to objects; they are not storage boxes with fixed types. Integers, floats, strings, booleans, and None represent distinct meanings. The string \"false\" is truthy because it is non-empty. Never convert an API flag with bool(raw) when raw might be a string.",
+    "example": "original = [{\"status\": \"failed\"}]\ncopy = original.copy()\ncopy[0][\"status\"] = \"passed\"\nprint(original[0][\"status\"])  # passed",
+    "lesson": "python-values",
+    "phase": 1
+  },
+  {
+    "term": "Pydantic",
+    "simple": "A Python library that validates data against declared models and produces typed objects.",
+    "deep": "Names bind to objects; they are not storage boxes with fixed types. Integers, floats, strings, booleans, and None represent distinct meanings. The string \"false\" is truthy because it is non-empty. Never convert an API flag with bool(raw) when raw might be a string.",
+    "example": "original = [{\"status\": \"failed\"}]\ncopy = original.copy()\ncopy[0][\"status\"] = \"passed\"\nprint(original[0][\"status\"])  # passed",
+    "lesson": "python-values",
+    "phase": 1
+  },
+  {
+    "term": "Fixture",
+    "simple": "Reusable controlled setup or data supplied to a test.",
+    "deep": "Names bind to objects; they are not storage boxes with fixed types. Integers, floats, strings, booleans, and None represent distinct meanings. The string \"false\" is truthy because it is non-empty. Never convert an API flag with bool(raw) when raw might be a string.",
+    "example": "original = [{\"status\": \"failed\"}]\ncopy = original.copy()\ncopy[0][\"status\"] = \"passed\"\nprint(original[0][\"status\"])  # passed",
+    "lesson": "python-values",
+    "phase": 1
+  },
+  {
+    "term": "Mock",
+    "simple": "A substitute dependency used to control observations and inspect interactions in a test.",
+    "deep": "Names bind to objects; they are not storage boxes with fixed types. Integers, floats, strings, booleans, and None represent distinct meanings. The string \"false\" is truthy because it is non-empty. Never convert an API flag with bool(raw) when raw might be a string.",
+    "example": "original = [{\"status\": \"failed\"}]\ncopy = original.copy()\ncopy[0][\"status\"] = \"passed\"\nprint(original[0][\"status\"])  # passed",
+    "lesson": "python-values",
+    "phase": 1
+  },
+  {
+    "term": "Coroutine",
+    "simple": "An asynchronous function execution that can suspend at await points.",
+    "deep": "Names bind to objects; they are not storage boxes with fixed types. Integers, floats, strings, booleans, and None represent distinct meanings. The string \"false\" is truthy because it is non-empty. Never convert an API flag with bool(raw) when raw might be a string.",
+    "example": "original = [{\"status\": \"failed\"}]\ncopy = original.copy()\ncopy[0][\"status\"] = \"passed\"\nprint(original[0][\"status\"])  # passed",
+    "lesson": "python-values",
+    "phase": 1
+  },
+  {
+    "term": "Semaphore",
+    "simple": "A counter-based control limiting the number of concurrent operations.",
+    "deep": "Names bind to objects; they are not storage boxes with fixed types. Integers, floats, strings, booleans, and None represent distinct meanings. The string \"false\" is truthy because it is non-empty. Never convert an API flag with bool(raw) when raw might be a string.",
+    "example": "original = [{\"status\": \"failed\"}]\ncopy = original.copy()\ncopy[0][\"status\"] = \"passed\"\nprint(original[0][\"status\"])  # passed",
+    "lesson": "python-values",
+    "phase": 1
+  },
+  {
+    "term": "Generator",
+    "simple": "An iterator that yields values incrementally rather than constructing all of them at once.",
+    "deep": "Names bind to objects; they are not storage boxes with fixed types. Integers, floats, strings, booleans, and None represent distinct meanings. The string \"false\" is truthy because it is non-empty. Never convert an API flag with bool(raw) when raw might be a string.",
+    "example": "original = [{\"status\": \"failed\"}]\ncopy = original.copy()\ncopy[0][\"status\"] = \"passed\"\nprint(original[0][\"status\"])  # passed",
+    "lesson": "python-values",
+    "phase": 1
+  },
+  {
+    "term": "Context manager",
+    "simple": "An object defining entry and exit behavior to release resources reliably.",
+    "deep": "Names bind to objects; they are not storage boxes with fixed types. Integers, floats, strings, booleans, and None represent distinct meanings. The string \"false\" is truthy because it is non-empty. Never convert an API flag with bool(raw) when raw might be a string.",
+    "example": "original = [{\"status\": \"failed\"}]\ncopy = original.copy()\ncopy[0][\"status\"] = \"passed\"\nprint(original[0][\"status\"])  # passed",
+    "lesson": "python-values",
+    "phase": 1
+  },
+  {
+    "term": "Broadcasting",
+    "simple": "NumPy rules that align compatible array shapes for elementwise operations.",
+    "deep": "Embedding search can score many documents at once with a matrix product. If queries have shape [q,d] and documents [n,d], normalize each row and multiply queries by documents transposed to obtain [q,n]. Each output row is one query's score against every document.",
+    "example": "import numpy as np\nq=np.array([[1.,0.],[0.,1.]])\nd=np.array([[1.,0.],[1.,1.]])\nd=d/np.linalg.norm(d,axis=1,keepdims=True)\nprint(q@d.T)",
+    "lesson": "p02-matrix",
+    "phase": 2
+  },
+  {
+    "term": "Vectorization",
+    "simple": "Expressing operations over arrays instead of explicit per-element Python loops.",
+    "deep": "A NumPy ndarray stores typed values in a multidimensional shape. A matrix shaped (runs, tests) has one row per run. sum(axis=0) reduces the run axis and produces one value per test. sum(axis=1) produces one value per run.",
+    "example": "latency = np.array([[100., 200., 300.], [120., 220., 330.]])\nbaseline = np.array([100., 200., 300.])\nprint(latency / baseline)",
+    "lesson": "numpy-arrays",
+    "phase": 2
+  },
+  {
+    "term": "Dot product",
+    "simple": "The sum of pairwise products of corresponding vector coordinates.",
+    "deep": "A NumPy ndarray stores typed values in a multidimensional shape. A matrix shaped (runs, tests) has one row per run. sum(axis=0) reduces the run axis and produces one value per test. sum(axis=1) produces one value per run.",
+    "example": "latency = np.array([[100., 200., 300.], [120., 220., 330.]])\nbaseline = np.array([100., 200., 300.])\nprint(latency / baseline)",
+    "lesson": "numpy-arrays",
+    "phase": 2
+  },
+  {
+    "term": "Norm",
+    "simple": "A measure of vector magnitude; the Euclidean norm is the square root of summed squares.",
+    "deep": "A NumPy ndarray stores typed values in a multidimensional shape. A matrix shaped (runs, tests) has one row per run. sum(axis=0) reduces the run axis and produces one value per test. sum(axis=1) produces one value per run.",
+    "example": "latency = np.array([[100., 200., 300.], [120., 220., 330.]])\nbaseline = np.array([100., 200., 300.])\nprint(latency / baseline)",
+    "lesson": "numpy-arrays",
+    "phase": 2
+  },
+  {
+    "term": "DataFrame",
+    "simple": "A labeled two-dimensional table with column-wise types and operations.",
+    "deep": "A DataFrame is a labeled table; each column is a Series. Start with head(), info(), dtypes, and isna().sum(). Read CSV with explicit types when identifiers have leading zeros. Parse timestamps with a defined timezone.",
+    "example": "",
+    "lesson": "pandas-clean",
+    "phase": 3
+  },
+  {
+    "term": "Groupby",
+    "simple": "Partitioning rows by keys before applying aggregation or transformation.",
+    "deep": "A DataFrame is a labeled table; each column is a Series. Start with head(), info(), dtypes, and isna().sum(). Read CSV with explicit types when identifiers have leading zeros. Parse timestamps with a defined timezone.",
+    "example": "",
+    "lesson": "pandas-clean",
+    "phase": 3
+  },
+  {
+    "term": "Join cardinality",
+    "simple": "The relationship between row counts and key multiplicity when tables are combined.",
+    "deep": "A DataFrame is a labeled table; each column is a Series. Start with head(), info(), dtypes, and isna().sum(). Read CSV with explicit types when identifiers have leading zeros. Parse timestamps with a defined timezone.",
+    "example": "",
+    "lesson": "pandas-clean",
+    "phase": 3
+  },
+  {
+    "term": "Pivot",
+    "simple": "Reshaping values into a table indexed by chosen row and column categories.",
+    "deep": "A DataFrame is a labeled table; each column is a Series. Start with head(), info(), dtypes, and isna().sum(). Read CSV with explicit types when identifiers have leading zeros. Parse timestamps with a defined timezone.",
+    "example": "",
+    "lesson": "pandas-clean",
+    "phase": 3
+  },
+  {
+    "term": "Feature engineering",
+    "simple": "Creating model inputs from raw data using a reproducible transformation.",
+    "deep": "A DataFrame is a labeled table; each column is a Series. Start with head(), info(), dtypes, and isna().sum(). Read CSV with explicit types when identifiers have leading zeros. Parse timestamps with a defined timezone.",
+    "example": "",
+    "lesson": "pandas-clean",
+    "phase": 3
+  },
+  {
+    "term": "CTE",
+    "simple": "A named query expression scoped to a SQL statement.",
+    "deep": "SELECT chooses expressions; FROM supplies relations; WHERE filters rows; GROUP BY forms groups; HAVING filters groups; ORDER BY orders the final result. Without ORDER BY, row order is not guaranteed.",
+    "example": "SELECT test_id, COUNT(*) AS failures\nFROM test_runs\nWHERE status = 'failed'\nGROUP BY test_id\nORDER BY test_id;",
+    "lesson": "sql-basics",
+    "phase": 4
+  },
+  {
+    "term": "Window function",
+    "simple": "A calculation over related rows that preserves individual result rows.",
+    "deep": "SELECT chooses expressions; FROM supplies relations; WHERE filters rows; GROUP BY forms groups; HAVING filters groups; ORDER BY orders the final result. Without ORDER BY, row order is not guaranteed.",
+    "example": "SELECT test_id, COUNT(*) AS failures\nFROM test_runs\nWHERE status = 'failed'\nGROUP BY test_id\nORDER BY test_id;",
+    "lesson": "sql-basics",
+    "phase": 4
+  },
+  {
+    "term": "LAG",
+    "simple": "A window function returning a value from a preceding ordered row.",
+    "deep": "SELECT chooses expressions; FROM supplies relations; WHERE filters rows; GROUP BY forms groups; HAVING filters groups; ORDER BY orders the final result. Without ORDER BY, row order is not guaranteed.",
+    "example": "SELECT test_id, COUNT(*) AS failures\nFROM test_runs\nWHERE status = 'failed'\nGROUP BY test_id\nORDER BY test_id;",
+    "lesson": "sql-basics",
+    "phase": 4
+  },
+  {
+    "term": "Query plan",
+    "simple": "The database's chosen execution strategy for a query.",
+    "deep": "SELECT chooses expressions; FROM supplies relations; WHERE filters rows; GROUP BY forms groups; HAVING filters groups; ORDER BY orders the final result. Without ORDER BY, row order is not guaranteed.",
+    "example": "SELECT test_id, COUNT(*) AS failures\nFROM test_runs\nWHERE status = 'failed'\nGROUP BY test_id\nORDER BY test_id;",
+    "lesson": "sql-basics",
+    "phase": 4
+  },
+  {
+    "term": "EXISTS",
+    "simple": "A SQL predicate testing whether a subquery returns at least one row.",
+    "deep": "SELECT chooses expressions; FROM supplies relations; WHERE filters rows; GROUP BY forms groups; HAVING filters groups; ORDER BY orders the final result. Without ORDER BY, row order is not guaranteed.",
+    "example": "SELECT test_id, COUNT(*) AS failures\nFROM test_runs\nWHERE status = 'failed'\nGROUP BY test_id\nORDER BY test_id;",
+    "lesson": "sql-basics",
+    "phase": 4
+  },
+  {
+    "term": "Population",
+    "simple": "The full group about which an analysis seeks to make a claim.",
+    "deep": "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+    "example": "",
+    "lesson": "stats-descriptive",
+    "phase": 5
+  },
+  {
+    "term": "Sample",
+    "simple": "The observed subset used to estimate properties of a population.",
+    "deep": "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+    "example": "",
+    "lesson": "stats-descriptive",
+    "phase": 5
+  },
+  {
+    "term": "Variance",
+    "simple": "The average squared deviation from the mean, with a denominator chosen for population or sample estimation.",
+    "deep": "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+    "example": "",
+    "lesson": "stats-descriptive",
+    "phase": 5
+  },
+  {
+    "term": "Confidence interval",
+    "simple": "An interval produced by a procedure with a stated long-run coverage under its assumptions.",
+    "deep": "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+    "example": "",
+    "lesson": "stats-descriptive",
+    "phase": 5
+  },
+  {
+    "term": "P-value",
+    "simple": "The probability, under the null model, of a result at least as extreme as the observed statistic.",
+    "deep": "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+    "example": "",
+    "lesson": "stats-descriptive",
+    "phase": 5
+  },
+  {
+    "term": "Effect size",
+    "simple": "The magnitude of a difference or relationship, distinct from statistical significance.",
+    "deep": "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+    "example": "",
+    "lesson": "stats-descriptive",
+    "phase": 5
+  },
+  {
+    "term": "Bootstrap",
+    "simple": "Estimating uncertainty by resampling observations with replacement.",
+    "deep": "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+    "example": "",
+    "lesson": "stats-descriptive",
+    "phase": 5
+  },
+  {
+    "term": "Type I error",
+    "simple": "Rejecting a true null hypothesis under the specified test procedure.",
+    "deep": "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+    "example": "",
+    "lesson": "stats-descriptive",
+    "phase": 5
+  },
+  {
+    "term": "Type II error",
+    "simple": "Failing to reject a false null hypothesis.",
+    "deep": "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+    "example": "",
+    "lesson": "stats-descriptive",
+    "phase": 5
+  },
+  {
+    "term": "Power",
+    "simple": "The probability of rejecting the null for a specified effect under the test design.",
+    "deep": "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+    "example": "",
+    "lesson": "stats-descriptive",
+    "phase": 5
+  },
+  {
+    "term": "Feature",
+    "simple": "An input attribute used by a model to make a prediction.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Label",
+    "simple": "The target value or category supplied as supervision.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Data leakage",
+    "simple": "Information unavailable at real prediction time influencing training or evaluation.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Overfitting",
+    "simple": "Learning training-specific patterns that do not generalize to independent cases.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Underfitting",
+    "simple": "Using a model or representation too limited to capture useful task patterns.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Cross-validation",
+    "simple": "Repeated training/validation splits used to estimate behavior and choose configurations.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Logistic regression",
+    "simple": "A linear scoring model transformed into class probabilities for classification.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Random forest",
+    "simple": "An ensemble of randomized decision trees combined for prediction.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Gradient boosting",
+    "simple": "Building an ensemble sequentially so later learners address errors of earlier ones.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Clustering",
+    "simple": "Grouping observations by similarity without target labels.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Precision",
+    "simple": "True positives divided by all predicted positives.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Recall",
+    "simple": "True positives divided by all actual positives.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "F1",
+    "simple": "The harmonic mean of precision and recall when their sum is nonzero.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "ROC-AUC",
+    "simple": "Area under the true-positive-rate versus false-positive-rate curve across thresholds.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Calibration",
+    "simple": "Agreement between predicted probability levels and observed outcome frequencies.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "MAE",
+    "simple": "Mean absolute difference between predictions and targets.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "RMSE",
+    "simple": "The square root of mean squared prediction error, expressed in target units.",
+    "deep": "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+    "example": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+    "lesson": "p06-formulation",
+    "phase": 6
+  },
+  {
+    "term": "Neuron",
+    "simple": "A weighted input combination followed by an activation function.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "Bias",
+    "simple": "An additive parameter shifting a neuron's pre-activation independently of its inputs.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "ReLU",
+    "simple": "An activation returning max(0,x).",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "Sigmoid",
+    "simple": "An activation mapping a real score to 1/(1+exp(-x)).",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "Gradient",
+    "simple": "The vector of partial derivatives of an objective with respect to its parameters.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "Gradient descent",
+    "simple": "Updating parameters by subtracting a learning-rate-scaled gradient.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "Backpropagation",
+    "simple": "Computing parameter gradients through a computation graph using the chain rule.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "Learning rate",
+    "simple": "The multiplier controlling update size in an optimization step.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "Epoch",
+    "simple": "One complete pass through the training data under a declared batching scheme.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "Batch",
+    "simple": "A group of examples processed together in one training or inference operation.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "Dropout",
+    "simple": "A training regularizer that randomly suppresses selected activations.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "CNN",
+    "simple": "A neural network using shared convolution filters to detect local patterns.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "RNN",
+    "simple": "A neural network that propagates a state across sequence positions.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "LSTM",
+    "simple": "A recurrent architecture with gates controlling information retention and updates.",
+    "deep": "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+    "example": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+    "lesson": "p07-neuron",
+    "phase": 7
+  },
+  {
+    "term": "Token",
+    "simple": "A unit in a model's tokenizer vocabulary, not necessarily a whole word.",
+    "deep": "A transformer consumes integer token IDs, not words. Subword tokenizers split unfamiliar identifiers into known fragments, so checkout_timeout can require several positions while a common word may require one. Whitespace, punctuation and Unicode normalization change the sequence. Vocabulary size is the number of IDs the model recognizes; sequence length is the number of positions in one input. Neither is the number of documents.",
+    "example": "vocab = {'<unk>': 0, 'timeout': 1, 'database': 2}\nids = [vocab.get(token, 0) for token in 'database timeout'.split()]\nassert ids == [2, 1]",
+    "lesson": "p08-tokens",
+    "phase": 8
+  },
+  {
+    "term": "Tokenization",
+    "simple": "Transforming text into a sequence of vocabulary IDs under a specific tokenizer.",
+    "deep": "A transformer consumes integer token IDs, not words. Subword tokenizers split unfamiliar identifiers into known fragments, so checkout_timeout can require several positions while a common word may require one. Whitespace, punctuation and Unicode normalization change the sequence. Vocabulary size is the number of IDs the model recognizes; sequence length is the number of positions in one input. Neither is the number of documents.",
+    "example": "vocab = {'<unk>': 0, 'timeout': 1, 'database': 2}\nids = [vocab.get(token, 0) for token in 'database timeout'.split()]\nassert ids == [2, 1]",
+    "lesson": "p08-tokens",
+    "phase": 8
+  },
+  {
+    "term": "Vocabulary",
+    "simple": "The mapping of token symbols to IDs recognized by a model.",
+    "deep": "A transformer consumes integer token IDs, not words. Subword tokenizers split unfamiliar identifiers into known fragments, so checkout_timeout can require several positions while a common word may require one. Whitespace, punctuation and Unicode normalization change the sequence. Vocabulary size is the number of IDs the model recognizes; sequence length is the number of positions in one input. Neither is the number of documents.",
+    "example": "vocab = {'<unk>': 0, 'timeout': 1, 'database': 2}\nids = [vocab.get(token, 0) for token in 'database timeout'.split()]\nassert ids == [2, 1]",
+    "lesson": "p08-tokens",
+    "phase": 8
+  },
+  {
+    "term": "Attention",
+    "simple": "A normalized weighted aggregation of values based on query-key compatibility.",
+    "deep": "Attention asks which other positions should contribute to the current position. A query represents what a position seeks; keys describe what each position offers; values contain the information to aggregate. Compute query-key dot products, scale by the square root of key dimension, apply the permitted-position mask, then softmax each query row.",
+    "example": "import math\ndef softmax(scores):\n    m=max(scores)\n    e=[math.exp(s-m) for s in scores]\n    return [v/sum(e) for v in e]\nprint(softmax([1,0]))",
+    "lesson": "p08-attention",
+    "phase": 8
+  },
+  {
+    "term": "Query",
+    "simple": "The attention projection representing what a position seeks from other positions.",
+    "deep": "Attention asks which other positions should contribute to the current position. A query represents what a position seeks; keys describe what each position offers; values contain the information to aggregate. Compute query-key dot products, scale by the square root of key dimension, apply the permitted-position mask, then softmax each query row.",
+    "example": "import math\ndef softmax(scores):\n    m=max(scores)\n    e=[math.exp(s-m) for s in scores]\n    return [v/sum(e) for v in e]\nprint(softmax([1,0]))",
+    "lesson": "p08-attention",
+    "phase": 8
+  },
+  {
+    "term": "Key",
+    "simple": "The attention projection used to score compatibility with a query.",
+    "deep": "Attention asks which other positions should contribute to the current position. A query represents what a position seeks; keys describe what each position offers; values contain the information to aggregate. Compute query-key dot products, scale by the square root of key dimension, apply the permitted-position mask, then softmax each query row.",
+    "example": "import math\ndef softmax(scores):\n    m=max(scores)\n    e=[math.exp(s-m) for s in scores]\n    return [v/sum(e) for v in e]\nprint(softmax([1,0]))",
+    "lesson": "p08-attention",
+    "phase": 8
+  },
+  {
+    "term": "Value",
+    "simple": "The attention projection whose information is combined using attention weights.",
+    "deep": "Attention asks which other positions should contribute to the current position. A query represents what a position seeks; keys describe what each position offers; values contain the information to aggregate. Compute query-key dot products, scale by the square root of key dimension, apply the permitted-position mask, then softmax each query row.",
+    "example": "import math\ndef softmax(scores):\n    m=max(scores)\n    e=[math.exp(s-m) for s in scores]\n    return [v/sum(e) for v in e]\nprint(softmax([1,0]))",
+    "lesson": "p08-attention",
+    "phase": 8
+  },
+  {
+    "term": "Softmax",
+    "simple": "Converting scores to positive normalized probabilities using exponentials.",
+    "deep": "Attention asks which other positions should contribute to the current position. A query represents what a position seeks; keys describe what each position offers; values contain the information to aggregate. Compute query-key dot products, scale by the square root of key dimension, apply the permitted-position mask, then softmax each query row.",
+    "example": "import math\ndef softmax(scores):\n    m=max(scores)\n    e=[math.exp(s-m) for s in scores]\n    return [v/sum(e) for v in e]\nprint(softmax([1,0]))",
+    "lesson": "p08-attention",
+    "phase": 8
+  },
+  {
+    "term": "Causal mask",
+    "simple": "A restriction preventing a decoder position from attending to future positions.",
+    "deep": "Attention asks which other positions should contribute to the current position. A query represents what a position seeks; keys describe what each position offers; values contain the information to aggregate. Compute query-key dot products, scale by the square root of key dimension, apply the permitted-position mask, then softmax each query row.",
+    "example": "import math\ndef softmax(scores):\n    m=max(scores)\n    e=[math.exp(s-m) for s in scores]\n    return [v/sum(e) for v in e]\nprint(softmax([1,0]))",
+    "lesson": "p08-attention",
+    "phase": 8
+  },
+  {
+    "term": "Encoder",
+    "simple": "An architecture producing contextual input representations, often with bidirectional attention.",
+    "deep": "Attention alone is permutation equivariant: swapping input positions swaps outputs without expressing order. Positional information supplies order through learned embeddings, sinusoidal encodings or rotary mechanisms. A transformer block combines attention with a position-wise feed-forward network, residual connections and normalization. Residual paths let gradients flow without replacing the entire representation at every layer.",
+    "example": "import torch\nfrom torch import nn\nlayer=nn.TransformerEncoderLayer(d_model=16,nhead=4,batch_first=True)\nlayer.eval()\nx=torch.zeros(2,5,16)\nwith torch.no_grad():\n    assert layer(x).shape == (2,5,16)",
+    "lesson": "p08-blocks",
+    "phase": 8
+  },
+  {
+    "term": "Decoder",
+    "simple": "An architecture generating outputs from earlier positions under causal attention.",
+    "deep": "Attention alone is permutation equivariant: swapping input positions swaps outputs without expressing order. Positional information supplies order through learned embeddings, sinusoidal encodings or rotary mechanisms. A transformer block combines attention with a position-wise feed-forward network, residual connections and normalization. Residual paths let gradients flow without replacing the entire representation at every layer.",
+    "example": "import torch\nfrom torch import nn\nlayer=nn.TransformerEncoderLayer(d_model=16,nhead=4,batch_first=True)\nlayer.eval()\nx=torch.zeros(2,5,16)\nwith torch.no_grad():\n    assert layer(x).shape == (2,5,16)",
+    "lesson": "p08-blocks",
+    "phase": 8
+  },
+  {
+    "term": "Residual connection",
+    "simple": "A path that adds a block input to its transformed output.",
+    "deep": "Attention alone is permutation equivariant: swapping input positions swaps outputs without expressing order. Positional information supplies order through learned embeddings, sinusoidal encodings or rotary mechanisms. A transformer block combines attention with a position-wise feed-forward network, residual connections and normalization. Residual paths let gradients flow without replacing the entire representation at every layer.",
+    "example": "import torch\nfrom torch import nn\nlayer=nn.TransformerEncoderLayer(d_model=16,nhead=4,batch_first=True)\nlayer.eval()\nx=torch.zeros(2,5,16)\nwith torch.no_grad():\n    assert layer(x).shape == (2,5,16)",
+    "lesson": "p08-blocks",
+    "phase": 8
+  },
+  {
+    "term": "Transformer",
+    "simple": "A model architecture built from attention and position-wise transformations.",
+    "deep": "Attention alone is permutation equivariant: swapping input positions swaps outputs without expressing order. Positional information supplies order through learned embeddings, sinusoidal encodings or rotary mechanisms. A transformer block combines attention with a position-wise feed-forward network, residual connections and normalization. Residual paths let gradients flow without replacing the entire representation at every layer.",
+    "example": "import torch\nfrom torch import nn\nlayer=nn.TransformerEncoderLayer(d_model=16,nhead=4,batch_first=True)\nlayer.eval()\nx=torch.zeros(2,5,16)\nwith torch.no_grad():\n    assert layer(x).shape == (2,5,16)",
+    "lesson": "p08-blocks",
+    "phase": 8
+  },
+  {
+    "term": "Pretraining",
+    "simple": "Learning general representations or token distributions before task-specific adaptation.",
+    "deep": "Pretraining learns a next-token distribution from many sequences. Instruction tuning trains responses to instructions, while preference or reward-based alignment changes which responses are favored. These stages can improve behavior without making the model an authoritative database. A foundation model can be adapted to many tasks; a task classifier produces a narrower output contract.",
+    "example": "result={'category':'UNKNOWN','evidence_ids':[],'needs_review':True}\nassert result['category']!='UNKNOWN' or result['needs_review']",
+    "lesson": "p09-lifecycle",
+    "phase": 9
+  },
+  {
+    "term": "Instruction tuning",
+    "simple": "Training a model on examples of following task instructions.",
+    "deep": "Pretraining learns a next-token distribution from many sequences. Instruction tuning trains responses to instructions, while preference or reward-based alignment changes which responses are favored. These stages can improve behavior without making the model an authoritative database. A foundation model can be adapted to many tasks; a task classifier produces a narrower output contract.",
+    "example": "result={'category':'UNKNOWN','evidence_ids':[],'needs_review':True}\nassert result['category']!='UNKNOWN' or result['needs_review']",
+    "lesson": "p09-lifecycle",
+    "phase": 9
+  },
+  {
+    "term": "Hallucination",
+    "simple": "An unsupported or incorrect generated claim presented as if it were grounded.",
+    "deep": "Pretraining learns a next-token distribution from many sequences. Instruction tuning trains responses to instructions, while preference or reward-based alignment changes which responses are favored. These stages can improve behavior without making the model an authoritative database. A foundation model can be adapted to many tasks; a task classifier produces a narrower output contract.",
+    "example": "result={'category':'UNKNOWN','evidence_ids':[],'needs_review':True}\nassert result['category']!='UNKNOWN' or result['needs_review']",
+    "lesson": "p09-lifecycle",
+    "phase": 9
+  },
+  {
+    "term": "Temperature",
+    "simple": "A decoding parameter that rescales logits before selecting output tokens.",
+    "deep": "Temperature rescales logits before softmax. Lower positive temperature concentrates probability on high-logit tokens; higher temperature spreads it. Top-p keeps the smallest ranked prefix whose cumulative probability reaches p, then renormalizes before sampling. These operations change selection behavior, not the truth of a claim.",
+    "example": "def nucleus(probs,p):\n    ranked=sorted(enumerate(probs),key=lambda x:-x[1])\n    selected=[];mass=0\n    for i,v in ranked:\n        selected.append(i);mass+=v\n        if mass>=p:break\n    return selected",
+    "lesson": "p09-decoding",
+    "phase": 9
+  },
+  {
+    "term": "Top-p",
+    "simple": "Sampling from a ranked token prefix whose cumulative probability reaches p.",
+    "deep": "Temperature rescales logits before softmax. Lower positive temperature concentrates probability on high-logit tokens; higher temperature spreads it. Top-p keeps the smallest ranked prefix whose cumulative probability reaches p, then renormalizes before sampling. These operations change selection behavior, not the truth of a claim.",
+    "example": "def nucleus(probs,p):\n    ranked=sorted(enumerate(probs),key=lambda x:-x[1])\n    selected=[];mass=0\n    for i,v in ranked:\n        selected.append(i);mass+=v\n        if mass>=p:break\n    return selected",
+    "lesson": "p09-decoding",
+    "phase": 9
+  },
+  {
+    "term": "Logit",
+    "simple": "An unnormalized model score before probability normalization.",
+    "deep": "Temperature rescales logits before softmax. Lower positive temperature concentrates probability on high-logit tokens; higher temperature spreads it. Top-p keeps the smallest ranked prefix whose cumulative probability reaches p, then renormalizes before sampling. These operations change selection behavior, not the truth of a claim.",
+    "example": "def nucleus(probs,p):\n    ranked=sorted(enumerate(probs),key=lambda x:-x[1])\n    selected=[];mass=0\n    for i,v in ranked:\n        selected.append(i);mass+=v\n        if mass>=p:break\n    return selected",
+    "lesson": "p09-decoding",
+    "phase": 9
+  },
+  {
+    "term": "Context window",
+    "simple": "The model's supported sequence budget under its input/output conventions.",
+    "deep": "Choose models against a workload contract rather than a popularity ranking. A failure classifier needs enum accuracy, calibration and low latency; a complex investigation needs multi-step evidence use and safe tools. Context capacity is an input/output budget, not a promise that every token is equally usable. Distracting evidence can reduce quality before the nominal limit is reached.",
+    "example": "def cost(input_tokens,output_tokens,input_rate,output_rate):\n    return (input_tokens*input_rate+output_tokens*output_rate)/1_000_000\nassert cost(1000,500,2,8)==.006",
+    "lesson": "p09-selection",
+    "phase": 9
+  },
+  {
+    "term": "Pareto frontier",
+    "simple": "Options for which no other option improves every compared objective simultaneously.",
+    "deep": "Choose models against a workload contract rather than a popularity ranking. A failure classifier needs enum accuracy, calibration and low latency; a complex investigation needs multi-step evidence use and safe tools. Context capacity is an input/output budget, not a promise that every token is equally usable. Distracting evidence can reduce quality before the nominal limit is reached.",
+    "example": "def cost(input_tokens,output_tokens,input_rate,output_rate):\n    return (input_tokens*input_rate+output_tokens*output_rate)/1_000_000\nassert cost(1000,500,2,8)==.006",
+    "lesson": "p09-selection",
+    "phase": 9
+  },
+  {
+    "term": "Deadline",
+    "simple": "The maximum total time allowed for an operation including attempts and waiting.",
+    "deep": "An adapter isolates provider-specific request and response formats from domain logic. The domain asks for a typed classification; the adapter authenticates, sends the request, normalizes usage and translates errors. Keep credentials on the server, obtained from environment variables or a secret manager. Browser storage and exported progress must never contain a provider key.",
+    "example": "def retryable(status):\n    return status == 429 or 500 <= status < 600\nassert not retryable(401)",
+    "lesson": "p10-deadlines",
+    "phase": 10
+  },
+  {
+    "term": "Timeout",
+    "simple": "The time limit for a particular operation or attempt.",
+    "deep": "An adapter isolates provider-specific request and response formats from domain logic. The domain asks for a typed classification; the adapter authenticates, sends the request, normalizes usage and translates errors. Keep credentials on the server, obtained from environment variables or a secret manager. Browser storage and exported progress must never contain a provider key.",
+    "example": "def retryable(status):\n    return status == 429 or 500 <= status < 600\nassert not retryable(401)",
+    "lesson": "p10-deadlines",
+    "phase": 10
+  },
+  {
+    "term": "Exponential backoff",
+    "simple": "Increasing delays between retries, commonly capped and randomized with jitter.",
+    "deep": "An adapter isolates provider-specific request and response formats from domain logic. The domain asks for a typed classification; the adapter authenticates, sends the request, normalizes usage and translates errors. Keep credentials on the server, obtained from environment variables or a secret manager. Browser storage and exported progress must never contain a provider key.",
+    "example": "def retryable(status):\n    return status == 429 or 500 <= status < 600\nassert not retryable(401)",
+    "lesson": "p10-deadlines",
+    "phase": 10
+  },
+  {
+    "term": "Idempotency",
+    "simple": "A contract under which repeating a request does not duplicate its intended effect.",
+    "deep": "An adapter isolates provider-specific request and response formats from domain logic. The domain asks for a typed classification; the adapter authenticates, sends the request, normalizes usage and translates errors. Keep credentials on the server, obtained from environment variables or a secret manager. Browser storage and exported progress must never contain a provider key.",
+    "example": "def retryable(status):\n    return status == 429 or 500 <= status < 600\nassert not retryable(401)",
+    "lesson": "p10-deadlines",
+    "phase": 10
+  },
+  {
+    "term": "Backpressure",
+    "simple": "Restricting new work when downstream capacity is insufficient.",
+    "deep": "Streaming emits a sequence of events before the final response exists. First-token latency describes responsiveness, while end-to-end latency includes the full completion. A partial JSON fragment is not a typed domain result. Treat transport events, assembled output and final validated response as separate objects.",
+    "example": "events=['{\"category\":', '\"UNKNOWN\"}']\nassembled=''.join(events)\nimport json\nassert json.loads(assembled)['category']=='UNKNOWN'",
+    "lesson": "p10-streaming",
+    "phase": 10
+  },
+  {
+    "term": "Streaming",
+    "simple": "Delivering incremental events before the full result is complete.",
+    "deep": "Streaming emits a sequence of events before the final response exists. First-token latency describes responsiveness, while end-to-end latency includes the full completion. A partial JSON fragment is not a typed domain result. Treat transport events, assembled output and final validated response as separate objects.",
+    "example": "events=['{\"category\":', '\"UNKNOWN\"}']\nassembled=''.join(events)\nimport json\nassert json.loads(assembled)['category']=='UNKNOWN'",
+    "lesson": "p10-streaming",
+    "phase": 10
+  },
+  {
+    "term": "TTFT",
+    "simple": "Elapsed time until the first generated token is received.",
+    "deep": "Streaming emits a sequence of events before the final response exists. First-token latency describes responsiveness, while end-to-end latency includes the full completion. A partial JSON fragment is not a typed domain result. Treat transport events, assembled output and final validated response as separate objects.",
+    "example": "events=['{\"category\":', '\"UNKNOWN\"}']\nassembled=''.join(events)\nimport json\nassert json.loads(assembled)['category']=='UNKNOWN'",
+    "lesson": "p10-streaming",
+    "phase": 10
+  },
+  {
+    "term": "Zero-shot",
+    "simple": "Giving task instructions without demonstrations in the prompt.",
+    "deep": "A prompt is a versioned behavioral contract. Zero-shot instructions state the task without examples; few-shot examples demonstrate the required decisions and boundaries. Specify the output schema, evidence rules, uncertainty behavior and forbidden actions. Examples should cover UNKNOWN and conflicting evidence, not only easy successes.",
+    "example": "template='Task: classify {failure_id}. Evidence: {log}'\nprint(template.format(failure_id='F1',log='TimeoutError'))",
+    "lesson": "p11-templates",
+    "phase": 11
+  },
+  {
+    "term": "Few-shot",
+    "simple": "Including a small set of task demonstrations in the prompt.",
+    "deep": "A prompt is a versioned behavioral contract. Zero-shot instructions state the task without examples; few-shot examples demonstrate the required decisions and boundaries. Specify the output schema, evidence rules, uncertainty behavior and forbidden actions. Examples should cover UNKNOWN and conflicting evidence, not only easy successes.",
+    "example": "template='Task: classify {failure_id}. Evidence: {log}'\nprint(template.format(failure_id='F1',log='TimeoutError'))",
+    "lesson": "p11-templates",
+    "phase": 11
+  },
+  {
+    "term": "Paired comparison",
+    "simple": "Evaluating candidates on matching cases to inspect per-case differences.",
+    "deep": "A prompt change is an experiment, not an aesthetic preference. Keep model, retrieval and dataset fixed while changing the prompt; otherwise a quality difference has multiple plausible causes. Paired comparison measures both candidates on each case, allowing you to inspect wins and losses rather than compare unrelated averages.",
+    "example": "base=[True,False,True];candidate=[True,True,False]\nprint([(b,c) for b,c in zip(base,candidate)])",
+    "lesson": "p11-regression",
+    "phase": 11
+  },
+  {
+    "term": "Prompt version",
+    "simple": "An identity for a specific instruction/template artifact used in an experiment.",
+    "deep": "A prompt is a versioned behavioral contract. Zero-shot instructions state the task without examples; few-shot examples demonstrate the required decisions and boundaries. Specify the output schema, evidence rules, uncertainty behavior and forbidden actions. Examples should cover UNKNOWN and conflicting evidence, not only easy successes.",
+    "example": "template='Task: classify {failure_id}. Evidence: {log}'\nprint(template.format(failure_id='F1',log='TimeoutError'))",
+    "lesson": "p11-templates",
+    "phase": 11
+  },
+  {
+    "term": "JSON Schema",
+    "simple": "A language for expressing structural constraints on JSON data.",
+    "deep": "JSON validity means a parser accepts the text. Schema validity means fields and types satisfy a contract. Business validity means the values are permitted by application rules. These are separate checks: {\"category\":\"PRODUCT_DEFECT\",\"evidence_ids\":[]} can parse and satisfy basic types while violating an evidence requirement.",
+    "example": "allowed={'PRODUCT_DEFECT','AUTOMATION_DEFECT','ENVIRONMENT','TEST_DATA','UNKNOWN'}\nassert 'TIMEOUT' not in allowed",
+    "lesson": "p12-schema",
+    "phase": 12
+  },
+  {
+    "term": "Structured output",
+    "simple": "A model result constrained or validated against an explicit schema.",
+    "deep": "JSON validity means a parser accepts the text. Schema validity means fields and types satisfy a contract. Business validity means the values are permitted by application rules. These are separate checks: {\"category\":\"PRODUCT_DEFECT\",\"evidence_ids\":[]} can parse and satisfy basic types while violating an evidence requirement.",
+    "example": "allowed={'PRODUCT_DEFECT','AUTOMATION_DEFECT','ENVIRONMENT','TEST_DATA','UNKNOWN'}\nassert 'TIMEOUT' not in allowed",
+    "lesson": "p12-schema",
+    "phase": 12
+  },
+  {
+    "term": "Tool calling",
+    "simple": "A model proposal for invoking an application-defined function with arguments.",
+    "deep": "A tool call is a model proposal containing a name and arguments. Your application decides whether to execute it. The model cannot grant itself permissions. A complete loop supplies tool definitions, validates a proposed call, authorizes it, executes within a budget, sends the result associated with its call ID and obtains a final answer.",
+    "example": "registry={'read_failure':lambda failure_id: {'id':failure_id}}\nname='read_failure'\nif name not in registry: raise ValueError('unknown tool')",
+    "lesson": "p12-tools",
+    "phase": 12
+  },
+  {
+    "term": "Allowlist",
+    "simple": "A positive set of permitted operations or values.",
+    "deep": "A tool call is a model proposal containing a name and arguments. Your application decides whether to execute it. The model cannot grant itself permissions. A complete loop supplies tool definitions, validates a proposed call, authorizes it, executes within a budget, sends the result associated with its call ID and obtains a final answer.",
+    "example": "registry={'read_failure':lambda failure_id: {'id':failure_id}}\nname='read_failure'\nif name not in registry: raise ValueError('unknown tool')",
+    "lesson": "p12-tools",
+    "phase": 12
+  },
+  {
+    "term": "Business invariant",
+    "simple": "A rule that must hold for an application result or state transition.",
+    "deep": "JSON validity means a parser accepts the text. Schema validity means fields and types satisfy a contract. Business validity means the values are permitted by application rules. These are separate checks: {\"category\":\"PRODUCT_DEFECT\",\"evidence_ids\":[]} can parse and satisfy basic types while violating an evidence requirement.",
+    "example": "allowed={'PRODUCT_DEFECT','AUTOMATION_DEFECT','ENVIRONMENT','TEST_DATA','UNKNOWN'}\nassert 'TIMEOUT' not in allowed",
+    "lesson": "p12-schema",
+    "phase": 12
+  },
+  {
+    "term": "Embedding",
+    "simple": "A learned vector representation with geometry shaped by a training objective.",
+    "deep": "An embedding is a learned dense vector whose geometry reflects a training objective. Related texts may be close, but distance is not a proof of equivalence or factual relevance. Query/document encoders may use different prefixes or projections; follow the model's retrieval contract.",
+    "example": "import math\na=[1,0];b=[1,1]\ncos=sum(x*y for x,y in zip(a,b))/(math.sqrt(sum(x*x for x in a))*math.sqrt(sum(x*x for x in b)))\nprint(cos)",
+    "lesson": "p13-geometry",
+    "phase": 13
+  },
+  {
+    "term": "Cosine similarity",
+    "simple": "The dot product of two vectors divided by the product of their norms.",
+    "deep": "An embedding is a learned dense vector whose geometry reflects a training objective. Related texts may be close, but distance is not a proof of equivalence or factual relevance. Query/document encoders may use different prefixes or projections; follow the model's retrieval contract.",
+    "example": "import math\na=[1,0];b=[1,1]\ncos=sum(x*y for x,y in zip(a,b))/(math.sqrt(sum(x*x for x in a))*math.sqrt(sum(x*x for x in b)))\nprint(cos)",
+    "lesson": "p13-geometry",
+    "phase": 13
+  },
+  {
+    "term": "Embedding drift",
+    "simple": "A change in representation behavior that can alter retrieval quality or compatibility.",
+    "deep": "An embedding is a learned dense vector whose geometry reflects a training objective. Related texts may be close, but distance is not a proof of equivalence or factual relevance. Query/document encoders may use different prefixes or projections; follow the model's retrieval contract.",
+    "example": "import math\na=[1,0];b=[1,1]\ncos=sum(x*y for x,y in zip(a,b))/(math.sqrt(sum(x*x for x in a))*math.sqrt(sum(x*x for x in b)))\nprint(cos)",
+    "lesson": "p13-geometry",
+    "phase": 13
+  },
+  {
+    "term": "ANN",
+    "simple": "Approximate nearest-neighbor search trading some exact recall for resource or latency gains.",
+    "deep": "Exact nearest-neighbor search scores every eligible vector. Approximate nearest-neighbor indexes trade some recall for lower latency and memory access. HNSW organizes a navigable graph; IVF partitions vectors into coarse cells and probes a subset. Index parameters affect recall, build cost and search latency.",
+    "example": "eligible=[d for d in docs if d['tenant']==principal.tenant]\nranked=sorted(eligible,key=lambda d:d['score'],reverse=True)[:k]",
+    "lesson": "p14-ann",
+    "phase": 14
+  },
+  {
+    "term": "HNSW",
+    "simple": "A graph-based approximate vector index using navigable layers.",
+    "deep": "Exact nearest-neighbor search scores every eligible vector. Approximate nearest-neighbor indexes trade some recall for lower latency and memory access. HNSW organizes a navigable graph; IVF partitions vectors into coarse cells and probes a subset. Index parameters affect recall, build cost and search latency.",
+    "example": "eligible=[d for d in docs if d['tenant']==principal.tenant]\nranked=sorted(eligible,key=lambda d:d['score'],reverse=True)[:k]",
+    "lesson": "p14-ann",
+    "phase": 14
+  },
+  {
+    "term": "IVF",
+    "simple": "An index that partitions vectors into coarse cells and probes selected cells.",
+    "deep": "Exact nearest-neighbor search scores every eligible vector. Approximate nearest-neighbor indexes trade some recall for lower latency and memory access. HNSW organizes a navigable graph; IVF partitions vectors into coarse cells and probes a subset. Index parameters affect recall, build cost and search latency.",
+    "example": "eligible=[d for d in docs if d['tenant']==principal.tenant]\nranked=sorted(eligible,key=lambda d:d['score'],reverse=True)[:k]",
+    "lesson": "p14-ann",
+    "phase": 14
+  },
+  {
+    "term": "Vector database",
+    "simple": "A store combining vector search with metadata, persistence and operational APIs.",
+    "deep": "Exact nearest-neighbor search scores every eligible vector. Approximate nearest-neighbor indexes trade some recall for lower latency and memory access. HNSW organizes a navigable graph; IVF partitions vectors into coarse cells and probes a subset. Index parameters affect recall, build cost and search latency.",
+    "example": "eligible=[d for d in docs if d['tenant']==principal.tenant]\nranked=sorted(eligible,key=lambda d:d['score'],reverse=True)[:k]",
+    "lesson": "p14-ann",
+    "phase": 14
+  },
+  {
+    "term": "RAG",
+    "simple": "Retrieval-augmented generation: supplying selected external evidence at answer time.",
+    "deep": "Retrieval-augmented generation supplies selected external evidence to a model at answer time. Ingestion loads, cleans, splits and versions documents; query-time retrieval selects context; generation produces an answer constrained by that context. RAG does not automatically prevent hallucination.",
+    "example": "def chunk(words,size,overlap):\n    step=size-overlap\n    return [words[i:i+size] for i in range(0,len(words),step)]",
+    "lesson": "p15-ingestion",
+    "phase": 15
+  },
+  {
+    "term": "Chunk overlap",
+    "simple": "Shared source content between neighboring document chunks.",
+    "deep": "Retrieval-augmented generation supplies selected external evidence to a model at answer time. Ingestion loads, cleans, splits and versions documents; query-time retrieval selects context; generation produces an answer constrained by that context. RAG does not automatically prevent hallucination.",
+    "example": "def chunk(words,size,overlap):\n    step=size-overlap\n    return [words[i:i+size] for i in range(0,len(words),step)]",
+    "lesson": "p15-ingestion",
+    "phase": 15
+  },
+  {
+    "term": "Grounding",
+    "simple": "Constraining or checking claims against supplied evidence.",
+    "deep": "Retrieval-augmented generation supplies selected external evidence to a model at answer time. Ingestion loads, cleans, splits and versions documents; query-time retrieval selects context; generation produces an answer constrained by that context. RAG does not automatically prevent hallucination.",
+    "example": "def chunk(words,size,overlap):\n    step=size-overlap\n    return [words[i:i+size] for i in range(0,len(words),step)]",
+    "lesson": "p15-ingestion",
+    "phase": 15
+  },
+  {
+    "term": "Citation",
+    "simple": "A resolvable reference linking a claim to an identifiable evidence source.",
+    "deep": "Retrieval-augmented generation supplies selected external evidence to a model at answer time. Ingestion loads, cleans, splits and versions documents; query-time retrieval selects context; generation produces an answer constrained by that context. RAG does not automatically prevent hallucination.",
+    "example": "def chunk(words,size,overlap):\n    step=size-overlap\n    return [words[i:i+size] for i in range(0,len(words),step)]",
+    "lesson": "p15-ingestion",
+    "phase": 15
+  },
+  {
+    "term": "BM25",
+    "simple": "A lexical retrieval scoring method using term frequency, document frequency and length normalization.",
+    "deep": "Sparse retrieval such as BM25 rewards lexical evidence including rare identifiers. Dense retrieval can recover paraphrases. Hybrid retrieval combines these complementary candidate lists. Reciprocal rank fusion scores a document by summing 1/(c+rank) across ranked lists, avoiding direct comparison of incompatible raw score scales.",
+    "example": "def rrf(lists,c=60):\n    scores={}\n    for ranked in lists:\n        for rank,doc in enumerate(ranked,1):\n            scores[doc]=scores.get(doc,0)+1/(c+rank)\n    return sorted(scores,key=lambda d:(-scores[d],d))",
+    "lesson": "p16-fusion",
+    "phase": 16
+  },
+  {
+    "term": "Reciprocal rank fusion",
+    "simple": "Combining ranked lists by summing reciprocal rank contributions.",
+    "deep": "Sparse retrieval such as BM25 rewards lexical evidence including rare identifiers. Dense retrieval can recover paraphrases. Hybrid retrieval combines these complementary candidate lists. Reciprocal rank fusion scores a document by summing 1/(c+rank) across ranked lists, avoiding direct comparison of incompatible raw score scales.",
+    "example": "def rrf(lists,c=60):\n    scores={}\n    for ranked in lists:\n        for rank,doc in enumerate(ranked,1):\n            scores[doc]=scores.get(doc,0)+1/(c+rank)\n    return sorted(scores,key=lambda d:(-scores[d],d))",
+    "lesson": "p16-fusion",
+    "phase": 16
+  },
+  {
+    "term": "Reranker",
+    "simple": "A second-stage scorer that reorders retrieved candidates for a query.",
+    "deep": "Sparse retrieval such as BM25 rewards lexical evidence including rare identifiers. Dense retrieval can recover paraphrases. Hybrid retrieval combines these complementary candidate lists. Reciprocal rank fusion scores a document by summing 1/(c+rank) across ranked lists, avoiding direct comparison of incompatible raw score scales.",
+    "example": "def rrf(lists,c=60):\n    scores={}\n    for ranked in lists:\n        for rank,doc in enumerate(ranked,1):\n            scores[doc]=scores.get(doc,0)+1/(c+rank)\n    return sorted(scores,key=lambda d:(-scores[d],d))",
+    "lesson": "p16-fusion",
+    "phase": 16
+  },
+  {
+    "term": "HyDE",
+    "simple": "Generating a hypothetical answer/document to form a retrieval representation.",
+    "deep": "Sparse retrieval such as BM25 rewards lexical evidence including rare identifiers. Dense retrieval can recover paraphrases. Hybrid retrieval combines these complementary candidate lists. Reciprocal rank fusion scores a document by summing 1/(c+rank) across ranked lists, avoiding direct comparison of incompatible raw score scales.",
+    "example": "def rrf(lists,c=60):\n    scores={}\n    for ranked in lists:\n        for rank,doc in enumerate(ranked,1):\n            scores[doc]=scores.get(doc,0)+1/(c+rank)\n    return sorted(scores,key=lambda d:(-scores[d],d))",
+    "lesson": "p16-fusion",
+    "phase": 16
+  },
+  {
+    "term": "Graph RAG",
+    "simple": "Using explicit relationships or graph structure to support evidence retrieval and reasoning.",
+    "deep": "Sparse retrieval such as BM25 rewards lexical evidence including rare identifiers. Dense retrieval can recover paraphrases. Hybrid retrieval combines these complementary candidate lists. Reciprocal rank fusion scores a document by summing 1/(c+rank) across ranked lists, avoiding direct comparison of incompatible raw score scales.",
+    "example": "def rrf(lists,c=60):\n    scores={}\n    for ranked in lists:\n        for rank,doc in enumerate(ranked,1):\n            scores[doc]=scores.get(doc,0)+1/(c+rank)\n    return sorted(scores,key=lambda d:(-scores[d],d))",
+    "lesson": "p16-fusion",
+    "phase": 16
+  },
+  {
+    "term": "Precision@K",
+    "simple": "The fraction of the first K retrieved positions that are relevant.",
+    "deep": "Precision@K is relevant retrieved documents divided by K; Recall@K is relevant retrieved documents divided by all relevant documents. Hit Rate measures whether any relevant item was found. MRR averages the reciprocal position of the first relevant result. NDCG compares discounted relevance gain with the ideal ranking and supports graded relevance.",
+    "example": "def reciprocal_rank(ranked,relevant):\n    return next((1/i for i,d in enumerate(ranked,1) if d in relevant),0)\nassert reciprocal_rank(['x','a'],{'a'})==.5",
+    "lesson": "p17-ranking",
+    "phase": 17
+  },
+  {
+    "term": "Recall@K",
+    "simple": "The fraction of all relevant items retrieved within the first K positions.",
+    "deep": "Precision@K is relevant retrieved documents divided by K; Recall@K is relevant retrieved documents divided by all relevant documents. Hit Rate measures whether any relevant item was found. MRR averages the reciprocal position of the first relevant result. NDCG compares discounted relevance gain with the ideal ranking and supports graded relevance.",
+    "example": "def reciprocal_rank(ranked,relevant):\n    return next((1/i for i,d in enumerate(ranked,1) if d in relevant),0)\nassert reciprocal_rank(['x','a'],{'a'})==.5",
+    "lesson": "p17-ranking",
+    "phase": 17
+  },
+  {
+    "term": "MRR",
+    "simple": "Mean reciprocal rank of the first relevant result across queries.",
+    "deep": "Precision@K is relevant retrieved documents divided by K; Recall@K is relevant retrieved documents divided by all relevant documents. Hit Rate measures whether any relevant item was found. MRR averages the reciprocal position of the first relevant result. NDCG compares discounted relevance gain with the ideal ranking and supports graded relevance.",
+    "example": "def reciprocal_rank(ranked,relevant):\n    return next((1/i for i,d in enumerate(ranked,1) if d in relevant),0)\nassert reciprocal_rank(['x','a'],{'a'})==.5",
+    "lesson": "p17-ranking",
+    "phase": 17
+  },
+  {
+    "term": "NDCG",
+    "simple": "Discounted graded relevance gain normalized by the ideal ranking at the same cutoff.",
+    "deep": "Precision@K is relevant retrieved documents divided by K; Recall@K is relevant retrieved documents divided by all relevant documents. Hit Rate measures whether any relevant item was found. MRR averages the reciprocal position of the first relevant result. NDCG compares discounted relevance gain with the ideal ranking and supports graded relevance.",
+    "example": "def reciprocal_rank(ranked,relevant):\n    return next((1/i for i,d in enumerate(ranked,1) if d in relevant),0)\nassert reciprocal_rank(['x','a'],{'a'})==.5",
+    "lesson": "p17-ranking",
+    "phase": 17
+  },
+  {
+    "term": "Faithfulness",
+    "simple": "The degree to which generated claims are supported by the supplied context.",
+    "deep": "Precision@K is relevant retrieved documents divided by K; Recall@K is relevant retrieved documents divided by all relevant documents. Hit Rate measures whether any relevant item was found. MRR averages the reciprocal position of the first relevant result. NDCG compares discounted relevance gain with the ideal ranking and supports graded relevance.",
+    "example": "def reciprocal_rank(ranked,relevant):\n    return next((1/i for i,d in enumerate(ranked,1) if d in relevant),0)\nassert reciprocal_rank(['x','a'],{'a'})==.5",
+    "lesson": "p17-ranking",
+    "phase": 17
+  },
+  {
+    "term": "Agent",
+    "simple": "A system that selects actions iteratively from observations and task state.",
+    "deep": "An agent repeatedly selects actions based on observations and state. A deterministic workflow has transitions specified by the application; an agentic transition delegates some choice to a model. Use deterministic steps when inputs and required operations are known, and agentic selection when investigation requires choosing evidence paths.",
+    "example": "seen=set();budget=4\nfor action in ['read:F1','search:timeout','search:timeout']:\n    if action in seen or budget<=0: break\n    seen.add(action);budget-=1",
+    "lesson": "p18-state",
+    "phase": 18
+  },
+  {
+    "term": "Trajectory",
+    "simple": "The ordered record of an agent's decisions, tool calls and observations.",
+    "deep": "An agent repeatedly selects actions based on observations and state. A deterministic workflow has transitions specified by the application; an agentic transition delegates some choice to a model. Use deterministic steps when inputs and required operations are known, and agentic selection when investigation requires choosing evidence paths.",
+    "example": "seen=set();budget=4\nfor action in ['read:F1','search:timeout','search:timeout']:\n    if action in seen or budget<=0: break\n    seen.add(action);budget-=1",
+    "lesson": "p18-state",
+    "phase": 18
+  },
+  {
+    "term": "Checkpoint",
+    "simple": "Persisted execution state enabling inspection or resumption, without granting permission.",
+    "deep": "Frameworks package orchestration mechanisms; they do not define your quality contract. LangGraph exposes nodes, edges, shared state, conditional routing and persisted checkpoints. LangChain's current create_agent interface combines models and tools with standardized messages. LlamaIndex provides ingestion/retrieval abstractions for data-grounded applications.",
+    "example": "from typing import TypedDict\nfrom langgraph.graph import StateGraph,START,END\nclass State(TypedDict):\n    failure_id:str\n    draft:str\ndef draft(s):return {'draft':'Review '+s['failure_id']}\ng=StateGraph(State);g.add_node('draft',draft)\ng.add_edge(START,'draft');g.add_edge('draft',END)\napp=g.compile()\nprint(app.invoke({'failure_id':'F1','draft':''}))",
+    "lesson": "p19-graphs",
+    "phase": 19
+  },
+  {
+    "term": "Reducer",
+    "simple": "A defined merge rule for state updates from multiple graph operations.",
+    "deep": "Frameworks package orchestration mechanisms; they do not define your quality contract. LangGraph exposes nodes, edges, shared state, conditional routing and persisted checkpoints. LangChain's current create_agent interface combines models and tools with standardized messages. LlamaIndex provides ingestion/retrieval abstractions for data-grounded applications.",
+    "example": "from typing import TypedDict\nfrom langgraph.graph import StateGraph,START,END\nclass State(TypedDict):\n    failure_id:str\n    draft:str\ndef draft(s):return {'draft':'Review '+s['failure_id']}\ng=StateGraph(State);g.add_node('draft',draft)\ng.add_edge(START,'draft');g.add_edge('draft',END)\napp=g.compile()\nprint(app.invoke({'failure_id':'F1','draft':''}))",
+    "lesson": "p19-graphs",
+    "phase": 19
+  },
+  {
+    "term": "MCP",
+    "simple": "A protocol standardizing connections to servers exposing tools, resources and prompts.",
+    "deep": "Model Context Protocol standardizes how hosts connect to servers exposing tools, resources and prompts. The host owns the user-facing application and policy; a client maintains a connection to a server. Tools perform operations, resources expose addressable context and prompts offer reusable interaction templates where supported.",
+    "example": "from mcp.server.fastmcp import FastMCP\nmcp=FastMCP('synthetic-ci')\n@mcp.tool()\ndef read_failure(failure_id:str)->dict:\n    if failure_id!='F1':raise ValueError('unknown fixture')\n    return {'id':'F1','error':'TimeoutError'}\nif __name__=='__main__':mcp.run(transport='stdio')",
+    "lesson": "p20-protocol",
+    "phase": 20
+  },
+  {
+    "term": "JSON-RPC",
+    "simple": "A message format for structured remote procedure requests and responses.",
+    "deep": "Model Context Protocol standardizes how hosts connect to servers exposing tools, resources and prompts. The host owns the user-facing application and policy; a client maintains a connection to a server. Tools perform operations, resources expose addressable context and prompts offer reusable interaction templates where supported.",
+    "example": "from mcp.server.fastmcp import FastMCP\nmcp=FastMCP('synthetic-ci')\n@mcp.tool()\ndef read_failure(failure_id:str)->dict:\n    if failure_id!='F1':raise ValueError('unknown fixture')\n    return {'id':'F1','error':'TimeoutError'}\nif __name__=='__main__':mcp.run(transport='stdio')",
+    "lesson": "p20-protocol",
+    "phase": 20
+  },
+  {
+    "term": "Transport",
+    "simple": "The communication mechanism carrying protocol messages, such as stdio or HTTP.",
+    "deep": "Model Context Protocol standardizes how hosts connect to servers exposing tools, resources and prompts. The host owns the user-facing application and policy; a client maintains a connection to a server. Tools perform operations, resources expose addressable context and prompts offer reusable interaction templates where supported.",
+    "example": "from mcp.server.fastmcp import FastMCP\nmcp=FastMCP('synthetic-ci')\n@mcp.tool()\ndef read_failure(failure_id:str)->dict:\n    if failure_id!='F1':raise ValueError('unknown fixture')\n    return {'id':'F1','error':'TimeoutError'}\nif __name__=='__main__':mcp.run(transport='stdio')",
+    "lesson": "p20-protocol",
+    "phase": 20
+  },
+  {
+    "term": "Handoff",
+    "simple": "A transfer of a typed task, scoped evidence and budget to another component or specialist.",
+    "deep": "Multiple agents are useful when specialties or independently verifiable subtasks justify coordination overhead. A supervisor routes work and integrates results; specialists operate within narrower tools and evidence scopes. Handoffs transfer a typed task, relevant evidence and a remaining budget, not an unrestricted conversation dump.",
+    "example": "results=[{'task':'logs','evidence':['F1']},{'task':'history','evidence':['F1','F2']}]\nmerged=sorted({e for r in results for e in r['evidence']})\nassert merged==['F1','F2']",
+    "lesson": "p21-handoffs",
+    "phase": 21
+  },
+  {
+    "term": "Abstention",
+    "simple": "Explicitly declining to make an unsupported task decision.",
+    "deep": "A chatbot must retain enough conversational state to resolve follow-up requests while avoiding cross-session leakage. Store messages under a session scoped to tenant and principal. Distinguish user intent, retrieved evidence and assistant claims; earlier assistant text is not automatically a trusted source.",
+    "example": "def session_key(tenant,user,session):\n    return (tenant,user,session)\nassert session_key('a','u','s')!=session_key('b','u','s')",
+    "lesson": "p22-sessions",
+    "phase": 22
+  },
+  {
+    "term": "LLM-as-a-judge",
+    "simple": "Using a language model to apply a declared evaluation rubric to another result.",
+    "deep": "Deterministic checks enforce contracts with crisp truth conditions: JSON validity, enum membership, required fields, resolved citations, forbidden actions, latency and token budgets. Semantic checks assess correctness, relevance, completeness and groundedness against a rubric. Neither replaces the other.",
+    "example": "checks={'schema':True,'citations':True,'privacy':False}\nrelease_ok=all(checks.values())\nassert not release_ok",
+    "lesson": "p23-scorers",
+    "phase": 23
+  },
+  {
+    "term": "Hard gate",
+    "simple": "A mandatory condition that other scores cannot compensate for violating.",
+    "deep": "Deterministic checks enforce contracts with crisp truth conditions: JSON validity, enum membership, required fields, resolved citations, forbidden actions, latency and token budgets. Semantic checks assess correctness, relevance, completeness and groundedness against a rubric. Neither replaces the other.",
+    "example": "checks={'schema':True,'citations':True,'privacy':False}\nrelease_ok=all(checks.values())\nassert not release_ok",
+    "lesson": "p23-scorers",
+    "phase": 23
+  },
+  {
+    "term": "Fault injection",
+    "simple": "Deliberately introducing a controlled failure to test system behavior.",
+    "deep": "An agent's result is only one part of its behavior. Component evaluation tests retriever, planner, model, tool and parser separately. Trajectory evaluation examines selected tools, argument correctness, unnecessary calls, loop behavior, permissions and progress toward the goal.",
+    "example": "trace=[{'tool':'read_failure','authorized':True},{'tool':'apply_patch','authorized':False}]\nviolations=[e for e in trace if not e['authorized']]",
+    "lesson": "p24-trajectories",
+    "phase": 24
+  },
+  {
+    "term": "Golden dataset",
+    "simple": "A versioned collection of reviewed cases and expected behavior for evaluation.",
+    "deep": "An evaluation framework turns cases into reproducible evidence. A case definition names task input, expected behavior, scorer configuration and thresholds. A runner invokes the system, captures output/trace, applies reusable scorers and creates a machine-readable verdict plus a human-readable report.",
+    "example": "import html\nrow='<script>alert(1)</script>'\nassert '<script>' not in html.escape(row)",
+    "lesson": "p25-runner",
+    "phase": 25
+  },
+  {
+    "term": "Baseline",
+    "simple": "A declared reference implementation or run used for comparison.",
+    "deep": "An evaluation framework turns cases into reproducible evidence. A case definition names task input, expected behavior, scorer configuration and thresholds. A runner invokes the system, captures output/trace, applies reusable scorers and creates a machine-readable verdict plus a human-readable report.",
+    "example": "import html\nrow='<script>alert(1)</script>'\nassert '<script>' not in html.escape(row)",
+    "lesson": "p25-runner",
+    "phase": 25
+  },
+  {
+    "term": "Prompt injection",
+    "simple": "Untrusted text attempting to redirect a model or its application behavior.",
+    "deep": "Prompt injection occurs when untrusted text attempts to redirect model behavior. Indirect injection arrives through retrieved documents, logs or tool results rather than the direct user request. Retrieval poisoning manipulates which evidence is selected; sensitive disclosure exposes data to an unauthorized audience.",
+    "example": "def allowed(doc,tenant):return doc['tenant']==tenant\nassert not allowed({'tenant':'other'},'current')",
+    "lesson": "p26-injection",
+    "phase": 26
+  },
+  {
+    "term": "Retrieval poisoning",
+    "simple": "Manipulating retrieved evidence or ranking to influence downstream behavior.",
+    "deep": "Prompt injection occurs when untrusted text attempts to redirect model behavior. Indirect injection arrives through retrieved documents, logs or tool results rather than the direct user request. Retrieval poisoning manipulates which evidence is selected; sensitive disclosure exposes data to an unauthorized audience.",
+    "example": "def allowed(doc,tenant):return doc['tenant']==tenant\nassert not allowed({'tenant':'other'},'current')",
+    "lesson": "p26-injection",
+    "phase": 26
+  },
+  {
+    "term": "Tenant isolation",
+    "simple": "Enforcing separation of data and actions between customer or organizational scopes.",
+    "deep": "Prompt injection occurs when untrusted text attempts to redirect model behavior. Indirect injection arrives through retrieved documents, logs or tool results rather than the direct user request. Retrieval poisoning manipulates which evidence is selected; sensitive disclosure exposes data to an unauthorized audience.",
+    "example": "def allowed(doc,tenant):return doc['tenant']==tenant\nassert not allowed({'tenant':'other'},'current')",
+    "lesson": "p26-injection",
+    "phase": 26
+  },
+  {
+    "term": "Least privilege",
+    "simple": "Granting only the data access and operations required for a component's task.",
+    "deep": "Guardrails are controls applied at specific boundaries: input validation, retrieval authorization, tool permissioning, output validation and rate limits. Moderation can classify content risks but cannot replace authentication or domain policy. Least privilege gives each component only the operations and data it requires.",
+    "example": "approved={'hash':'abc','expires':200}\nassert approved['hash']=='abc' and approved['expires']>100",
+    "lesson": "p27-policies",
+    "phase": 27
+  },
+  {
+    "term": "GraphQL",
+    "simple": "A typed query language and execution model for API data operations.",
+    "deep": "Generated tests are candidates that require independent validation. For GraphQL, inspect operations, arguments, required fields, nullability, enum values and authorization rules. A syntactically valid query may fail business rules; an HTTP 200 response may contain GraphQL errors.",
+    "example": "response={'data':None,'errors':[{'message':'Unauthorized'}]}\nassert bool(response.get('errors'))",
+    "lesson": "p28-generation",
+    "phase": 28
+  },
+  {
+    "term": "Traceability",
+    "simple": "Linking tests or results to the requirements and evidence they verify.",
+    "deep": "Generated tests are candidates that require independent validation. For GraphQL, inspect operations, arguments, required fields, nullability, enum values and authorization rules. A syntactically valid query may fail business rules; an HTTP 200 response may contain GraphQL errors.",
+    "example": "response={'data':None,'errors':[{'message':'Unauthorized'}]}\nassert bool(response.get('errors'))",
+    "lesson": "p28-generation",
+    "phase": 28
+  },
+  {
+    "term": "Test oracle",
+    "simple": "An independent basis for deciding whether observed behavior is correct.",
+    "deep": "Generated code can import nonexistent APIs, mishandle edge cases or encode the wrong requirement. A compile/type check establishes basic structural compatibility, not correctness. Unit tests check isolated behavior; integration tests check real contracts; static and dependency checks address additional risks.",
+    "example": "def allowed(role):return role=='admin'\nassert allowed('admin') and not allowed('viewer')",
+    "lesson": "p29-verification",
+    "phase": 29
+  },
+  {
+    "term": "Mutation testing",
+    "simple": "Changing implementation behavior to check whether tests detect meaningful differences.",
+    "deep": "Generated code can import nonexistent APIs, mishandle edge cases or encode the wrong requirement. A compile/type check establishes basic structural compatibility, not correctness. Unit tests check isolated behavior; integration tests check real contracts; static and dependency checks address additional risks.",
+    "example": "def allowed(role):return role=='admin'\nassert allowed('admin') and not allowed('viewer')",
+    "lesson": "p29-verification",
+    "phase": 29
+  },
+  {
+    "term": "Dependency injection",
+    "simple": "Supplying a component's dependencies through explicit interfaces or configuration.",
+    "deep": "An AI service should expose typed domain contracts rather than raw provider messages. FastAPI routes accept request models, call application services and return response models. Dependency injection supplies authenticated principals and adapters. Health reports process liveness; readiness reports whether required dependencies can serve requests.",
+    "example": "from fastapi import FastAPI\nfrom pydantic import BaseModel,ConfigDict\nclass Request(BaseModel):\n    model_config=ConfigDict(extra='forbid')\n    failure_id:str\napp=FastAPI()\n@app.get('/health')\ndef health():return {'status':'ok'}",
+    "lesson": "p30-service",
+    "phase": 30
+  },
+  {
+    "term": "Readiness",
+    "simple": "Whether a service can serve its required workload and dependencies.",
+    "deep": "An AI service should expose typed domain contracts rather than raw provider messages. FastAPI routes accept request models, call application services and return response models. Dependency injection supplies authenticated principals and adapters. Health reports process liveness; readiness reports whether required dependencies can serve requests.",
+    "example": "from fastapi import FastAPI\nfrom pydantic import BaseModel,ConfigDict\nclass Request(BaseModel):\n    model_config=ConfigDict(extra='forbid')\n    failure_id:str\napp=FastAPI()\n@app.get('/health')\ndef health():return {'status':'ok'}",
+    "lesson": "p30-service",
+    "phase": 30
+  },
+  {
+    "term": "Circuit breaker",
+    "simple": "A stateful control that temporarily stops calls to a failing dependency.",
+    "deep": "A production AI path includes authentication, admission control, retrieval, provider work, validation and response delivery. Caches reduce repeated work, queues decouple long tasks, circuit breakers limit calls to failing dependencies and fallbacks preserve a smaller safe capability. Each mechanism changes failure behavior and needs a contract.",
+    "example": "cache_key=('tenant-a','permissions-v2','prompt-v3','index-v4','question')\nassert len(cache_key)==5",
+    "lesson": "p31-resilience",
+    "phase": 31
+  },
+  {
+    "term": "Container",
+    "simple": "An isolated running process environment created from an image.",
+    "deep": "An image packages filesystem layers and runtime metadata; a container is an isolated running instance. Dockerfile layer order affects dependency cache reuse. Copying dependency manifests before application source lets source-only changes avoid reinstalling dependencies.",
+    "example": "# Dockerfile\nFROM python:3.11-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nUSER 10001\nCMD [\"uvicorn\",\"app:app\",\"--host\",\"0.0.0.0\",\"--port\",\"8000\"]",
+    "lesson": "p32-containers",
+    "phase": 32
+  },
+  {
+    "term": "Docker image",
+    "simple": "A packaged filesystem and runtime configuration composed from build layers.",
+    "deep": "An image packages filesystem layers and runtime metadata; a container is an isolated running instance. Dockerfile layer order affects dependency cache reuse. Copying dependency manifests before application source lets source-only changes avoid reinstalling dependencies.",
+    "example": "# Dockerfile\nFROM python:3.11-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nUSER 10001\nCMD [\"uvicorn\",\"app:app\",\"--host\",\"0.0.0.0\",\"--port\",\"8000\"]",
+    "lesson": "p32-containers",
+    "phase": 32
+  },
+  {
+    "term": "CI",
+    "simple": "Automated integration checks that validate changes before release.",
+    "deep": "Continuous integration validates changes before they become release candidates. A useful pipeline installs locked dependencies, checks content and contracts, runs unit/integration tests, builds the app and executes representative browser and service tests. Continuous delivery packages a candidate after those gates; deployment publishes an approved artifact.",
+    "example": "# CI command\npython -m pytest local-labs\npython local-labs/evals/runner.py --cases data/evaluation.json\nnpm run lint\nnpm test\nnpm run build",
+    "lesson": "p33-ci",
+    "phase": 33
+  },
+  {
+    "term": "Trace",
+    "simple": "A linked record of operations within a task or request.",
+    "deep": "A trace links operations within one task; spans describe timed units such as retrieval, provider calls and tools. Logs record events, metrics summarize distributions and user feedback contributes product outcomes. Correlation IDs connect these views without requiring sensitive text in every record.",
+    "example": "from opentelemetry import trace\ntracer=trace.get_tracer('ci-quality')\nwith tracer.start_as_current_span('retrieve') as span:\n    span.set_attribute('retrieval.index_version','v1')",
+    "lesson": "p34-tracing",
+    "phase": 34
+  },
+  {
+    "term": "Span",
+    "simple": "A timed operation within a distributed trace.",
+    "deep": "A trace links operations within one task; spans describe timed units such as retrieval, provider calls and tools. Logs record events, metrics summarize distributions and user feedback contributes product outcomes. Correlation IDs connect these views without requiring sensitive text in every record.",
+    "example": "from opentelemetry import trace\ntracer=trace.get_tracer('ci-quality')\nwith tracer.start_as_current_span('retrieve') as span:\n    span.set_attribute('retrieval.index_version','v1')",
+    "lesson": "p34-tracing",
+    "phase": 34
+  },
+  {
+    "term": "OpenTelemetry",
+    "simple": "Standardized APIs and tooling for traces, metrics and logs.",
+    "deep": "A trace links operations within one task; spans describe timed units such as retrieval, provider calls and tools. Logs record events, metrics summarize distributions and user feedback contributes product outcomes. Correlation IDs connect these views without requiring sensitive text in every record.",
+    "example": "from opentelemetry import trace\ntracer=trace.get_tracer('ci-quality')\nwith tracer.start_as_current_span('retrieve') as span:\n    span.set_attribute('retrieval.index_version','v1')",
+    "lesson": "p34-tracing",
+    "phase": 34
+  },
+  {
+    "term": "Cost per task",
+    "simple": "Total measured spend divided by tasks meeting the declared success contract.",
+    "deep": "AI cost includes input/output tokens, embedding/indexing work, retries, agent steps, evaluation and human review. Price per token is only one input to cost per accepted task. Smaller models, shorter context and caching help only if they preserve the required outcome.",
+    "example": "attempt_costs=[.003,.004,.002]\naccepted=2\ncost_per_accepted=sum(attempt_costs)/accepted",
+    "lesson": "p35-economics",
+    "phase": 35
+  },
+  {
+    "term": "p95",
+    "simple": "A percentile threshold at or below which approximately 95 percent of measured samples fall.",
+    "deep": "TTFT measures time to the first generated token; end-to-end latency measures completion; tokens per second describes generation rate. p50, p95 and p99 summarize latency distributions. Throughput counts completed tasks per unit time, while concurrency counts in-flight tasks. These quantities answer different capacity questions.",
+    "example": "import math\ndef percentile(values,p):\n    v=sorted(values)\n    return v[max(0,math.ceil(p/100*len(v))-1)]",
+    "lesson": "p36-load",
+    "phase": 36
+  },
+  {
+    "term": "Throughput",
+    "simple": "Completed work per unit time under a stated workload.",
+    "deep": "TTFT measures time to the first generated token; end-to-end latency measures completion; tokens per second describes generation rate. p50, p95 and p99 summarize latency distributions. Throughput counts completed tasks per unit time, while concurrency counts in-flight tasks. These quantities answer different capacity questions.",
+    "example": "import math\ndef percentile(values,p):\n    v=sorted(values)\n    return v[max(0,math.ceil(p/100*len(v))-1)]",
+    "lesson": "p36-load",
+    "phase": 36
+  },
+  {
+    "term": "Coordinated omission",
+    "simple": "A measurement bias where a waiting load generator under-samples work during slow periods.",
+    "deep": "TTFT measures time to the first generated token; end-to-end latency measures completion; tokens per second describes generation rate. p50, p95 and p99 summarize latency distributions. Throughput counts completed tasks per unit time, while concurrency counts in-flight tasks. These quantities answer different capacity questions.",
+    "example": "import math\ndef percentile(values,p):\n    v=sorted(values)\n    return v[max(0,math.ceil(p/100*len(v))-1)]",
+    "lesson": "p36-load",
+    "phase": 36
+  },
+  {
+    "term": "Graceful degradation",
+    "simple": "Delivering a smaller truthful capability when the full service cannot succeed.",
+    "deep": "Reliability is the ability to deliver an acceptable outcome despite dependency and input failures. AI failures include provider outage, rate limit, timeout, malformed result, hallucinated evidence, stale index, vector-store outage, broken tools, looping agents and context overflow. Not all failures should be retried.",
+    "example": "fallback={'status':'degraded','answer':None,'evidence_ids':['D1']}\nassert fallback['answer'] is None",
+    "lesson": "p37-faults",
+    "phase": 37
+  },
+  {
+    "term": "Error budget",
+    "simple": "The allowed amount of reliability failure over a declared measurement window.",
+    "deep": "Reliability is the ability to deliver an acceptable outcome despite dependency and input failures. AI failures include provider outage, rate limit, timeout, malformed result, hallucinated evidence, stale index, vector-store outage, broken tools, looping agents and context overflow. Not all failures should be retried.",
+    "example": "fallback={'status':'degraded','answer':None,'evidence_ids':['D1']}\nassert fallback['answer'] is None",
+    "lesson": "p37-faults",
+    "phase": 37
+  },
+  {
+    "term": "Release manifest",
+    "simple": "A record linking compatible code, data, model, prompt, index and evaluation artifacts.",
+    "deep": "A reproducible AI release links code, dataset, model, tokenizer, prompt, retrieval index, evaluation rubric and environment. MLOps manages training/serving artifacts; LLMOps adds prompt and provider configuration, retrieval and semantic evaluation. Both need experiment tracking and operational monitoring.",
+    "example": "manifest={'dataset':'ci-v1','prompt':'triage-v2','index':'docs-v1','model':'configured','evaluation':'run-001'}\nassert all(manifest.values())",
+    "lesson": "p38-versions",
+    "phase": 38
+  },
+  {
+    "term": "MLOps",
+    "simple": "Practices for reproducible model training, release, serving and monitoring.",
+    "deep": "A reproducible AI release links code, dataset, model, tokenizer, prompt, retrieval index, evaluation rubric and environment. MLOps manages training/serving artifacts; LLMOps adds prompt and provider configuration, retrieval and semantic evaluation. Both need experiment tracking and operational monitoring.",
+    "example": "manifest={'dataset':'ci-v1','prompt':'triage-v2','index':'docs-v1','model':'configured','evaluation':'run-001'}\nassert all(manifest.values())",
+    "lesson": "p38-versions",
+    "phase": 38
+  },
+  {
+    "term": "LLMOps",
+    "simple": "Operational practices for model providers, prompts, retrieval, evaluation and AI application releases.",
+    "deep": "A reproducible AI release links code, dataset, model, tokenizer, prompt, retrieval index, evaluation rubric and environment. MLOps manages training/serving artifacts; LLMOps adds prompt and provider configuration, retrieval and semantic evaluation. Both need experiment tracking and operational monitoring.",
+    "example": "manifest={'dataset':'ci-v1','prompt':'triage-v2','index':'docs-v1','model':'configured','evaluation':'run-001'}\nassert all(manifest.values())",
+    "lesson": "p38-versions",
+    "phase": 38
+  },
+  {
+    "term": "Fine-tuning",
+    "simple": "Updating model parameters using task-specific training examples.",
+    "deep": "Prompting changes instructions, RAG supplies changing evidence, and fine-tuning changes model parameters for repeated task behavior. Fine-tuning is not a reliable way to maintain rapidly changing facts or enforce authorization. Start with a baseline and a measured failure pattern before paying training and maintenance costs.",
+    "example": "rank=4;input_dim=100;output_dim=80\nfull=input_dim*output_dim\nlora=rank*(input_dim+output_dim)\nassert lora<full",
+    "lesson": "p39-adaptation",
+    "phase": 39
+  },
+  {
+    "term": "LoRA",
+    "simple": "Learning low-rank parameter updates while keeping base weights fixed.",
+    "deep": "Prompting changes instructions, RAG supplies changing evidence, and fine-tuning changes model parameters for repeated task behavior. Fine-tuning is not a reliable way to maintain rapidly changing facts or enforce authorization. Start with a baseline and a measured failure pattern before paying training and maintenance costs.",
+    "example": "rank=4;input_dim=100;output_dim=80\nfull=input_dim*output_dim\nlora=rank*(input_dim+output_dim)\nassert lora<full",
+    "lesson": "p39-adaptation",
+    "phase": 39
+  },
+  {
+    "term": "PEFT",
+    "simple": "Parameter-efficient adaptation methods that train only a limited subset or added parameters.",
+    "deep": "Prompting changes instructions, RAG supplies changing evidence, and fine-tuning changes model parameters for repeated task behavior. Fine-tuning is not a reliable way to maintain rapidly changing facts or enforce authorization. Start with a baseline and a measured failure pattern before paying training and maintenance costs.",
+    "example": "rank=4;input_dim=100;output_dim=80\nfull=input_dim*output_dim\nlora=rank*(input_dim+output_dim)\nassert lora<full",
+    "lesson": "p39-adaptation",
+    "phase": 39
+  },
+  {
+    "term": "SLO",
+    "simple": "A measurable service-level objective over a defined window and workload.",
+    "deep": "AI system design begins with users, tasks, failure costs and measurable constraints. A support chatbot, failure triage service, test-generation platform and enterprise RAG system share components but have different permissions, latency and quality requirements. State what the system may decide autonomously and what requires review.",
+    "example": "requirements={'tenant_isolation':True,'writes_require_approval':True,'max_steps':5,'deadline_seconds':15}\nassert requirements['max_steps']>0",
+    "lesson": "p40-tradeoffs",
+    "phase": 40
+  },
+  {
+    "term": "Trust boundary",
+    "simple": "A point where data or actions cross between differently trusted scopes.",
+    "deep": "AI system design begins with users, tasks, failure costs and measurable constraints. A support chatbot, failure triage service, test-generation platform and enterprise RAG system share components but have different permissions, latency and quality requirements. State what the system may decide autonomously and what requires review.",
+    "example": "requirements={'tenant_isolation':True,'writes_require_approval':True,'max_steps':5,'deadline_seconds':15}\nassert requirements['max_steps']>0",
+    "lesson": "p40-tradeoffs",
+    "phase": 40
+  }
+]

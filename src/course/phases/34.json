@@ -1,0 +1,349 @@
+[
+  {
+    "id": "p34-tracing",
+    "phase": 34,
+    "module": "AI Observability",
+    "title": "Observability: spans, redaction and experiment identity",
+    "minutes": 35,
+    "objectives": [
+      "Observability",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects observability: spans, redaction and experiment identity with test contracts, failure triage, and evidence for release. During a simulated outage, the trace should identify the failing dependency, retry attempts and final fallback without exposing credentials.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A trace links operations within one task; spans describe timed units such as retrieval, provider calls and tools. Logs record events, metrics summarize distributions and user feedback contributes product outcomes. Correlation IDs connect these views without requiring sensitive text in every record.",
+          "AI observability adds prompt/model versions, retrieval IDs, token usage, cost, finish reasons and validation outcomes. Raw prompts and responses may contain private data, so visibility needs access controls, redaction and retention."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use OpenTelemetry spans around domain stages and propagate context into HTTP/tool calls. Record safe attributes such as task ID, model ID, mode, duration and counts. Store sensitive evidence separately under controlled access, referencing it by ID.",
+          "MLflow, LangSmith or Phoenix can organize traces and experiments; keep portable run JSON as a baseline. Attach dataset/prompt/index revisions so a quality change can be correlated with a release."
+        ],
+        "code": "from opentelemetry import trace\ntracer=trace.get_tracer('ci-quality')\nwith tracer.start_as_current_span('retrieve') as span:\n    span.set_attribute('retrieval.index_version','v1')",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A dashboard shows average latency but cannot distinguish queue delay from model delay. A trace logs Authorization headers or synthetic canaries. An evaluator failure appears as a successful model span.",
+          "Test attribute redaction, parent-child span relationships, error status and correlation across retries. Track p95 and failure slices, not only global means."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "During a simulated outage, the trace should identify the failing dependency, retry attempts and final fallback without exposing credentials. Quality reports should link to the corresponding safe trace ID.",
+          "SDETs can assert observability contracts as part of integration tests: required spans exist, status matches the outcome and prohibited attributes never appear."
+        ]
+      }
+    ],
+    "mistake": "A dashboard shows average latency but cannot distinguish queue delay from model delay. A trace logs Authorization headers or synthetic canaries. An evaluator failure appears as a successful model span.",
+    "takeaway": "During a simulated outage, the trace should identify the failing dependency, retry attempts and final fallback without exposing credentials.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def redact(record):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def redact(record):\n    blocked={'authorization','api_key','password','token'}\n    return {k:('[REDACTED]' if k.lower() in blocked else v) for k,v in record.items()}",
+      "starter": "def redact(record):\n    return record",
+      "tests": "assert redact({'Authorization':'secret','task':'F1'})=={'Authorization':'[REDACTED]','task':'F1'}",
+      "id": "p34-tracing-exercise",
+      "hints": [
+        "A trace links operations within one task; spans describe timed units such as retrieval, provider calls and tools.",
+        "A dashboard shows average latency but cannot distinguish queue delay from model delay.",
+        "Use OpenTelemetry spans around domain stages and propagate context into HTTP/tool calls.",
+        "During a simulated outage, the trace should identify the failing dependency, retry attempts and final fallback without exposing credentials."
+      ],
+      "explanation": "def redact(record):\n    blocked={'authorization','api_key','password','token'}\n    return {k:('[REDACTED]' if k.lower() in blocked else v) for k,v in record.items()}"
+    },
+    "quiz": {
+      "question": "Which attribute helps attribute a retrieval regression?",
+      "options": [
+        "Index generation/version",
+        "User password",
+        "A random decorative label"
+      ],
+      "answer": 0,
+      "explanation": "Versioned retrieval artifacts connect observed behavior to changed inputs."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which attribute helps attribute a retrieval regression?",
+      "options": [
+        "Index generation/version",
+        "User password",
+        "A random decorative label"
+      ],
+      "answer": 0,
+      "explanation": "Versioned retrieval artifacts connect observed behavior to changed inputs."
+    },
+    "sources": [
+      "https://opentelemetry.io/docs/languages/python/instrumentation/",
+      "https://mlflow.org/docs/latest/genai/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p33-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Trace",
+      "Span",
+      "OpenTelemetry"
+    ],
+    "interviewIds": [
+      "bridge-production-006",
+      "bridge-production-007",
+      "bridge-production-023",
+      "bridge-phase-34-3",
+      "bridge-phase-34-4",
+      "bridge-phase-34-5",
+      "bridge-phase-34-6",
+      "bridge-phase-34-7"
+    ]
+  },
+  {
+    "id": "p34-correlation",
+    "phase": 34,
+    "module": "AI Observability",
+    "title": "Trace correlation and safe telemetry assertions",
+    "minutes": 35,
+    "objectives": [
+      "Trace correlation and safe telemetry assertions",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects trace correlation and safe telemetry assertions with test contracts, failure triage, and evidence for release. Acceptance evidence shows a complete trace for a normal request and an injected failure, with no canary or credential attributes.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A trace is useful only when its spans explain the user task. Queue, retrieval, provider, validation and tool spans should share context while recording their own durations and statuses. A random request ID in every log without shared linkage cannot reconstruct the task.",
+          "Telemetry is also a data surface. Prompt text, authorization headers and evidence from restricted tenants should not become broadly accessible trace attributes."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The local OpenTelemetry example emits a parent release-evaluation span and a child deterministic-cases span with dataset and mode attributes. Add domain spans around dependency calls, propagate trace context and mark failures at the responsible stage.",
+          "Keep safe scalar attributes and controlled artifact references. Redact structured sensitive fields recursively; use a dedicated protected store for raw evidence when the product requires it. Configure retention and reader access independently from application access."
+        ],
+        "code": "python local-labs/frameworks/tracing.py\n# Inspect parent_span_id, dataset.version and evaluation.passed in output",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A provider failure is swallowed and the span remains successful. Retry attempts have no parent, preventing correlation. A nested header includes a secret despite a top-level redactor.",
+          "Test required span names, parent IDs, error statuses, attempt counts and forbidden attributes using an in-memory exporter. Preserve a synthetic canary test so privacy regressions in telemetry are visible."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance evidence shows a complete trace for a normal request and an injected failure, with no canary or credential attributes. Version IDs connect the trace to the evaluation run and release manifest.",
+          "SDETs can make observability assertions deterministic even when model quality is probabilistic. A useful trace explains the first failed boundary and the visible fallback without exposing sensitive content."
+        ]
+      }
+    ],
+    "mistake": "A provider failure is swallowed and the span remains successful. Retry attempts have no parent, preventing correlation. A nested header includes a secret despite a top-level redactor.",
+    "takeaway": "Acceptance evidence shows a complete trace for a normal request and an injected failure, with no canary or credential attributes.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def safe_attributes(attrs):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def safe_attributes(attrs):\n    forbidden={'authorization','api_key','password','raw_prompt'}\n    return not any(k.lower() in forbidden for k in attrs)",
+      "starter": "def safe_attributes(attrs):\n    return False",
+      "tests": "assert safe_attributes({'dataset.version':'v1'})\nassert not safe_attributes({'Authorization':'secret'})\nassert not safe_attributes({'raw_prompt':'sensitive'})",
+      "id": "p34-correlation-exercise",
+      "hints": [
+        "A trace is useful only when its spans explain the user task.",
+        "A provider failure is swallowed and the span remains successful.",
+        "The local OpenTelemetry example emits a parent release-evaluation span and a child deterministic-cases span with dataset and mode attributes.",
+        "Acceptance evidence shows a complete trace for a normal request and an injected failure, with no canary or credential attributes."
+      ],
+      "explanation": "def safe_attributes(attrs):\n    forbidden={'authorization','api_key','password','raw_prompt'}\n    return not any(k.lower() in forbidden for k in attrs)"
+    },
+    "quiz": {
+      "question": "What links a trace to a reproducible quality experiment?",
+      "options": [
+        "Dataset, prompt/model/index and run identities",
+        "Raw passwords",
+        "Only the console timestamp"
+      ],
+      "answer": 0,
+      "explanation": "Version identities connect execution evidence to its exact inputs."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What links a trace to a reproducible quality experiment?",
+      "options": [
+        "Dataset, prompt/model/index and run identities",
+        "Raw passwords",
+        "Only the console timestamp"
+      ],
+      "answer": 0,
+      "explanation": "Version identities connect execution evidence to its exact inputs."
+    },
+    "sources": [
+      "https://opentelemetry.io/docs/languages/python/instrumentation/",
+      "https://mlflow.org/docs/latest/genai/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p34-tracing"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Trace correlation",
+      "Telemetry redaction"
+    ],
+    "interviewIds": [
+      "bridge-production-006",
+      "bridge-production-007",
+      "bridge-production-023",
+      "bridge-phase-34-3",
+      "bridge-phase-34-4",
+      "bridge-phase-34-5",
+      "bridge-phase-34-6",
+      "bridge-phase-34-7"
+    ]
+  },
+  {
+    "id": "p34-checkpoint",
+    "phase": 34,
+    "module": "AI Observability",
+    "title": "Phase 34 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 34 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 34 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance evidence shows a complete trace for a normal request and an injected failure, with no canary or credential attributes.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects trace correlation and safe telemetry assertions to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The local OpenTelemetry example emits a parent release-evaluation span and a child deterministic-cases span with dataset and mode attributes. Add domain spans around dependency calls, propagate trace context and mark failures at the responsible stage.",
+          "Keep safe scalar attributes and controlled artifact references. Redact structured sensitive fields recursively; use a dedicated protected store for raw evidence when the product requires it. Configure retention and reader access independently from application access.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "python local-labs/frameworks/tracing.py\n# Inspect parent_span_id, dataset.version and evaluation.passed in output",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A provider failure is swallowed and the span remains successful. Retry attempts have no parent, preventing correlation. A nested header includes a secret despite a top-level redactor.",
+          "Test required span names, parent IDs, error statuses, attempt counts and forbidden attributes using an in-memory exporter. Preserve a synthetic canary test so privacy regressions in telemetry are visible.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance evidence shows a complete trace for a normal request and an injected failure, with no canary or credential attributes. Version IDs connect the trace to the evaluation run and release manifest.",
+          "SDETs can make observability assertions deterministic even when model quality is probabilistic. A useful trace explains the first failed boundary and the visible fallback without exposing sensitive content.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A provider failure is swallowed and the span remains successful. Retry attempts have no parent, preventing correlation. A nested header includes a secret despite a top-level redactor.",
+    "takeaway": "Acceptance evidence shows a complete trace for a normal request and an injected failure, with no canary or credential attributes.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Trace correlation and safe telemetry assertions to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance evidence shows a complete trace for a normal request and an injected failure, with no canary or credential attributes.",
+      "id": "p34-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects trace correlation and safe telemetry assertions to the shared CI quality platform.",
+        "A provider failure is swallowed and the span remains successful.",
+        "The local OpenTelemetry example emits a parent release-evaluation span and a child deterministic-cases span with dataset and mode attributes.",
+        "Acceptance evidence shows a complete trace for a normal request and an injected failure, with no canary or credential attributes."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance evidence shows a complete trace for a normal request and an injected failure, with no canary or credential attributes."
+    },
+    "quiz": {
+      "question": "A candidate for trace correlation and safe telemetry assertions meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for trace correlation and safe telemetry assertions meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://opentelemetry.io/docs/languages/python/instrumentation/",
+      "https://mlflow.org/docs/latest/genai/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p34-correlation"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-production-006",
+      "bridge-production-007",
+      "bridge-production-023",
+      "bridge-phase-34-3",
+      "bridge-phase-34-4",
+      "bridge-phase-34-5",
+      "bridge-phase-34-6",
+      "bridge-phase-34-7"
+    ]
+  }
+]

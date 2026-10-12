@@ -1,0 +1,695 @@
+[
+  {
+    "id": "p08-tokens",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Tokenization: text becomes an indexed sequence",
+    "minutes": 35,
+    "objectives": [
+      "Tokenization",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects tokenization: text becomes an indexed sequence with test contracts, failure triage, and evidence for release. Create a token budget report for ten CI logs: model/tokenizer revision, input count, reserved output count and retained evidence.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A transformer consumes integer token IDs, not words. Subword tokenizers split unfamiliar identifiers into known fragments, so checkout_timeout can require several positions while a common word may require one. Whitespace, punctuation and Unicode normalization change the sequence. Vocabulary size is the number of IDs the model recognizes; sequence length is the number of positions in one input. Neither is the number of documents.",
+          "For failure triage, preserving exception names and paths can matter more than lowercasing everything. Compare raw and normalized logs with the actual model tokenizer before choosing preprocessing. Tokens have no universal meaning across models: ID 42 in one vocabulary is unrelated to ID 42 in another."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The local transformer lab uses a small, declared vocabulary so you can inspect every ID without downloading weights. Production experiments use AutoTokenizer from the model's published checkpoint, preserving attention masks and tokenizer revision alongside weights. Unknown IDs must map to an explicit unknown token rather than silently disappear.",
+          "Count prompt, retrieved context and requested completion together before making a request. Truncate on semantic boundaries and preserve the error cause; chopping the tail of a stack trace can remove the most useful evidence."
+        ],
+        "code": "vocab = {'<unk>': 0, 'timeout': 1, 'database': 2}\nids = [vocab.get(token, 0) for token in 'database timeout'.split()]\nassert ids == [2, 1]",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A developer estimates cost from len(text.split()) and undercounts long stack traces. Reproduce with URLs, emoji and minified JSON, compare actual token counts, and inspect which evidence was removed. A tokenizer mismatch can also produce valid-looking IDs that feed the wrong embedding rows.",
+          "Test encode/decode round trips subject to documented normalization, empty strings, unknown characters, and context overflow. Do not assert that every word is exactly one token."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Create a token budget report for ten CI logs: model/tokenizer revision, input count, reserved output count and retained evidence. Reject inputs that exceed the budget before provider work. Record both truncation rate and downstream classification accuracy.",
+          "A shorter prompt is successful only if it preserves the decision-critical evidence. Compare the same held-out failures with and without normalization, keeping model and prompt versions fixed."
+        ]
+      }
+    ],
+    "mistake": "A developer estimates cost from len(text.split()) and undercounts long stack traces. Reproduce with URLs, emoji and minified JSON, compare actual token counts, and inspect which evidence was removed. A tokenizer mismatch can also produce valid-looking IDs that feed the wrong embedding rows.",
+    "takeaway": "Create a token budget report for ten CI logs: model/tokenizer revision, input count, reserved output count and retained evidence.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement encode(text, vocab): split on whitespace and map unknown tokens to vocab[\"<unk>\"].",
+      "answer": "",
+      "solution": "def encode(text, vocab):\n    return [vocab.get(t, vocab['<unk>']) for t in text.split()]",
+      "starter": "def encode(text, vocab):\n    # Keep unknown positions\n    return []",
+      "tests": "assert encode('db timeout', {'<unk>':0,'timeout':1}) == [0,1]\nassert encode('', {'<unk>':0}) == []",
+      "id": "p08-tokens-exercise",
+      "hints": [
+        "A transformer consumes integer token IDs, not words.",
+        "A developer estimates cost from len(text.split()) and undercounts long stack traces.",
+        "The local transformer lab uses a small, declared vocabulary so you can inspect every ID without downloading weights.",
+        "Create a token budget report for ten CI logs: model/tokenizer revision, input count, reserved output count and retained evidence."
+      ],
+      "explanation": "def encode(text, vocab):\n    return [vocab.get(t, vocab['<unk>']) for t in text.split()]"
+    },
+    "quiz": {
+      "question": "What must match a trained embedding table?",
+      "options": [
+        "The tokenizer vocabulary and ID mapping",
+        "The number of CI builds",
+        "The display font"
+      ],
+      "answer": 0,
+      "explanation": "Embedding rows are selected by token ID, so the trained mapping is part of the model contract."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What must match a trained embedding table?",
+      "options": [
+        "The tokenizer vocabulary and ID mapping",
+        "The number of CI builds",
+        "The display font"
+      ],
+      "answer": 0,
+      "explanation": "Embedding rows are selected by token ID, so the trained mapping is part of the model contract."
+    },
+    "sources": [
+      "https://arxiv.org/abs/1706.03762",
+      "https://huggingface.co/docs/transformers/index"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p07-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Token",
+      "Vocabulary",
+      "Tokenization"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-001",
+      "bridge-transformers--llm-002",
+      "bridge-transformers--llm-003",
+      "bridge-phase-08-3",
+      "bridge-phase-08-4",
+      "bridge-phase-08-5",
+      "bridge-phase-08-6",
+      "bridge-phase-08-7"
+    ]
+  },
+  {
+    "id": "p08-attention",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Attention: query, key and value with a causal mask",
+    "minutes": 35,
+    "objectives": [
+      "Attention",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects attention: query, key and value with a causal mask with test contracts, failure triage, and evidence for release. Use the attention calculator to vary scores and observe normalized weights and the value mixture.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Attention asks which other positions should contribute to the current position. A query represents what a position seeks; keys describe what each position offers; values contain the information to aggregate. Compute query-key dot products, scale by the square root of key dimension, apply the permitted-position mask, then softmax each query row.",
+          "The output is a weighted sum of values, not the selected key or a database lookup. In a failure log, the word timeout may attend to database rather than unrelated login text. Learned projections determine this behavior; a diagram illustrates a mechanism, not a proof that a model understands a cause."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "For one query q=[1,0], keys [[1,0],[0,1]] and values [[4,0],[0,2]], unscaled scores are [1,0]. Softmax gives approximately [0.731,0.269], so the output is [2.924,0.538]. Scaling changes the weights. Subtract the maximum score before exponentiating for numerical stability.",
+          "Decoder self-attention masks future positions with negative infinity before softmax. Padding masks prevent empty slots from absorbing weight. Each head has its own projections; concatenated heads pass through an output projection, allowing different relationships without assuming each head has a fixed human label."
+        ],
+        "code": "import math\ndef softmax(scores):\n    m=max(scores)\n    e=[math.exp(s-m) for s in scores]\n    return [v/sum(e) for v in e]\nprint(softmax([1,0]))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A mask applied after softmax without renormalizing leaves a row sum below one. A transposed key matrix or wrong softmax axis mixes batch examples instead of positions. Test shape contracts, finite weights, nonnegative weights and row sums of one.",
+          "A decoder trained with visible future tokens can show excellent training loss and fail during generation. Check that perturbing a future token cannot change earlier outputs in evaluation mode."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Use the attention calculator to vary scores and observe normalized weights and the value mixture. Implement stable softmax and test extreme scores such as [1000,1001]. The stability test is an SDET boundary check with a mathematical invariant.",
+          "Attention weights help inspect the computation but are not sufficient explanations of factual correctness. Validate final claims against source evidence and test causal masking independently of answer quality."
+        ]
+      }
+    ],
+    "mistake": "A mask applied after softmax without renormalizing leaves a row sum below one. A transposed key matrix or wrong softmax axis mixes batch examples instead of positions. Test shape contracts, finite weights, nonnegative weights and row sums of one.",
+    "takeaway": "Use the attention calculator to vary scores and observe normalized weights and the value mixture.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement softmax(scores), stable for very large scores. Return [] for no scores.",
+      "answer": "",
+      "solution": "import math\ndef softmax(scores):\n    if not scores: return []\n    e=[math.exp(s-max(scores)) for s in scores]\n    return [v/sum(e) for v in e]",
+      "starter": "def softmax(scores):\n    return []",
+      "tests": "assert softmax([])==[]\nassert abs(sum(softmax([1000,1001]))-1)<1e-9\nassert softmax([1,1])==[0.5,0.5]",
+      "id": "p08-attention-exercise",
+      "hints": [
+        "Attention asks which other positions should contribute to the current position.",
+        "A mask applied after softmax without renormalizing leaves a row sum below one.",
+        "For one query q=[1,0], keys [[1,0],[0,1]] and values [[4,0],[0,2]], unscaled scores are [1,0].",
+        "Use the attention calculator to vary scores and observe normalized weights and the value mixture."
+      ],
+      "explanation": "import math\ndef softmax(scores):\n    if not scores: return []\n    e=[math.exp(s-max(scores)) for s in scores]\n    return [v/sum(e) for v in e]"
+    },
+    "quiz": {
+      "question": "When should a causal mask be applied?",
+      "options": [
+        "Before softmax",
+        "After returning the answer",
+        "Only during logging"
+      ],
+      "answer": 0,
+      "explanation": "Disallowed scores must receive zero normalized weight; masking the scores achieves that."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: When should a causal mask be applied?",
+      "options": [
+        "Before softmax",
+        "After returning the answer",
+        "Only during logging"
+      ],
+      "answer": 0,
+      "explanation": "Disallowed scores must receive zero normalized weight; masking the scores achieves that."
+    },
+    "sources": [
+      "https://arxiv.org/abs/1706.03762",
+      "https://huggingface.co/docs/transformers/index"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p08-tokens"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Attention",
+      "Query",
+      "Key",
+      "Value",
+      "Softmax",
+      "Causal mask"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-001",
+      "bridge-transformers--llm-002",
+      "bridge-transformers--llm-003",
+      "bridge-phase-08-3",
+      "bridge-phase-08-4",
+      "bridge-phase-08-5",
+      "bridge-phase-08-6",
+      "bridge-phase-08-7"
+    ],
+    "demo": "attention"
+  },
+  {
+    "id": "p08-blocks",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Transformer blocks: position, residuals and encoder\u2013decoder roles",
+    "minutes": 35,
+    "objectives": [
+      "Transformer blocks",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects transformer blocks: position, residuals and encoder\u2013decoder roles with test contracts, failure triage, and evidence for release. Sketch the failure-classification encoder path and the support-answer decoder path with input/output shapes.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Attention alone is permutation equivariant: swapping input positions swaps outputs without expressing order. Positional information supplies order through learned embeddings, sinusoidal encodings or rotary mechanisms. A transformer block combines attention with a position-wise feed-forward network, residual connections and normalization. Residual paths let gradients flow without replacing the entire representation at every layer.",
+          "An encoder can see both directions and produce representations for classification or retrieval. A causal decoder predicts the next token from preceding tokens. An encoder-decoder model reads a source sequence and generates a target with cross-attention to encoded source positions."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Track shapes before code: token IDs [batch,length], hidden vectors [batch,length,width], per-head Q/K/V [batch,heads,length,head_width]. Project width into head dimensions, form scores [batch,heads,length,length], then return to hidden width. Feed-forward layers expand and contract each position's width.",
+          "The runnable lab uses torch.nn.TransformerEncoderLayer and an explicit padding mask. Inspect train/eval behavior because dropout changes repeated outputs. Persist vocabulary, positional convention and maximum length with the checkpoint."
+        ],
+        "code": "import torch\nfrom torch import nn\nlayer=nn.TransformerEncoderLayer(d_model=16,nhead=4,batch_first=True)\nlayer.eval()\nx=torch.zeros(2,5,16)\nwith torch.no_grad():\n    assert layer(x).shape == (2,5,16)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Confusing an embedding encoder with a generation decoder produces an integration mismatch: sentence vectors are not next-token distributions. Forgetting positional information can make two differently ordered log messages nearly indistinguishable.",
+          "A successful tensor shape does not prove a correct mask. Test padding invariance and causal invariance, then compare held-out quality. Length-dependent failures often indicate truncation or positional limits rather than random provider errors."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Sketch the failure-classification encoder path and the support-answer decoder path with input/output shapes. Explain why cross-attention is appropriate for source-to-target generation and why sentence embeddings need a pooling strategy.",
+          "For an SDET, architecture knowledge enables focused tests: permutation sensitivity, padding invariance, finite outputs, and reproducible evaluation mode. These contracts complement task-level precision and evidence correctness."
+        ]
+      }
+    ],
+    "mistake": "Confusing an embedding encoder with a generation decoder produces an integration mismatch: sentence vectors are not next-token distributions. Forgetting positional information can make two differently ordered log messages nearly indistinguishable.",
+    "takeaway": "Sketch the failure-classification encoder path and the support-answer decoder path with input/output shapes.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Describe tests for a padded log classifier and a causal generator. Include both shape and information-flow checks.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Padding invariance",
+          "terms": [
+            "padding",
+            "unchanged"
+          ]
+        },
+        {
+          "label": "Causal isolation",
+          "terms": [
+            "future",
+            "earlier"
+          ]
+        },
+        {
+          "label": "Evaluation behavior",
+          "terms": [
+            "eval",
+            "dropout"
+          ]
+        }
+      ],
+      "solution": "Padding changes should leave real-token outputs unchanged under the mask. Changing future tokens must leave earlier decoder outputs unchanged. Use eval mode to disable dropout before comparing.",
+      "id": "p08-blocks-exercise",
+      "hints": [
+        "Attention alone is permutation equivariant: swapping input positions swaps outputs without expressing order.",
+        "Confusing an embedding encoder with a generation decoder produces an integration mismatch: sentence vectors are not next-token distributions.",
+        "Track shapes before code: token IDs [batch,length], hidden vectors [batch,length,width], per-head Q/K/V [batch,heads,length,head_width].",
+        "Sketch the failure-classification encoder path and the support-answer decoder path with input/output shapes."
+      ],
+      "explanation": "Padding changes should leave real-token outputs unchanged under the mask. Changing future tokens must leave earlier decoder outputs unchanged. Use eval mode to disable dropout before comparing."
+    },
+    "quiz": {
+      "question": "What supplies order that plain self-attention lacks?",
+      "options": [
+        "Positional information",
+        "A larger batch alone",
+        "JSON parsing"
+      ],
+      "answer": 0,
+      "explanation": "Position mechanisms distinguish otherwise permutation-equivariant token processing."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What supplies order that plain self-attention lacks?",
+      "options": [
+        "Positional information",
+        "A larger batch alone",
+        "JSON parsing"
+      ],
+      "answer": 0,
+      "explanation": "Position mechanisms distinguish otherwise permutation-equivariant token processing."
+    },
+    "sources": [
+      "https://arxiv.org/abs/1706.03762",
+      "https://huggingface.co/docs/transformers/index"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p08-attention"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Transformer",
+      "Encoder",
+      "Decoder",
+      "Residual connection"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-001",
+      "bridge-transformers--llm-002",
+      "bridge-transformers--llm-003",
+      "bridge-phase-08-3",
+      "bridge-phase-08-4",
+      "bridge-phase-08-5",
+      "bridge-phase-08-6",
+      "bridge-phase-08-7"
+    ]
+  },
+  {
+    "id": "p08-objective",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Next-token training: shifted targets and cross-entropy",
+    "minutes": 35,
+    "objectives": [
+      "Next-token training",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects next-token training: shifted targets and cross-entropy with test contracts, failure triage, and evidence for release. A decreasing loss proves optimization progress under the training objective, not better grounded answers.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A causal language model learns to predict the next token from the preceding sequence. Training pairs logits at position t with the observed token at t+1. Cross-entropy penalizes assigning low probability to the observed target. This objective teaches statistical continuation, not factual verification or authorization.",
+          "Pretraining supplies broad text patterns; instruction tuning changes task-following examples; preference/reward methods influence which responses are favored. These stages differ in data and objective, and none removes the need for evidence-grounded application checks."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "For a target token assigned probability .25, the negative log-likelihood is \u2212log(.25), about 1.386 nats. Average over valid target positions, excluding padded or intentionally masked labels. In a causal model, the library may perform the shift internally; inspect the model contract before shifting twice.",
+          "The local PyTorch mechanisms lab demonstrates logits, loss and gradients, while the genuine PEFT example adapts a pretrained encoder for the five-class task. Keep classification fine-tuning distinct from causal language-model supervised tuning."
+        ],
+        "code": "import math\nprobability_of_target=.25\nloss=-math.log(probability_of_target)\nassert abs(loss-1.38629436112)<1e-9",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A developer aligns each position with itself, allowing input-token copying rather than next-token prediction. Another applies softmax before a cross-entropy function expecting logits. Padding contributes loss and dominates short examples.",
+          "Test shifted alignment, masked positions, finite loss and gradient flow. Use a hand-computed two-token probability example as an independent loss oracle."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "A decreasing loss proves optimization progress under the training objective, not better grounded answers. Evaluate the downstream task and safety contract on independent examples after any adaptation.",
+          "SDETs should retain objective, target alignment and masking configuration in training artifacts. Understanding the objective explains why fluent continuation can coexist with hallucinated claims and why the application still needs retrieval, uncertainty and evaluation."
+        ]
+      }
+    ],
+    "mistake": "A developer aligns each position with itself, allowing input-token copying rather than next-token prediction. Another applies softmax before a cross-entropy function expecting logits. Padding contributes loss and dominates short examples.",
+    "takeaway": "A decreasing loss proves optimization progress under the training objective, not better grounded answers.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def nll(probabilities):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def nll(probabilities):\n    import math\n    if not probabilities or any(not 0<p<=1 for p in probabilities):raise ValueError('probabilities')\n    return -sum(math.log(p) for p in probabilities)/len(probabilities)",
+      "starter": "def nll(probabilities):\n    return 0",
+      "tests": "import math\nassert nll([1,1])==0\nassert abs(nll([.5,.5])-math.log(2))<1e-9\ntry:nll([0]);assert False\nexcept ValueError:pass",
+      "id": "p08-objective-exercise",
+      "hints": [
+        "A causal language model learns to predict the next token from the preceding sequence.",
+        "A developer aligns each position with itself, allowing input-token copying rather than next-token prediction.",
+        "For a target token assigned probability .25, the negative log-likelihood is \u2212log(.25), about 1.386 nats.",
+        "A decreasing loss proves optimization progress under the training objective, not better grounded answers."
+      ],
+      "explanation": "def nll(probabilities):\n    import math\n    if not probabilities or any(not 0<p<=1 for p in probabilities):raise ValueError('probabilities')\n    return -sum(math.log(p) for p in probabilities)/len(probabilities)"
+    },
+    "quiz": {
+      "question": "What does next-token loss directly reward?",
+      "options": [
+        "Probability assigned to observed target tokens",
+        "Verified access to current facts",
+        "Authorization correctness"
+      ],
+      "answer": 0,
+      "explanation": "The objective models continuation; application truth and permissions need separate evidence."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What does next-token loss directly reward?",
+      "options": [
+        "Probability assigned to observed target tokens",
+        "Verified access to current facts",
+        "Authorization correctness"
+      ],
+      "answer": 0,
+      "explanation": "The objective models continuation; application truth and permissions need separate evidence."
+    },
+    "sources": [
+      "https://arxiv.org/abs/1706.03762",
+      "https://huggingface.co/docs/transformers/index"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p08-blocks"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Cross-entropy",
+      "Next-token prediction"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-001",
+      "bridge-transformers--llm-002",
+      "bridge-transformers--llm-003",
+      "bridge-phase-08-3",
+      "bridge-phase-08-4",
+      "bridge-phase-08-5",
+      "bridge-phase-08-6",
+      "bridge-phase-08-7"
+    ]
+  },
+  {
+    "id": "p08-positions",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Position information and causal invariance tests",
+    "minutes": 35,
+    "objectives": [
+      "Position information and causal invariance tests",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects position information and causal invariance tests with test contracts, failure triage, and evidence for release. Keep positional configuration and tokenizer revision with model artifacts.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A sequence model must distinguish database failed after login from login failed after database. Token embeddings identify symbols, while positional mechanisms encode their order. Sinusoidal encodings use different frequencies by dimension; learned positional embeddings use a trained table; rotary embeddings transform queries and keys to express relative position relationships.",
+          "These mechanisms have different extrapolation behavior and configuration. A larger advertised context window is not achieved by simply appending zeros to the positional table."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "For a simple sinusoidal demonstration, encode even coordinates with sin(pos/10000^(2i/d)) and odd coordinates with cos of the same angle. Add the position vector to the token representation in the classic formulation. Rotary mechanisms instead rotate paired coordinates in attention projections.",
+          "To test a causal decoder, compare early-position outputs before and after changing a later token in eval mode. Their equality within numerical tolerance verifies the mask's information-flow contract. Padding tests similarly perturb only masked positions."
+        ],
+        "code": "import math\ndef position(pos):\n    return [math.sin(pos),math.cos(pos),math.sin(pos/100),math.cos(pos/100)]\nassert position(0)==[0.,1.,0.,1.]",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A decoder's triangular mask is inverted, exposing future tokens. The test uses dropout in training mode and incorrectly attributes random differences to the mask. An index off-by-one assigns the same position to two adjacent tokens.",
+          "Control random state and evaluation mode, inspect the permitted-position matrix and test sequences of several lengths including one. Shape tests alone do not detect future-information leakage."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Keep positional configuration and tokenizer revision with model artifacts. Report how truncation and longer sequences affect task quality rather than assuming every allowed position is equally useful.",
+          "An SDET can test position mechanisms with invariants: different positions have different encodings in the valid range, output dimensions are stable and future perturbations cannot influence earlier causal outputs. These checks isolate architecture behavior from semantic answer evaluation."
+        ]
+      }
+    ],
+    "mistake": "A decoder's triangular mask is inverted, exposing future tokens. The test uses dropout in training mode and incorrectly attributes random differences to the mask. An index off-by-one assigns the same position to two adjacent tokens.",
+    "takeaway": "Keep positional configuration and tokenizer revision with model artifacts.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def causal_allowed(query_position,key_position):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def causal_allowed(query_position,key_position):\n    if min(query_position,key_position)<0:raise ValueError('position')\n    return key_position<=query_position",
+      "starter": "def causal_allowed(query_position,key_position):\n    return False",
+      "tests": "assert causal_allowed(2,0)\nassert causal_allowed(2,2)\nassert not causal_allowed(2,3)\ntry: causal_allowed(-1,0);assert False\nexcept ValueError:pass",
+      "id": "p08-positions-exercise",
+      "hints": [
+        "A sequence model must distinguish database failed after login from login failed after database.",
+        "A decoder's triangular mask is inverted, exposing future tokens.",
+        "For a simple sinusoidal demonstration, encode even coordinates with sin(pos/10000^(2i/d)) and odd coordinates with cos of the same angle.",
+        "Keep positional configuration and tokenizer revision with model artifacts."
+      ],
+      "explanation": "def causal_allowed(query_position,key_position):\n    if min(query_position,key_position)<0:raise ValueError('position')\n    return key_position<=query_position"
+    },
+    "quiz": {
+      "question": "What invalidates a causal information-flow comparison?",
+      "options": [
+        "Uncontrolled dropout during the comparison",
+        "Evaluation mode",
+        "An explicit future-token perturbation"
+      ],
+      "answer": 0,
+      "explanation": "Random dropout can change outputs independently of the mask and hide the intended invariant."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What invalidates a causal information-flow comparison?",
+      "options": [
+        "Uncontrolled dropout during the comparison",
+        "Evaluation mode",
+        "An explicit future-token perturbation"
+      ],
+      "answer": 0,
+      "explanation": "Random dropout can change outputs independently of the mask and hide the intended invariant."
+    },
+    "sources": [
+      "https://arxiv.org/abs/1706.03762",
+      "https://huggingface.co/docs/transformers/index"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p08-objective"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Positional encoding",
+      "Rotary embedding"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-001",
+      "bridge-transformers--llm-002",
+      "bridge-transformers--llm-003",
+      "bridge-phase-08-3",
+      "bridge-phase-08-4",
+      "bridge-phase-08-5",
+      "bridge-phase-08-6",
+      "bridge-phase-08-7"
+    ]
+  },
+  {
+    "id": "p08-checkpoint",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Phase 08 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 08 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 08 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Keep positional configuration and tokenizer revision with model artifacts.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects position information and causal invariance tests to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "For a simple sinusoidal demonstration, encode even coordinates with sin(pos/10000^(2i/d)) and odd coordinates with cos of the same angle. Add the position vector to the token representation in the classic formulation. Rotary mechanisms instead rotate paired coordinates in attention projections.",
+          "To test a causal decoder, compare early-position outputs before and after changing a later token in eval mode. Their equality within numerical tolerance verifies the mask's information-flow contract. Padding tests similarly perturb only masked positions.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "import math\ndef position(pos):\n    return [math.sin(pos),math.cos(pos),math.sin(pos/100),math.cos(pos/100)]\nassert position(0)==[0.,1.,0.,1.]",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A decoder's triangular mask is inverted, exposing future tokens. The test uses dropout in training mode and incorrectly attributes random differences to the mask. An index off-by-one assigns the same position to two adjacent tokens.",
+          "Control random state and evaluation mode, inspect the permitted-position matrix and test sequences of several lengths including one. Shape tests alone do not detect future-information leakage.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Keep positional configuration and tokenizer revision with model artifacts. Report how truncation and longer sequences affect task quality rather than assuming every allowed position is equally useful.",
+          "An SDET can test position mechanisms with invariants: different positions have different encodings in the valid range, output dimensions are stable and future perturbations cannot influence earlier causal outputs. These checks isolate architecture behavior from semantic answer evaluation.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A decoder's triangular mask is inverted, exposing future tokens. The test uses dropout in training mode and incorrectly attributes random differences to the mask. An index off-by-one assigns the same position to two adjacent tokens.",
+    "takeaway": "Keep positional configuration and tokenizer revision with model artifacts.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Position information and causal invariance tests to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nKeep positional configuration and tokenizer revision with model artifacts.",
+      "id": "p08-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects position information and causal invariance tests to the shared CI quality platform.",
+        "A decoder's triangular mask is inverted, exposing future tokens.",
+        "For a simple sinusoidal demonstration, encode even coordinates with sin(pos/10000^(2i/d)) and odd coordinates with cos of the same angle.",
+        "Keep positional configuration and tokenizer revision with model artifacts."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nKeep positional configuration and tokenizer revision with model artifacts."
+    },
+    "quiz": {
+      "question": "A candidate for position information and causal invariance tests meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for position information and causal invariance tests meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://arxiv.org/abs/1706.03762",
+      "https://huggingface.co/docs/transformers/index"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p08-positions"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-transformers--llm-001",
+      "bridge-transformers--llm-002",
+      "bridge-transformers--llm-003",
+      "bridge-phase-08-3",
+      "bridge-phase-08-4",
+      "bridge-phase-08-5",
+      "bridge-phase-08-6",
+      "bridge-phase-08-7"
+    ]
+  }
+]

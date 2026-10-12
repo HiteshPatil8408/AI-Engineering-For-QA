@@ -1,0 +1,629 @@
+[
+  {
+    "id": "sql-basics",
+    "phase": 4,
+    "module": "Relational analysis",
+    "title": "Query test runs with explicit semantics",
+    "minutes": 26,
+    "objectives": [
+      "Filter before grouping when appropriate",
+      "Distinguish WHERE from HAVING",
+      "Use NULL-aware aggregates"
+    ],
+    "relevance": "SQL lets you investigate CI and service evidence near its source, with clear relational contracts.",
+    "sections": [
+      {
+        "title": "Rows, filters, and groups",
+        "paragraphs": [
+          "SELECT chooses expressions; FROM supplies relations; WHERE filters rows; GROUP BY forms groups; HAVING filters groups; ORDER BY orders the final result. Without ORDER BY, row order is not guaranteed.",
+          "COUNT(*) counts rows. COUNT(duration) counts non-NULL durations. AVG(duration) ignores NULL. SQL comparisons with NULL produce unknown; use IS NULL, not = NULL."
+        ],
+        "code": "SELECT test_id, COUNT(*) AS runs,\n       SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failures\nFROM test_runs\nGROUP BY test_id\nHAVING COUNT(*) >= 2\nORDER BY test_id;"
+      },
+      {
+        "title": "The browser database",
+        "paragraphs": [
+          "The lab seeds fictional builds, test_cases, test_runs, failures, and defects in DuckDB-WASM. No server receives your SQL. You can inspect data with SELECT * FROM test_runs.",
+          "Use GROUP BY for counts by module, CASE for indicators, and HAVING for minimum sample size. A CTE gives an intermediate result a meaningful name. It improves readability but does not necessarily force materialization."
+        ]
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "WHERE filters rows before aggregation; HAVING filters groups after aggregation. COUNT(*) counts rows, while COUNT(duration) excludes NULL durations. AVG also ignores NULL, which can conceal missing execution data if the report does not include a missing count. Use CASE to make denominator policy explicit.",
+          "Ordering is a contract when comparing query output in a test. Without ORDER BY, a database may return equivalent rows in a different order. Test all-pass, all-fail and NULL-status cases with hand-computed expected rows. Relational models should use stable keys and constraints for builds, cases, runs and defects; a test display name is a useful label but a weak primary key when names can change."
+        ]
+      }
+    ],
+    "mistake": "COUNT(duration) can be smaller than COUNT(*) when duration is unknown.",
+    "takeaway": "Make NULL behavior and denominators visible in every metric.",
+    "exercise": {
+      "id": "sql-basics-exercise",
+      "kind": "sql",
+      "prompt": "Return test_id and failures for every test with at least one failed run. Sort by test_id.",
+      "answer": "",
+      "explanation": "Filter failed rows, group by test_id, count rows, and sort deterministically.",
+      "hints": [
+        "Start with the invariant: filter before grouping when appropriate.",
+        "Consider this constraint: COUNT(duration) can be smaller than COUNT(*) when duration is unknown.",
+        "Work through a tiny example before generalizing. Make NULL behavior and denominators visible in every metric.",
+        "Filter failed rows, group by test_id, count rows, and sort deterministically."
+      ],
+      "starter": "SELECT test_id, COUNT(*) AS failures\nFROM test_runs\n-- Add the failure filter and grouping\nORDER BY test_id;",
+      "tests": "[{\"test_id\":1,\"failures\":2},{\"test_id\":2,\"failures\":1},{\"test_id\":3,\"failures\":3}]",
+      "solution": "SELECT test_id, COUNT(*) AS failures\nFROM test_runs\nWHERE status = 'failed'\nGROUP BY test_id\nORDER BY test_id;"
+    },
+    "quiz": {
+      "question": "Which clause filters aggregate groups?",
+      "options": [
+        "WHERE",
+        "HAVING",
+        "SELECT"
+      ],
+      "answer": 1,
+      "explanation": "WHERE operates on input rows; HAVING filters grouped results."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://duckdb.org/docs/stable/sql/query_syntax/select.html"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "p03-checkpoint"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-sql-001",
+      "bridge-sql-002",
+      "bridge-sql-003",
+      "q-3",
+      "bridge-sql-016",
+      "bridge-sql-017",
+      "bridge-phase-04-6",
+      "bridge-phase-04-7"
+    ]
+  },
+  {
+    "id": "sql-joins",
+    "phase": 4,
+    "module": "Relational analysis",
+    "title": "Join failures to builds and defects",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish inner and outer joins",
+      "Preserve unmatched rows for investigation",
+      "Avoid accidental join multiplication"
+    ],
+    "relevance": "Defect correlation requires faithful event relationships. A bad join can fabricate a spike in product failures.",
+    "sections": [
+      {
+        "title": "Preserving evidence",
+        "paragraphs": [
+          "INNER JOIN retains matching pairs only. LEFT JOIN retains every left row and fills absent right fields with NULL. RIGHT JOIN is the symmetric concept; it can usually be rewritten as a left join with reversed tables.",
+          "Filtering a right-hand column in WHERE after a left join can remove the unmatched rows and effectively behave like an inner join. Put the match restriction in ON when retaining all left rows is the goal."
+        ],
+        "code": "SELECT tc.name, COUNT(tr.run_id) AS executions\nFROM test_cases tc\nLEFT JOIN test_runs tr ON tc.test_id = tr.test_id\nGROUP BY tc.test_id, tc.name\nORDER BY tc.name;"
+      },
+      {
+        "title": "Correlation is not causal attribution",
+        "paragraphs": [
+          "Join failures to defects using an explicit defect_id when available. A shared time window or module is weaker evidence; describe it as correlation. Multiple defects per failure need a linking table and deliberate counting of distinct failure IDs.",
+          "UNION removes duplicate rows; UNION ALL preserves them. Do not use UNION as a bandage for an incorrect join. Indexes and query plans help diagnose performance, but measure scanned rows and join cardinalities before guessing."
+        ]
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "A LEFT JOIN retains every left-side record, but a WHERE predicate on a right-side column can remove unmatched rows and effectively turn the result into an inner join. Put matching conditions in ON when unmatched cases must remain visible, and explicitly decide how NULL evidence affects the report.",
+          "Use EXISTS for membership questions when joined detail rows would multiply results. UNION removes duplicate rows; UNION ALL preserves them and is appropriate only when duplicate events should count. Test one-to-many failures, unmatched defects and duplicate related records. Explain expected row cardinality before running the query, then compare actual counts. A plausible report number is not enough if the join changed the unit of analysis."
+        ]
+      }
+    ],
+    "mistake": "COUNT(*) after a left join counts the preserved unmatched row; count a right-hand ID for actual matches.",
+    "takeaway": "Choose a join by the evidence you must preserve.",
+    "exercise": {
+      "id": "sql-joins-exercise",
+      "kind": "choice",
+      "prompt": "How do you count actual executions while retaining cases with zero executions?",
+      "answer": "LEFT JOIN and COUNT(tr.run_id)",
+      "explanation": "COUNT of a nullable right-hand identifier returns zero for an unmatched case.",
+      "hints": [
+        "Start with the invariant: distinguish inner and outer joins.",
+        "Consider this constraint: COUNT(*) after a left join counts the preserved unmatched row; count a right-hand ID for actual matches.",
+        "Work through a tiny example before generalizing. Choose a join by the evidence you must preserve.",
+        "COUNT of a nullable right-hand identifier returns zero for an unmatched case."
+      ],
+      "options": [
+        "INNER JOIN and COUNT(*)",
+        "LEFT JOIN and COUNT(*)",
+        "LEFT JOIN and COUNT(tr.run_id)"
+      ]
+    },
+    "quiz": {
+      "question": "Where should a right-table filter go to preserve all left rows?",
+      "options": [
+        "In the ON condition",
+        "Always in WHERE",
+        "In ORDER BY"
+      ],
+      "answer": 0,
+      "explanation": "A WHERE condition can eliminate NULL rows created by the outer join."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://duckdb.org/docs/stable/sql/query_syntax/from.html"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "sql-basics"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-sql-001",
+      "bridge-sql-002",
+      "bridge-sql-003",
+      "q-3",
+      "bridge-sql-016",
+      "bridge-sql-017",
+      "bridge-phase-04-6",
+      "bridge-phase-04-7"
+    ]
+  },
+  {
+    "id": "sql-windows",
+    "phase": 4,
+    "module": "Relational analysis",
+    "title": "Latest results, ranks, and failure streaks",
+    "minutes": 26,
+    "objectives": [
+      "Use window functions without collapsing rows",
+      "Make ordering deterministic",
+      "Find latest execution per test with a CTE"
+    ],
+    "relevance": "Latest-state dashboards and consecutive-failure alerts depend on per-test ordering, not global timestamps.",
+    "sections": [
+      {
+        "title": "Windows preserve rows",
+        "paragraphs": [
+          "GROUP BY reduces multiple rows to a group. A window function annotates each row using its partition. ROW_NUMBER() gives a unique sequence within a partition; RANK() gives ties the same rank and leaves gaps.",
+          "Use PARTITION BY test_id for independent sequences. Order by build_id DESC and run_id DESC to break ties deterministically. Filter row number in an outer query or QUALIFY."
+        ],
+        "code": "WITH ranked AS (\n  SELECT *, ROW_NUMBER() OVER (\n    PARTITION BY test_id ORDER BY build_id DESC, run_id DESC\n  ) AS rn\n  FROM test_runs\n)\nSELECT test_id, status FROM ranked WHERE rn = 1 ORDER BY test_id;"
+      },
+      {
+        "title": "Lag and failure streaks",
+        "paragraphs": [
+          "LAG(status) reads the previous row within the ordered partition; LEAD reads the next. Three consecutive executions failing is not always three consecutive builds: retries can add rows and missing builds create gaps.",
+          "Define a build-level status policy first, then check the current and previous two statuses plus consecutive build identifiers. Production build IDs may not be sequential; join to a build calendar or explicit sequence."
+        ]
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "A latest-result query needs a deterministic tie break. ROW_NUMBER over partition by test_id order by build_id descending, run_id descending identifies one latest run; RANK can return several ties. LAG and LEAD preserve rows while accessing neighbors within the declared order.",
+          "Three failures in a row is different from three failures anywhere in history. Filter-free ordered windows must preserve intervening passes; filtering failures before LAG creates a false streak. Tests with F,P,F,F and F,F,F make the distinction visible. Inspect plans to understand scans, sorts and joins, and evaluate indexes for the actual filter/order workload rather than assuming an index always improves performance."
+        ]
+      }
+    ],
+    "mistake": "Ordering only by timestamp when timestamps tie makes the selected latest row unstable.",
+    "takeaway": "Define the unit of sequence and provide a stable tie breaker.",
+    "exercise": {
+      "id": "sql-windows-exercise",
+      "kind": "sql",
+      "prompt": "Return test_id and status for each test\u2019s latest result. Latest means highest build_id, then run_id. Sort by test_id.",
+      "answer": "",
+      "explanation": "Partition by test_id, assign descending row numbers, and select rn=1 in the outer query.",
+      "hints": [
+        "Start with the invariant: use window functions without collapsing rows.",
+        "Consider this constraint: Ordering only by timestamp when timestamps tie makes the selected latest row unstable.",
+        "Work through a tiny example before generalizing. Define the unit of sequence and provide a stable tie breaker.",
+        "Partition by test_id, assign descending row numbers, and select rn=1 in the outer query."
+      ],
+      "starter": "WITH ranked AS (\n  SELECT *, ROW_NUMBER() OVER (ORDER BY build_id DESC) AS rn\n  FROM test_runs\n)\nSELECT test_id, status FROM ranked WHERE rn = 1 ORDER BY test_id;",
+      "tests": "[{\"test_id\":1,\"status\":\"passed\"},{\"test_id\":2,\"status\":\"passed\"},{\"test_id\":3,\"status\":\"failed\"}]",
+      "solution": "WITH ranked AS (\n SELECT *, ROW_NUMBER() OVER (PARTITION BY test_id ORDER BY build_id DESC, run_id DESC) AS rn\n FROM test_runs\n)\nSELECT test_id, status FROM ranked WHERE rn = 1 ORDER BY test_id;"
+    },
+    "quiz": {
+      "question": "What is the key difference between GROUP BY and window functions?",
+      "options": [
+        "Windows annotate rather than collapse rows",
+        "Windows cannot sort",
+        "GROUP BY preserves every input row"
+      ],
+      "answer": 0,
+      "explanation": "A window calculates across related rows while keeping their identity."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://duckdb.org/docs/stable/sql/functions/window_functions.html"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "sql-joins"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-sql-001",
+      "bridge-sql-002",
+      "bridge-sql-003",
+      "q-3",
+      "bridge-sql-016",
+      "bridge-sql-017",
+      "bridge-phase-04-6",
+      "bridge-phase-04-7"
+    ]
+  },
+  {
+    "id": "p04-query-plans",
+    "phase": 4,
+    "module": "SQL For Test And AI Engineering",
+    "title": "Subqueries, CASE, UNION, and query plans",
+    "minutes": 35,
+    "objectives": [
+      "Subqueries, CASE, UNION, and query plans",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects subqueries, case, union, and query plans with test contracts, failure triage, and evidence for release. Verify a regression query against hand-calculated expected output and test tie ordering.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A correlated subquery references an outer row and can express existence without multiplying it. EXISTS asks whether at least one related row matches; a join returns all matching pairs. Choose based on the desired cardinality, then inspect the actual plan.",
+          "CASE models conditional expressions, UNION deduplicates result rows, and UNION ALL preserves events. Deduplication is not a repair for an incorrect join. Relational modeling separates stable test identity, builds, executions, and failure annotations."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use EXPLAIN to inspect operators and EXPLAIN ANALYZE when it is safe to execute the query. Examine filters, estimated and actual rows, join cardinality, and scan cost. Index usefulness depends on the engine and workload; do not assume an OLTP B-tree rule applies unchanged to DuckDB analytical scans.",
+          "For consecutive build failures, first reduce retries to a documented build-level outcome. Then LAG and LEAD operate over the build sequence. Require adjacency rather than merely three failed rows."
+        ],
+        "code": "SELECT tc.name FROM test_cases tc\nWHERE EXISTS (SELECT 1 FROM test_runs tr\n              WHERE tr.test_id=tc.test_id AND tr.status='failed')\nORDER BY tc.name;",
+        "language": "sql"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "An inner join drops unknown test metadata. A many-to-many join fabricates additional failure events. Selecting MAX(status) does not select the status associated with the latest timestamp.",
+          "Construct a fixture with duplicate metadata, missing builds, and multiple attempts. Compare row counts after every CTE. Query performance diagnoses should explain work performed, not just whether a query appears short."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Verify a regression query against hand-calculated expected output and test tie ordering. Include the actual SQL, schema, sample count, and plan in the CI report. Use separate correctness and performance gates so a fast wrong query cannot pass.",
+          "SQL interviews reward explicit NULL and cardinality reasoning. In an AI evaluation store, incorrect joins can produce an apparent model improvement by silently dropping difficult cases."
+        ]
+      }
+    ],
+    "mistake": "An inner join drops unknown test metadata. A many-to-many join fabricates additional failure events. Selecting MAX(status) does not select the status associated with the latest timestamp.",
+    "takeaway": "Verify a regression query against hand-calculated expected output and test tie ordering.",
+    "exercise": {
+      "kind": "sql",
+      "prompt": "Return name for test cases with any failed execution. Sort by name. Use EXISTS to avoid multiplication.",
+      "answer": "",
+      "solution": "SELECT tc.name FROM test_cases tc WHERE EXISTS (SELECT 1 FROM test_runs tr WHERE tr.test_id=tc.test_id AND tr.status='failed') ORDER BY tc.name;",
+      "starter": "SELECT name FROM test_cases;",
+      "tests": "[{\"name\":\"checkout\"},{\"name\":\"login\"},{\"name\":\"search\"}]",
+      "id": "p04-query-plans-exercise",
+      "hints": [
+        "A correlated subquery references an outer row and can express existence without multiplying it.",
+        "An inner join drops unknown test metadata.",
+        "Use EXPLAIN to inspect operators and EXPLAIN ANALYZE when it is safe to execute the query.",
+        "Verify a regression query against hand-calculated expected output and test tie ordering."
+      ],
+      "explanation": "SELECT tc.name FROM test_cases tc WHERE EXISTS (SELECT 1 FROM test_runs tr WHERE tr.test_id=tc.test_id AND tr.status='failed') ORDER BY tc.name;"
+    },
+    "quiz": {
+      "question": "Why use EXISTS rather than a plain join for \u201chas any failure\u201d?",
+      "options": [
+        "To return every failure pair",
+        "To preserve one row per case",
+        "To sort automatically"
+      ],
+      "answer": 1,
+      "explanation": "EXISTS tests membership without duplicating the outer record."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Why use EXISTS rather than a plain join for \u201chas any failure\u201d?",
+      "options": [
+        "To return every failure pair",
+        "To preserve one row per case",
+        "To sort automatically"
+      ],
+      "answer": 1,
+      "explanation": "EXISTS tests membership without duplicating the outer record."
+    },
+    "sources": [
+      "https://duckdb.org/docs/stable/sql/query_syntax/select.html",
+      "https://duckdb.org/docs/stable/sql/functions/window_functions.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "sql-windows"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-sql-001",
+      "bridge-sql-002",
+      "bridge-sql-003",
+      "q-3",
+      "bridge-sql-016",
+      "bridge-sql-017",
+      "bridge-phase-04-6",
+      "bridge-phase-04-7"
+    ]
+  },
+  {
+    "id": "p04-streaks",
+    "phase": 4,
+    "module": "SQL For Test And AI Engineering",
+    "title": "Consecutive failures: preserve passes in the window",
+    "minutes": 35,
+    "objectives": [
+      "Consecutive failures",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects consecutive failures: preserve passes in the window with test contracts, failure triage, and evidence for release. In the bundled nine-run fixture, checkout fails in all three builds and should be returned once.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Three failures somewhere in history do not prove three consecutive failing builds. Order every outcome by build and run identity, including passes, then inspect neighbors. Filtering to failed rows before a window calculation removes the events that interrupt a streak.",
+          "Define how reruns within a build are handled before counting consecutive builds. A latest-run policy can select one outcome per test/build; the streak then operates over those selected outcomes."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "First rank reruns by run_id descending within test/build and select row one. On the remaining complete history, calculate LAG(status,1) and LAG(status,2) partitioned by test_id and ordered by build_id. Select rows where all three statuses are failed.",
+          "For strict adjacent build IDs, also compare the lagged build IDs to current minus one and two. If a test was not scheduled in an intervening build, decide whether that missing observation breaks the streak and record the rule."
+        ],
+        "code": "WITH history AS (\n SELECT test_id,status,build_id,\n LAG(status,1) OVER(PARTITION BY test_id ORDER BY build_id) AS prev,\n LAG(status,2) OVER(PARTITION BY test_id ORDER BY build_id) AS prev2\n FROM test_runs\n) SELECT DISTINCT c.name FROM history h JOIN test_cases c USING(test_id)\nWHERE h.status='failed' AND prev='failed' AND prev2='failed' ORDER BY c.name;",
+        "language": "sql"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A query counts F,P,F,F as a three-failure streak after removing P. Another treats builds 1,4,8 as consecutive merely because they are adjacent observed rows.",
+          "Use tiny histories to test uninterrupted failures, intervening passes, missing builds and duplicate reruns. Inspect ordering and partition keys when results appear plausible but disagree with the declared policy."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "In the bundled nine-run fixture, checkout fails in all three builds and should be returned once. Login has two failures followed by a pass, and search has one failure between passes.",
+          "SDETs should compare exact expected names and explain why each excluded test does not meet the rule. Keep this query as a regression detector, not a claim that all repeated failures have the same root cause."
+        ]
+      }
+    ],
+    "mistake": "A query counts F,P,F,F as a three-failure streak after removing P. Another treats builds 1,4,8 as consecutive merely because they are adjacent observed rows.",
+    "takeaway": "In the bundled nine-run fixture, checkout fails in all three builds and should be returned once.",
+    "exercise": {
+      "kind": "sql",
+      "prompt": "Return one name column for tests with three consecutive failed builds in the bundled fixture. Preserve passes before calculating windows.",
+      "answer": "",
+      "starter": "-- Keep all outcomes in the ordered window\n",
+      "solution": "WITH h AS (SELECT test_id,status,LAG(status) OVER(PARTITION BY test_id ORDER BY build_id) p,LAG(status,2) OVER(PARTITION BY test_id ORDER BY build_id) p2 FROM test_runs) SELECT DISTINCT c.name FROM h JOIN test_cases c USING(test_id) WHERE status='failed' AND p='failed' AND p2='failed' ORDER BY name",
+      "tests": "[{\"name\":\"checkout\"}]",
+      "id": "p04-streaks-exercise",
+      "hints": [
+        "Three failures somewhere in history do not prove three consecutive failing builds.",
+        "A query counts F,P,F,F as a three-failure streak after removing P.",
+        "First rank reruns by run_id descending within test/build and select row one.",
+        "In the bundled nine-run fixture, checkout fails in all three builds and should be returned once."
+      ],
+      "explanation": "WITH h AS (SELECT test_id,status,LAG(status) OVER(PARTITION BY test_id ORDER BY build_id) p,LAG(status,2) OVER(PARTITION BY test_id ORDER BY build_id) p2 FROM test_runs) SELECT DISTINCT c.name FROM h JOIN test_cases c USING(test_id) WHERE status='failed' AND p='failed' AND p2='failed' ORDER BY name"
+    },
+    "quiz": {
+      "question": "Why not filter failed rows before LAG?",
+      "options": [
+        "It removes passes that break a streak",
+        "It improves correctness automatically",
+        "LAG requires only failures"
+      ],
+      "answer": 0,
+      "explanation": "Window neighbors must represent the full declared history."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Why not filter failed rows before LAG?",
+      "options": [
+        "It removes passes that break a streak",
+        "It improves correctness automatically",
+        "LAG requires only failures"
+      ],
+      "answer": 0,
+      "explanation": "Window neighbors must represent the full declared history."
+    },
+    "sources": [
+      "https://duckdb.org/docs/stable/sql/query_syntax/select.html",
+      "https://duckdb.org/docs/stable/sql/functions/window_functions.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p04-query-plans"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Failure streak",
+      "Window partition"
+    ],
+    "interviewIds": [
+      "bridge-sql-001",
+      "bridge-sql-002",
+      "bridge-sql-003",
+      "q-3",
+      "bridge-sql-016",
+      "bridge-sql-017",
+      "bridge-phase-04-6",
+      "bridge-phase-04-7"
+    ]
+  },
+  {
+    "id": "p04-checkpoint",
+    "phase": 4,
+    "module": "SQL For Test And AI Engineering",
+    "title": "Phase 04 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 04 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 04 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. In the bundled nine-run fixture, checkout fails in all three builds and should be returned once.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects consecutive failures: preserve passes in the window to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "First rank reruns by run_id descending within test/build and select row one. On the remaining complete history, calculate LAG(status,1) and LAG(status,2) partitioned by test_id and ordered by build_id. Select rows where all three statuses are failed.",
+          "For strict adjacent build IDs, also compare the lagged build IDs to current minus one and two. If a test was not scheduled in an intervening build, decide whether that missing observation breaks the streak and record the rule.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "WITH history AS (\n SELECT test_id,status,build_id,\n LAG(status,1) OVER(PARTITION BY test_id ORDER BY build_id) AS prev,\n LAG(status,2) OVER(PARTITION BY test_id ORDER BY build_id) AS prev2\n FROM test_runs\n) SELECT DISTINCT c.name FROM history h JOIN test_cases c USING(test_id)\nWHERE h.status='failed' AND prev='failed' AND prev2='failed' ORDER BY c.name;",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A query counts F,P,F,F as a three-failure streak after removing P. Another treats builds 1,4,8 as consecutive merely because they are adjacent observed rows.",
+          "Use tiny histories to test uninterrupted failures, intervening passes, missing builds and duplicate reruns. Inspect ordering and partition keys when results appear plausible but disagree with the declared policy.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "In the bundled nine-run fixture, checkout fails in all three builds and should be returned once. Login has two failures followed by a pass, and search has one failure between passes.",
+          "SDETs should compare exact expected names and explain why each excluded test does not meet the rule. Keep this query as a regression detector, not a claim that all repeated failures have the same root cause.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A query counts F,P,F,F as a three-failure streak after removing P. Another treats builds 1,4,8 as consecutive merely because they are adjacent observed rows.",
+    "takeaway": "In the bundled nine-run fixture, checkout fails in all three builds and should be returned once.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Consecutive failures: preserve passes in the window to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nIn the bundled nine-run fixture, checkout fails in all three builds and should be returned once.",
+      "id": "p04-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects consecutive failures: preserve passes in the window to the shared CI quality platform.",
+        "A query counts F,P,F,F as a three-failure streak after removing P.",
+        "First rank reruns by run_id descending within test/build and select row one.",
+        "In the bundled nine-run fixture, checkout fails in all three builds and should be returned once."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nIn the bundled nine-run fixture, checkout fails in all three builds and should be returned once."
+    },
+    "quiz": {
+      "question": "A candidate for consecutive failures: preserve passes in the window meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for consecutive failures: preserve passes in the window meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://duckdb.org/docs/stable/sql/query_syntax/select.html",
+      "https://duckdb.org/docs/stable/sql/functions/window_functions.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p04-streaks"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-sql-001",
+      "bridge-sql-002",
+      "bridge-sql-003",
+      "q-3",
+      "bridge-sql-016",
+      "bridge-sql-017",
+      "bridge-phase-04-6",
+      "bridge-phase-04-7"
+    ]
+  }
+]

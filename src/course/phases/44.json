@@ -1,0 +1,798 @@
+[
+  {
+    "id": "p44-automation-agent",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Safe automation assistant: read, investigate and propose",
+    "minutes": 35,
+    "objectives": [
+      "Safe automation assistant",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects safe automation assistant: read, investigate and propose with test contracts, failure triage, and evidence for release. Acceptance requires goal-completion evidence, validated drafts, bounded calls/deadline, zero unauthorized effects, correct approval binding and fault recovery.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "The assistant investigates a failing test using approved logs and history, then proposes an explanation, locator replacement, candidate test or draft defect summary. Proposals are artifacts for review; modifying code, changing tests or filing defects are separate side effects requiring concrete authorization.",
+          "The portfolio result must be reproducible from the supplied synthetic fixtures and declared configuration. Keep a deterministic baseline visible alongside any live-provider results."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Implement a bounded state machine with typed tools, action IDs and a trace. Read failure, search history, inspect a fixture DOM and create a draft. Validate locator uniqueness and candidate test syntax. Bind approval to the exact proposed action hash with expiry before any write.",
+          "The repository labs provide the domain entry points and fixture cases. Run the acceptance checks before recording project completion and keep the generated run ID in your field notes."
+        ],
+        "code": "# Local acceptance workflow\npython -m pytest local-labs\npython local-labs/evals/runner.py --output artifacts/evaluation\n# Inspect JSON verdict and escaped HTML case report",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Inject repeated searches, malformed tool results, path traversal, cross-tenant IDs and an unapproved write request. The assistant must stop or escalate without broadening tools or resetting its budget. A final polite refusal does not excuse an earlier forbidden effect.",
+          "Trace the actual effect and retain the counterexample as a regression fixture. Fixing presentation alone does not establish that the application boundary is safe."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires goal-completion evidence, validated drafts, bounded calls/deadline, zero unauthorized effects, correct approval binding and fault recovery. Compare the safe workflow with a deterministic baseline and report unnecessary calls, p95 latency and cost.",
+          "Prepare a technical deep dive explaining one rejected design, one detected regression and the tradeoff behind the final implementation. Separate fixture contract evidence from live model quality claims."
+        ]
+      }
+    ],
+    "mistake": "Inject repeated searches, malformed tool results, path traversal, cross-tenant IDs and an unapproved write request. The assistant must stop or escalate without broadening tools or resetting its budget. A final polite refusal does not excuse an earlier forbidden effect.",
+    "takeaway": "Acceptance requires goal-completion evidence, validated drafts, bounded calls/deadline, zero unauthorized effects, correct approval binding and fault recovery.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Write your acceptance memo: link a reproducible run, explain a measured failure, the boundary that fixes it, and the release/rollback decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Reproducible evidence",
+          "terms": [
+            "dataset",
+            "run"
+          ]
+        },
+        {
+          "label": "Failure and enforcement",
+          "terms": [
+            "failure",
+            "boundary"
+          ]
+        },
+        {
+          "label": "Release plan",
+          "terms": [
+            "release",
+            "rollback"
+          ]
+        }
+      ],
+      "solution": "Acceptance requires goal-completion evidence, validated drafts, bounded calls/deadline, zero unauthorized effects, correct approval binding and fault recovery. Compare the safe workflow with a deterministic baseline and report unnecessary calls, p95 latency and cost.",
+      "id": "p44-automation-agent-exercise",
+      "hints": [
+        "The assistant investigates a failing test using approved logs and history, then proposes an explanation, locator replacement, candidate test or draft defect summary.",
+        "Inject repeated searches, malformed tool results, path traversal, cross-tenant IDs and an unapproved write request.",
+        "Implement a bounded state machine with typed tools, action IDs and a trace.",
+        "Acceptance requires goal-completion evidence, validated drafts, bounded calls/deadline, zero unauthorized effects, correct approval binding and fault recovery."
+      ],
+      "explanation": "Acceptance requires goal-completion evidence, validated drafts, bounded calls/deadline, zero unauthorized effects, correct approval binding and fault recovery. Compare the safe workflow with a deterministic baseline and report unnecessary calls, p95 latency and cost."
+    },
+    "quiz": {
+      "question": "What demonstrates this project is ready for review?",
+      "options": [
+        "Reproducible acceptance evidence with failure cases",
+        "A polished diagram alone",
+        "A model saying the project works"
+      ],
+      "answer": 0,
+      "explanation": "Reviewable artifacts and independent checks establish the claimed behavior."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What demonstrates this project is ready for review?",
+      "options": [
+        "Reproducible acceptance evidence with failure cases",
+        "A polished diagram alone",
+        "A model saying the project works"
+      ],
+      "answer": 0,
+      "explanation": "Reviewable artifacts and independent checks establish the claimed behavior."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p43-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Acceptance evidence"
+    ],
+    "interviewIds": [
+      "bridge-agents-010",
+      "bridge-agents-011",
+      "bridge-agents-012",
+      "bridge-phase-44-3",
+      "bridge-phase-44-4",
+      "bridge-phase-44-5",
+      "bridge-phase-44-6",
+      "bridge-phase-44-7"
+    ]
+  },
+  {
+    "id": "p44-tools",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Implement scoped read tools and explicit proposal artifacts",
+    "minutes": 35,
+    "objectives": [
+      "Implement scoped read tools and explicit proposal artifacts",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects implement scoped read tools and explicit proposal artifacts with test contracts, failure triage, and evidence for release. Acceptance requires no unrestricted execution, no cross-tenant fixture results and drafts clearly marked unexecuted.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "The assistant reads a failure, searches approved history, inspects a fixture DOM and creates a draft. Reading and proposing are separate from applying a patch. Tenant, path and tool scopes are deterministic application contracts.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run the bounded tool policy with fixture actions and inspect each event. Use read_failure and search_history over the same synthetic incident dataset exposed by MCP. Keep tool arguments typed and derive identity from the session, never from model-supplied tenant values.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python local-labs/mcp/client.py\npython -m pytest local-labs/tests/test_quality.py -k policy",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A generic shell tool or arbitrary path argument bypasses narrow read permissions. A successful final summary can hide an earlier unauthorized read. Inspect the trace, including denied calls and empty results.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires no unrestricted execution, no cross-tenant fixture results and drafts clearly marked unexecuted. Every observation must retain a source ID and every action an authorization outcome.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "A generic shell tool or arbitrary path argument bypasses narrow read permissions. A successful final summary can hide an earlier unauthorized read. Inspect the trace, including denied calls and empty results.",
+    "takeaway": "Acceptance requires no unrestricted execution, no cross-tenant fixture results and drafts clearly marked unexecuted.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the implement scoped read tools and explicit proposal artifacts stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires no unrestricted execution, no cross-tenant fixture results and drafts clearly marked unexecuted. Every observation must retain a source ID and every action an authorization outcome.",
+      "id": "p44-tools-exercise",
+      "hints": [
+        "The assistant reads a failure, searches approved history, inspects a fixture DOM and creates a draft.",
+        "A generic shell tool or arbitrary path argument bypasses narrow read permissions.",
+        "Run the bounded tool policy with fixture actions and inspect each event.",
+        "Acceptance requires no unrestricted execution, no cross-tenant fixture results and drafts clearly marked unexecuted."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires no unrestricted execution, no cross-tenant fixture results and drafts clearly marked unexecuted. Every observation must retain a source ID and every action an authorization outcome."
+    },
+    "quiz": {
+      "question": "The implement scoped read tools and explicit proposal artifacts stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The implement scoped read tools and explicit proposal artifacts stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p44-automation-agent"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-agents-010",
+      "bridge-agents-011",
+      "bridge-agents-012",
+      "bridge-phase-44-3",
+      "bridge-phase-44-4",
+      "bridge-phase-44-5",
+      "bridge-phase-44-6",
+      "bridge-phase-44-7"
+    ]
+  },
+  {
+    "id": "p44-approval",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Bind human approval to the exact proposed action",
+    "minutes": 35,
+    "objectives": [
+      "Bind human approval to the exact proposed action",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects bind human approval to the exact proposed action with test contracts, failure triage, and evidence for release. Acceptance includes action-mutation, expiry and unauthorized-tool tests.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Human confirmation protects a concrete side effect only when it identifies the exact payload and scope. An approved draft is not a standing grant for later generated changes. Hash the canonical action and record principal, expiry and status.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Calculate the action hash from stable sorted JSON, display the proposed artifact, then validate the approval before execution. Recheck current permissions on resume. The fixture lab simulates an approved effect and never edits the repository.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python -m pytest local-labs/tests/test_quality.py -k policy_loop_and_approval",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A changed path or patch text invalidates a prior approval. Expired approval or revoked access must deny execution. A generic approved=True boolean cannot demonstrate which operation was authorized.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes action-mutation, expiry and unauthorized-tool tests. The proposal/approval/effect trace should make it possible to prove that denied actions had zero effects. Distinguish simulation from real writes in the artifact.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "A changed path or patch text invalidates a prior approval. Expired approval or revoked access must deny execution. A generic approved=True boolean cannot demonstrate which operation was authorized.",
+    "takeaway": "Acceptance includes action-mutation, expiry and unauthorized-tool tests.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the bind human approval to the exact proposed action stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance includes action-mutation, expiry and unauthorized-tool tests. The proposal/approval/effect trace should make it possible to prove that denied actions had zero effects. Distinguish simulation from real writes in the artifact.",
+      "id": "p44-approval-exercise",
+      "hints": [
+        "Human confirmation protects a concrete side effect only when it identifies the exact payload and scope.",
+        "A changed path or patch text invalidates a prior approval.",
+        "Calculate the action hash from stable sorted JSON, display the proposed artifact, then validate the approval before execution.",
+        "Acceptance includes action-mutation, expiry and unauthorized-tool tests."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance includes action-mutation, expiry and unauthorized-tool tests. The proposal/approval/effect trace should make it possible to prove that denied actions had zero effects. Distinguish simulation from real writes in the artifact."
+    },
+    "quiz": {
+      "question": "The bind human approval to the exact proposed action stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The bind human approval to the exact proposed action stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p44-tools"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-agents-010",
+      "bridge-agents-011",
+      "bridge-agents-012",
+      "bridge-phase-44-3",
+      "bridge-phase-44-4",
+      "bridge-phase-44-5",
+      "bridge-phase-44-6",
+      "bridge-phase-44-7"
+    ]
+  },
+  {
+    "id": "p44-state",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Add loop detection, budget and fault recovery",
+    "minutes": 35,
+    "objectives": [
+      "Add loop detection, budget and fault recovery",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects add loop detection, budget and fault recovery with test contracts, failure triage, and evidence for release. Acceptance requires bounded termination, visible denied/stopped/incomplete states and safe restart behavior.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A bounded investigator tracks goal, observed evidence, action signatures and remaining budget. Repeated unsuccessful searches, broken tools and missing evidence are explicit states. Recovery may select another permitted read, but cannot reset limits or expand privileges.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run deterministic plans with duplicate signatures, unknown tools and missing fixture IDs. Compare a plain state machine with the real LangGraph read/draft/review graph. Persist thread IDs scoped to tenant and user if resumption is enabled.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python local-labs/frameworks/langgraph_lab.py\npython local-labs/evals/runner.py --output artifacts/agent-evaluation",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Declaring success after a draft does not establish that a requested fix was verified. A graph checkpoint can replay a side effect if idempotency and approval are omitted. Parallel updates can overwrite evidence without a reducer.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires bounded termination, visible denied/stopped/incomplete states and safe restart behavior. Retain the first failing action so an evaluator can distinguish planning, execution and missing-verification errors.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "Declaring success after a draft does not establish that a requested fix was verified. A graph checkpoint can replay a side effect if idempotency and approval are omitted. Parallel updates can overwrite evidence without a reducer.",
+    "takeaway": "Acceptance requires bounded termination, visible denied/stopped/incomplete states and safe restart behavior.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the add loop detection, budget and fault recovery stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires bounded termination, visible denied/stopped/incomplete states and safe restart behavior. Retain the first failing action so an evaluator can distinguish planning, execution and missing-verification errors.",
+      "id": "p44-state-exercise",
+      "hints": [
+        "A bounded investigator tracks goal, observed evidence, action signatures and remaining budget.",
+        "Declaring success after a draft does not establish that a requested fix was verified.",
+        "Run deterministic plans with duplicate signatures, unknown tools and missing fixture IDs.",
+        "Acceptance requires bounded termination, visible denied/stopped/incomplete states and safe restart behavior."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires bounded termination, visible denied/stopped/incomplete states and safe restart behavior. Retain the first failing action so an evaluator can distinguish planning, execution and missing-verification errors."
+    },
+    "quiz": {
+      "question": "The add loop detection, budget and fault recovery stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The add loop detection, budget and fault recovery stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p44-approval"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-agents-010",
+      "bridge-agents-011",
+      "bridge-agents-012",
+      "bridge-phase-44-3",
+      "bridge-phase-44-4",
+      "bridge-phase-44-5",
+      "bridge-phase-44-6",
+      "bridge-phase-44-7"
+    ]
+  },
+  {
+    "id": "p44-quality",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Evaluate trajectories and prepare the technical deep dive",
+    "minutes": 35,
+    "objectives": [
+      "Evaluate trajectories and prepare the technical deep dive",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects evaluate trajectories and prepare the technical deep dive with test contracts, failure triage, and evidence for release. Acceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "The assistant is evaluated for goal completion, correct tools/arguments, unnecessary work, loop handling and unauthorized effects. A single ideal call sequence is too restrictive when several safe plans can obtain the required evidence.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use required evidence and forbidden effects as trajectory contracts. Replay fixture traces, inject one broken observation and compare before/after outcomes. Report calls, latency and cost alongside draft quality and reviewer intervention.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python -m pytest local-labs/tests local-labs/fastapi -q\npython local-labs/evals/runner.py --output artifacts/agent-release",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A polished answer can receive a high judge score even when the trace violates policy. Averaging denied writes into a broad quality metric hides a hard failure. An agent count is not evidence that the architecture needed delegation.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts. Explain the simpler baseline, the failure you reproduced and the measured benefit of the final design in your portfolio interview.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "A polished answer can receive a high judge score even when the trace violates policy. Averaging denied writes into a broad quality metric hides a hard failure. An agent count is not evidence that the architecture needed delegation.",
+    "takeaway": "Acceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the evaluate trajectories and prepare the technical deep dive stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts. Explain the simpler baseline, the failure you reproduced and the measured benefit of the final design in your portfolio interview.",
+      "id": "p44-quality-exercise",
+      "hints": [
+        "The assistant is evaluated for goal completion, correct tools/arguments, unnecessary work, loop handling and unauthorized effects.",
+        "A polished answer can receive a high judge score even when the trace violates policy.",
+        "Use required evidence and forbidden effects as trajectory contracts.",
+        "Acceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts. Explain the simpler baseline, the failure you reproduced and the measured benefit of the final design in your portfolio interview."
+    },
+    "quiz": {
+      "question": "The evaluate trajectories and prepare the technical deep dive stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The evaluate trajectories and prepare the technical deep dive stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p44-state"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-agents-010",
+      "bridge-agents-011",
+      "bridge-agents-012",
+      "bridge-phase-44-3",
+      "bridge-phase-44-4",
+      "bridge-phase-44-5",
+      "bridge-phase-44-6",
+      "bridge-phase-44-7"
+    ]
+  },
+  {
+    "id": "p44-checkpoint",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Phase 44 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 44 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 44 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects evaluate trajectories and prepare the technical deep dive to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use required evidence and forbidden effects as trajectory contracts. Replay fixture traces, inject one broken observation and compare before/after outcomes. Report calls, latency and cost alongside draft quality and reviewer intervention.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "python -m pytest local-labs/tests local-labs/fastapi -q\npython local-labs/evals/runner.py --output artifacts/agent-release",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A polished answer can receive a high judge score even when the trace violates policy. Averaging denied writes into a broad quality metric hides a hard failure. An agent count is not evidence that the architecture needed delegation.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts. Explain the simpler baseline, the failure you reproduced and the measured benefit of the final design in your portfolio interview.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A polished answer can receive a high judge score even when the trace violates policy. Averaging denied writes into a broad quality metric hides a hard failure. An agent count is not evidence that the architecture needed delegation.",
+    "takeaway": "Acceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Evaluate trajectories and prepare the technical deep dive to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts.",
+      "id": "p44-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects evaluate trajectories and prepare the technical deep dive to the shared CI quality platform.",
+        "A polished answer can receive a high judge score even when the trace violates policy.",
+        "Use required evidence and forbidden effects as trajectory contracts.",
+        "Acceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance requires zero unauthorized effects, bounded calls and useful evidence-backed drafts."
+    },
+    "quiz": {
+      "question": "A candidate for evaluate trajectories and prepare the technical deep dive meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for evaluate trajectories and prepare the technical deep dive meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p44-quality"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-agents-010",
+      "bridge-agents-011",
+      "bridge-agents-012",
+      "bridge-phase-44-3",
+      "bridge-phase-44-4",
+      "bridge-phase-44-5",
+      "bridge-phase-44-6",
+      "bridge-phase-44-7"
+    ]
+  }
+]

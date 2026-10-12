@@ -1,0 +1,682 @@
+[
+  {
+    "id": "p07-neuron",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "Neurons, activations, tensors, and initialization",
+    "minutes": 35,
+    "objectives": [
+      "Neurons, activations, tensors, and initialization",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects neurons, activations, tensors, and initialization with test contracts, failure triage, and evidence for release. Use the neuron playground to change x, weight, bias, and activation.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A neuron computes z=w\u00b7x+b and applies an activation. Without nonlinear activation, stacking linear layers still produces a linear transformation. Sigmoid maps to (0,1), tanh to (-1,1), ReLU uses max(0,z), and softmax turns a vector of logits into normalized positive probabilities.",
+          "A tensor generalizes vectors and matrices to multiple axes. Label batch, feature, and class dimensions: a classification batch shaped (N,D) multiplied by weights (D,C) gives logits (N,C). Shape validity alone does not prove that axes mean the intended things."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Initialize weights with a scale appropriate to the activation rather than all zeros. Use ReLU in a small hidden layer and leave final logits unnormalized when a loss such as CrossEntropyLoss expects logits. Compute stable softmax by subtracting the maximum logit first.",
+          "Inspect a single sample before batching. Verify dtype, input shape, class indices, and output dimension. Keep training and evaluation modes explicit when dropout or normalization changes behavior."
+        ],
+        "code": "import math\ndef sigmoid(z):\n    return 1/(1+math.exp(-z)) if z>=0 else math.exp(z)/(1+math.exp(z))\nx,w,b=2.,.5,-.2\nprint(sigmoid(w*x+b))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Identical zero-initialized hidden weights preserve symmetry and cannot learn distinct features. Applying softmax before a loss that already incorporates log-softmax can weaken or distort optimization. A sigmoid with extreme logits saturates and gives tiny gradients.",
+          "Print intermediate shapes and compare a manual forward pass with the framework. Diagnose a wrong tensor axis before changing learning rate or adding layers."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Use the neuron playground to change x, weight, bias, and activation. Record when the output is zero, saturated, or linear. Test softmax sum and numerical stability on large logits.",
+          "A failure classifier is only useful if input features and output class indices remain aligned across training, artifact serialization, and the API. This is a familiar contract-testing problem with numeric tensors."
+        ]
+      }
+    ],
+    "mistake": "Identical zero-initialized hidden weights preserve symmetry and cannot learn distinct features. Applying softmax before a loss that already incorporates log-softmax can weaken or distort optimization. A sigmoid with extreme logits saturates and gives tiny gradients.",
+    "takeaway": "Use the neuron playground to change x, weight, bias, and activation.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement relu_neuron(x,w,b): return max(0,w*x+b).",
+      "answer": "",
+      "solution": "def relu_neuron(x,w,b):\n    return max(0,w*x+b)",
+      "starter": "def relu_neuron(x,w,b):\n    return 0",
+      "tests": "assert relu_neuron(2,.5,-.2)==.8\nassert relu_neuron(-2,1,0)==0",
+      "id": "p07-neuron-exercise",
+      "hints": [
+        "A neuron computes z=w\u00b7x+b and applies an activation.",
+        "Identical zero-initialized hidden weights preserve symmetry and cannot learn distinct features.",
+        "Initialize weights with a scale appropriate to the activation rather than all zeros.",
+        "Use the neuron playground to change x, weight, bias, and activation."
+      ],
+      "explanation": "def relu_neuron(x,w,b):\n    return max(0,w*x+b)"
+    },
+    "quiz": {
+      "question": "Why do hidden layers need nonlinear activations?",
+      "options": [
+        "To make stacked transformations express nonlinear functions",
+        "To remove tensor axes",
+        "To avoid all validation"
+      ],
+      "answer": 0,
+      "explanation": "Composed linear transforms are still linear."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Why do hidden layers need nonlinear activations?",
+      "options": [
+        "To make stacked transformations express nonlinear functions",
+        "To remove tensor axes",
+        "To avoid all validation"
+      ],
+      "answer": 0,
+      "explanation": "Composed linear transforms are still linear."
+    },
+    "sources": [
+      "https://docs.pytorch.org/tutorials/beginner/basics/intro.html",
+      "https://docs.pytorch.org/docs/stable/nn.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p06-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Neuron",
+      "ReLU",
+      "Softmax"
+    ],
+    "interviewIds": [
+      "bridge-deep-learning-001",
+      "bridge-deep-learning-002",
+      "bridge-deep-learning-003",
+      "bridge-deep-learning-016",
+      "bridge-deep-learning-017",
+      "bridge-deep-learning-018",
+      "bridge-phase-07-6",
+      "bridge-phase-07-7"
+    ],
+    "demo": "neuron"
+  },
+  {
+    "id": "p07-gradient",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "Gradient descent and the learning-rate contract",
+    "minutes": 35,
+    "objectives": [
+      "Gradient descent and the learning-rate contract",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects gradient descent and the learning-rate contract with test contracts, failure triage, and evidence for release. Use the gradient visualizer to compare step sizes on the same quadratic objective.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A derivative measures how a small input change affects a function. A gradient collects derivatives with respect to parameters. Gradient descent updates parameters opposite the gradient to reduce a differentiable loss locally. For L(w)=(w-3)\u00b2, the derivative is 2(w-3).",
+          "Learning rate controls step size. Too small can converge slowly; too large can overshoot or diverge. A lower training loss does not alone establish better generalization. The optimization objective and validation objective may differ."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Compute a forward prediction, scalar loss, gradients, and an update. In PyTorch, zero gradients before the next backward call because gradients accumulate by default. Separate the optimizer step from data iteration and log meaningful loss aggregates.",
+          "An epoch is a pass through training data; a minibatch is a subset used for one update. Shuffling improves stochastic training but keep deterministic seeds and independent evaluation splits for reproducibility."
+        ],
+        "code": "w=0.\nfor epoch in range(10):\n    gradient=2*(w-3)\n    w-=.1*gradient\nprint(w,(w-3)**2)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Exploding loss can come from excessive learning rate, unscaled features, invalid labels, or an unstable numerical operation. Vanishing gradients can arise through saturated activations or long chains of multiplication.",
+          "Test a tiny batch you should be able to overfit. If loss does not decrease there, inspect gradient values, parameter updates, labels, and loss input contract before blaming dataset scale."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Use the gradient visualizer to compare step sizes on the same quadratic objective. Finite differences approximate a derivative and provide a useful check of a manually derived gradient.",
+          "In production model training, store the learning-rate schedule, optimizer state, seeds, and validation curves. An engineer should explain both how optimization works and how they distinguish optimization failure from overfit."
+        ]
+      }
+    ],
+    "mistake": "Exploding loss can come from excessive learning rate, unscaled features, invalid labels, or an unstable numerical operation. Vanishing gradients can arise through saturated activations or long chains of multiplication.",
+    "takeaway": "Use the gradient visualizer to compare step sizes on the same quadratic objective.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement step(w,lr): take one gradient descent update for loss (w-3)^2.",
+      "answer": "",
+      "solution": "def step(w,lr):\n    return w-lr*2*(w-3)",
+      "starter": "def step(w,lr):\n    return w",
+      "tests": "assert abs(step(0,.1)-.6)<1e-9\nassert step(3,.1)==3\nassert step(0,1)==6",
+      "id": "p07-gradient-exercise",
+      "hints": [
+        "A derivative measures how a small input change affects a function.",
+        "Exploding loss can come from excessive learning rate, unscaled features, invalid labels, or an unstable numerical operation.",
+        "Compute a forward prediction, scalar loss, gradients, and an update.",
+        "Use the gradient visualizer to compare step sizes on the same quadratic objective."
+      ],
+      "explanation": "def step(w,lr):\n    return w-lr*2*(w-3)"
+    },
+    "quiz": {
+      "question": "Why call optimizer.zero_grad() each ordinary batch?",
+      "options": [
+        "Gradients accumulate by default",
+        "It deletes the dataset",
+        "It normalizes labels"
+      ],
+      "answer": 0,
+      "explanation": "Unintended accumulation changes the optimization step."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Why call optimizer.zero_grad() each ordinary batch?",
+      "options": [
+        "Gradients accumulate by default",
+        "It deletes the dataset",
+        "It normalizes labels"
+      ],
+      "answer": 0,
+      "explanation": "Unintended accumulation changes the optimization step."
+    },
+    "sources": [
+      "https://docs.pytorch.org/tutorials/beginner/basics/intro.html",
+      "https://docs.pytorch.org/docs/stable/nn.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p07-neuron"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-deep-learning-001",
+      "bridge-deep-learning-002",
+      "bridge-deep-learning-003",
+      "bridge-deep-learning-016",
+      "bridge-deep-learning-017",
+      "bridge-deep-learning-018",
+      "bridge-phase-07-6",
+      "bridge-phase-07-7"
+    ],
+    "demo": "gradient"
+  },
+  {
+    "id": "p07-backprop",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "Backpropagation is the chain rule in a graph",
+    "minutes": 35,
+    "objectives": [
+      "Backpropagation is the chain rule in a graph",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects backpropagation is the chain rule in a graph with test contracts, failure triage, and evidence for release. The walkthrough displays forward values and the gradients flowing backward.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Backpropagation efficiently applies the chain rule through a computation graph. It does not search randomly for better weights. For h=w1*x, y=w2*h, and loss=(y-target)\u00b2, propagate dL/dy=2(y-target), dL/dw2=(dL/dy)*h, and dL/dw1=(dL/dy)*w2*x.",
+          "Every local operation contributes its derivative. Reusing a parameter means its gradient receives contributions from every path. Automatic differentiation records these operations so a framework can perform the same calculation."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Compute one tiny network by hand, then compare gradients with PyTorch autograd and finite differences. Avoid modifying a tensor needed by backward in place. Detaching a tensor or converting through an external array can sever the computation graph.",
+          "Gradient checking uses a small epsilon: (L(w+epsilon)-L(w-epsilon))/(2*epsilon). Extremely small epsilon introduces floating-point noise; very large epsilon is a poor local approximation."
+        ],
+        "code": "x,w1,w2,target=2.,.5,3.,1.\nh=w1*x\ny=w2*h\ndy=2*(y-target)\nprint(\"dL/dw1\",dy*w2*x,\"dL/dw2\",dy*h)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A layer\u2019s parameters may have no gradients because the output was detached, the loss did not depend on them, or gradient tracking was disabled. A graph can also accidentally retain many past batches and grow memory.",
+          "Inspect requires_grad, grad_fn, and actual parameter gradients. Use no_grad for evaluation and loss.item for a detached logging scalar. Do not retain the training graph merely to print metrics."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The walkthrough displays forward values and the gradients flowing backward. Compare analytical and finite-difference results on a synthetic scalar network. Explain why changing an earlier weight changes the final loss through downstream operations.",
+          "This gives an SDET a principled way to diagnose broken training code rather than treating backward() as magic. Shape, dependency, and numeric contracts remain testable."
+        ]
+      }
+    ],
+    "mistake": "A layer\u2019s parameters may have no gradients because the output was detached, the loss did not depend on them, or gradient tracking was disabled. A graph can also accidentally retain many past batches and grow memory.",
+    "takeaway": "The walkthrough displays forward values and the gradients flowing backward.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement gradients(x,w1,w2,target): return (dL/dw1,dL/dw2) for the described network.",
+      "answer": "",
+      "solution": "def gradients(x,w1,w2,target):\n    h=w1*x\n    dy=2*(w2*h-target)\n    return dy*w2*x,dy*h",
+      "starter": "def gradients(x,w1,w2,target):\n    return 0.,0.",
+      "tests": "assert gradients(2,.5,3,1)==(24.,4.)\nassert gradients(1,1,1,1)==(0.,0.)",
+      "id": "p07-backprop-exercise",
+      "hints": [
+        "Backpropagation efficiently applies the chain rule through a computation graph.",
+        "A layer\u2019s parameters may have no gradients because the output was detached, the loss did not depend on them, or gradient tracking was disabled.",
+        "Compute one tiny network by hand, then compare gradients with PyTorch autograd and finite differences.",
+        "The walkthrough displays forward values and the gradients flowing backward."
+      ],
+      "explanation": "def gradients(x,w1,w2,target):\n    h=w1*x\n    dy=2*(w2*h-target)\n    return dy*w2*x,dy*h"
+    },
+    "quiz": {
+      "question": "Converting a trainable tensor to a detached array and back can cause what?",
+      "options": [
+        "A broken gradient path",
+        "Automatic regularization",
+        "A larger context window"
+      ],
+      "answer": 0,
+      "explanation": "The new tensor does not preserve the original autograd dependency."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Converting a trainable tensor to a detached array and back can cause what?",
+      "options": [
+        "A broken gradient path",
+        "Automatic regularization",
+        "A larger context window"
+      ],
+      "answer": 0,
+      "explanation": "The new tensor does not preserve the original autograd dependency."
+    },
+    "sources": [
+      "https://docs.pytorch.org/tutorials/beginner/basics/intro.html",
+      "https://docs.pytorch.org/docs/stable/nn.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p07-gradient"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-deep-learning-001",
+      "bridge-deep-learning-002",
+      "bridge-deep-learning-003",
+      "bridge-deep-learning-016",
+      "bridge-deep-learning-017",
+      "bridge-deep-learning-018",
+      "bridge-phase-07-6",
+      "bridge-phase-07-7"
+    ],
+    "demo": "backprop"
+  },
+  {
+    "id": "p07-training",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "Train and debug a small PyTorch classifier",
+    "minutes": 35,
+    "objectives": [
+      "Train and debug a small PyTorch classifier",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects train and debug a small pytorch classifier with test contracts, failure triage, and evidence for release. The local PyTorch lab trains on fictional failures and reports confusion matrices and threshold-based UNKNOWN routing.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A multilayer perceptron combines dense layers and activations. Training minimizes a loss on labeled batches, while validation measures generalization on separate cases. Cross-entropy is appropriate for class logits; regression losses serve numeric targets.",
+          "Dropout randomly suppresses activations during training, weight decay penalizes parameter magnitude, and normalization stabilizes representations. These techniques do not repair leakage or labels that contradict one another."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Build a model with nn.Sequential, use integer class indices, and optimize CrossEntropyLoss with Adam. Call model.train for training and model.eval plus no_grad for validation. Track class support and early-stop based on a held-out criterion.",
+          "Checkpoint model, optimizer, vocabulary or feature scaler, and class mapping together. Test that a saved model produces equivalent logits on a fixed fixture after loading."
+        ],
+        "code": "import torch\nfrom torch import nn\nmodel=nn.Sequential(nn.Linear(8,16),nn.ReLU(),nn.Dropout(.1),nn.Linear(16,5))\nloss_fn=nn.CrossEntropyLoss()\noptimizer=torch.optim.Adam(model.parameters(),lr=.001)\n# logits=model(batch_x); loss=loss_fn(logits,batch_y)\n# optimizer.zero_grad(); loss.backward(); optimizer.step()",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Training loss decreases while validation loss rises when a model memorizes or shifts away from the held-out distribution. A constant prediction can indicate severe imbalance, label encoding errors, or an inappropriate output activation.",
+          "Compare a linear baseline before blaming model size. Inspect errors per class, not just overall accuracy. Ensure class weights refer to the same category order as the label encoder."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The local PyTorch lab trains on fictional failures and reports confusion matrices and threshold-based UNKNOWN routing. The browser exercises teach the same numeric mechanisms without requiring a GPU.",
+          "Document whether training used CPU or GPU, seed behavior, versioned data, and nondeterministic operations. Reproducibility means recording limitations, not promising identical floating-point results on every device."
+        ]
+      }
+    ],
+    "mistake": "Training loss decreases while validation loss rises when a model memorizes or shifts away from the held-out distribution. A constant prediction can indicate severe imbalance, label encoding errors, or an inappropriate output activation.",
+    "takeaway": "The local PyTorch lab trains on fictional failures and reports confusion matrices and threshold-based UNKNOWN routing.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "A five-class network outputs softmax twice, sees validation loss rise, and cannot be reproduced after saving. Diagnose and repair all three boundaries.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Loss contract",
+          "terms": [
+            "logits",
+            "cross-entropy"
+          ]
+        },
+        {
+          "label": "Generalization",
+          "terms": [
+            "validation",
+            "early"
+          ]
+        },
+        {
+          "label": "Artifact parity",
+          "terms": [
+            "mapping",
+            "scaler"
+          ]
+        }
+      ],
+      "solution": "Feed logits to cross-entropy. Inspect overfit and leakage, compare the linear baseline, regularize and early-stop on held-out validation. Save the class mapping, scaler, model, optimizer state, seed, and dataset version; verify reload parity.",
+      "id": "p07-training-exercise",
+      "hints": [
+        "A multilayer perceptron combines dense layers and activations.",
+        "Training loss decreases while validation loss rises when a model memorizes or shifts away from the held-out distribution.",
+        "Build a model with nn.Sequential, use integer class indices, and optimize CrossEntropyLoss with Adam.",
+        "The local PyTorch lab trains on fictional failures and reports confusion matrices and threshold-based UNKNOWN routing."
+      ],
+      "explanation": "Feed logits to cross-entropy. Inspect overfit and leakage, compare the linear baseline, regularize and early-stop on held-out validation. Save the class mapping, scaler, model, optimizer state, seed, and dataset version; verify reload parity."
+    },
+    "quiz": {
+      "question": "When should dropout be active?",
+      "options": [
+        "During training, disabled in evaluation mode",
+        "Always including validation",
+        "Only when saving"
+      ],
+      "answer": 0,
+      "explanation": "Evaluation should use the learned network without stochastic dropout."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: When should dropout be active?",
+      "options": [
+        "During training, disabled in evaluation mode",
+        "Always including validation",
+        "Only when saving"
+      ],
+      "answer": 0,
+      "explanation": "Evaluation should use the learned network without stochastic dropout."
+    },
+    "sources": [
+      "https://docs.pytorch.org/tutorials/beginner/basics/intro.html",
+      "https://docs.pytorch.org/docs/stable/nn.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p07-backprop"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-deep-learning-001",
+      "bridge-deep-learning-002",
+      "bridge-deep-learning-003",
+      "bridge-deep-learning-016",
+      "bridge-deep-learning-017",
+      "bridge-deep-learning-018",
+      "bridge-phase-07-6",
+      "bridge-phase-07-7"
+    ]
+  },
+  {
+    "id": "p07-architectures",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "From CNNs and recurrent networks to attention",
+    "minutes": 35,
+    "objectives": [
+      "From CNNs and recurrent networks to attention",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects from cnns and recurrent networks to attention with test contracts, failure triage, and evidence for release. Explain the evolution from local filters and recurrent memory to content-addressed attention.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A CNN applies shared filters across local neighborhoods, learning patterns independent of their exact position. Pooling trades spatial detail for invariance. For logs, a one-dimensional convolution can detect local token patterns; image applications use spatial dimensions.",
+          "An RNN updates a hidden state sequentially, sharing parameters across positions. Long chains can struggle with gradients and long-range information. LSTM gates control what enters, persists, and leaves a memory state, reducing some of those difficulties."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Choose architecture by structure: MLP for tabular features, CNN for local patterns, RNN/LSTM for sequences when sequential state is useful. Mask padding and distinguish batch, sequence, and feature axes.",
+          "Attention can directly combine information from distant positions rather than forcing every dependency through one recurrent state. Transformers make this combination highly parallelizable during training, though autoregressive generation still produces dependent next tokens."
+        ],
+        "code": "def moving_pattern(sequence):\n    return [sequence[i]+sequence[i+1] for i in range(len(sequence)-1)]\nprint(moving_pattern([1,0,1,1]))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A model may learn padding artifacts or sequence length instead of failure content. Recurrent hidden state accidentally reused across independent incidents leaks context. Flattening all tokens into an MLP loses positional relationships unless explicitly represented.",
+          "Test invariants by changing padding, permuting irrelevant boilerplate, and separating incidents. Measure meaningful improvements against simpler representations before choosing an architecture for novelty alone."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Explain the evolution from local filters and recurrent memory to content-addressed attention. Use the next phase\u2019s attention calculation to see what direct cross-token interaction means.",
+          "For AI quality engineering, the main objective is diagnosing representation and state failures, not memorizing architecture names. A technical interview answer should connect computational structure to its tradeoffs."
+        ]
+      }
+    ],
+    "mistake": "A model may learn padding artifacts or sequence length instead of failure content. Recurrent hidden state accidentally reused across independent incidents leaks context. Flattening all tokens into an MLP loses positional relationships unless explicitly represented.",
+    "takeaway": "Explain the evolution from local filters and recurrent memory to content-addressed attention.",
+    "exercise": {
+      "kind": "choice",
+      "prompt": "Which architecture uses a hidden state updated sequentially across tokens?",
+      "options": [
+        "MLP",
+        "RNN/LSTM",
+        "A SQL join"
+      ],
+      "answer": "RNN/LSTM",
+      "solution": "RNN/LSTM",
+      "id": "p07-architectures-exercise",
+      "hints": [
+        "A CNN applies shared filters across local neighborhoods, learning patterns independent of their exact position.",
+        "A model may learn padding artifacts or sequence length instead of failure content.",
+        "Choose architecture by structure: MLP for tabular features, CNN for local patterns, RNN/LSTM for sequences when sequential state is useful.",
+        "Explain the evolution from local filters and recurrent memory to content-addressed attention."
+      ],
+      "explanation": "RNN/LSTM"
+    },
+    "quiz": {
+      "question": "What attention helps address relative to a single recurrent state?",
+      "options": [
+        "Direct access to distant token information",
+        "Elimination of all inference latency",
+        "Guaranteed truthful outputs"
+      ],
+      "answer": 0,
+      "explanation": "Attention combines selected information from positions without one recurrent bottleneck."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What attention helps address relative to a single recurrent state?",
+      "options": [
+        "Direct access to distant token information",
+        "Elimination of all inference latency",
+        "Guaranteed truthful outputs"
+      ],
+      "answer": 0,
+      "explanation": "Attention combines selected information from positions without one recurrent bottleneck."
+    },
+    "sources": [
+      "https://docs.pytorch.org/tutorials/beginner/basics/intro.html",
+      "https://docs.pytorch.org/docs/stable/nn.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p07-training"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-deep-learning-001",
+      "bridge-deep-learning-002",
+      "bridge-deep-learning-003",
+      "bridge-deep-learning-016",
+      "bridge-deep-learning-017",
+      "bridge-deep-learning-018",
+      "bridge-phase-07-6",
+      "bridge-phase-07-7"
+    ]
+  },
+  {
+    "id": "p07-checkpoint",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "Phase 07 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 07 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 07 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Explain the evolution from local filters and recurrent memory to content-addressed attention.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects from cnns and recurrent networks to attention to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Choose architecture by structure: MLP for tabular features, CNN for local patterns, RNN/LSTM for sequences when sequential state is useful. Mask padding and distinguish batch, sequence, and feature axes.",
+          "Attention can directly combine information from distant positions rather than forcing every dependency through one recurrent state. Transformers make this combination highly parallelizable during training, though autoregressive generation still produces dependent next tokens.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "def moving_pattern(sequence):\n    return [sequence[i]+sequence[i+1] for i in range(len(sequence)-1)]\nprint(moving_pattern([1,0,1,1]))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A model may learn padding artifacts or sequence length instead of failure content. Recurrent hidden state accidentally reused across independent incidents leaks context. Flattening all tokens into an MLP loses positional relationships unless explicitly represented.",
+          "Test invariants by changing padding, permuting irrelevant boilerplate, and separating incidents. Measure meaningful improvements against simpler representations before choosing an architecture for novelty alone.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Explain the evolution from local filters and recurrent memory to content-addressed attention. Use the next phase\u2019s attention calculation to see what direct cross-token interaction means.",
+          "For AI quality engineering, the main objective is diagnosing representation and state failures, not memorizing architecture names. A technical interview answer should connect computational structure to its tradeoffs.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A model may learn padding artifacts or sequence length instead of failure content. Recurrent hidden state accidentally reused across independent incidents leaks context. Flattening all tokens into an MLP loses positional relationships unless explicitly represented.",
+    "takeaway": "Explain the evolution from local filters and recurrent memory to content-addressed attention.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply From CNNs and recurrent networks to attention to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nExplain the evolution from local filters and recurrent memory to content-addressed attention.",
+      "id": "p07-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects from cnns and recurrent networks to attention to the shared CI quality platform.",
+        "A model may learn padding artifacts or sequence length instead of failure content.",
+        "Choose architecture by structure: MLP for tabular features, CNN for local patterns, RNN/LSTM for sequences when sequential state is useful.",
+        "Explain the evolution from local filters and recurrent memory to content-addressed attention."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nExplain the evolution from local filters and recurrent memory to content-addressed attention."
+    },
+    "quiz": {
+      "question": "A candidate for from cnns and recurrent networks to attention meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for from cnns and recurrent networks to attention meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://docs.pytorch.org/tutorials/beginner/basics/intro.html",
+      "https://docs.pytorch.org/docs/stable/nn.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p07-architectures"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-deep-learning-001",
+      "bridge-deep-learning-002",
+      "bridge-deep-learning-003",
+      "bridge-deep-learning-016",
+      "bridge-deep-learning-017",
+      "bridge-deep-learning-018",
+      "bridge-phase-07-6",
+      "bridge-phase-07-7"
+    ]
+  }
+]

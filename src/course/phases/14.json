@@ -1,0 +1,350 @@
+[
+  {
+    "id": "p14-ann",
+    "phase": 14,
+    "module": "Vector Databases",
+    "title": "Vector indexes: exact search, ANN and filtered recall",
+    "minutes": 35,
+    "objectives": [
+      "Vector indexes",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects vector indexes: exact search, ann and filtered recall with test contracts, failure triage, and evidence for release. The local lab includes exact vector search for transparent reference results and an optional real Qdrant backend.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Exact nearest-neighbor search scores every eligible vector. Approximate nearest-neighbor indexes trade some recall for lower latency and memory access. HNSW organizes a navigable graph; IVF partitions vectors into coarse cells and probes a subset. Index parameters affect recall, build cost and search latency.",
+          "Vector stores also manage IDs, payload metadata, persistence, updates and filters. FAISS focuses on vector indexing; Qdrant, Chroma, Weaviate, Pinecone and pgvector provide different deployment and database capabilities. Compare required filters, operations and durability before choosing."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Create a Qdrant collection with an explicit vector size and distance. Upsert stable point IDs with tenant, document version and permissions in payload. Query with the authenticated tenant filter and a top-k limit. Add payload indexes for frequent filters according to measured workload.",
+          "Measure ANN Recall@K against exact eligible search, not against all tenants. Tune graph/search effort or IVF probe count while plotting recall versus p95 latency. Small datasets may not benefit from approximation."
+        ],
+        "code": "eligible=[d for d in docs if d['tenant']==principal.tenant]\nranked=sorted(eligible,key=lambda d:d['score'],reverse=True)[:k]",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Filtering the top ten global neighbors after retrieval can return no authorized results even when relevant tenant documents exist. More seriously, passing the unfiltered context to generation leaks other tenants' evidence.",
+          "Test tenant isolation before ranking, deletion visibility, repeated upserts, incompatible dimensions and persistence across restart. Benchmark selective filters because their cost and recall can differ sharply from unfiltered search."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The local lab includes exact vector search for transparent reference results and an optional real Qdrant backend. Store backend type in the report; the exact baseline is not labeled a vector database deployment.",
+          "Release evidence should show recall, p95, memory, restart behavior and isolation invariants. A faster index with unauthorized context fails regardless of its similarity score."
+        ]
+      }
+    ],
+    "mistake": "Filtering the top ten global neighbors after retrieval can return no authorized results even when relevant tenant documents exist. More seriously, passing the unfiltered context to generation leaks other tenants' evidence.",
+    "takeaway": "The local lab includes exact vector search for transparent reference results and an optional real Qdrant backend.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def authorized_topk(docs,tenant,k):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def authorized_topk(docs,tenant,k):\n    if k<0: raise ValueError('k')\n    return [d['id'] for d in sorted((d for d in docs if d['tenant']==tenant),key=lambda d:(-d['score'],d['id']))[:k]]",
+      "starter": "def authorized_topk(docs,tenant,k):\n    return []",
+      "tests": "assert authorized_topk([{'id':'A','tenant':'x','score':.9},{'id':'B','tenant':'y','score':1}], 'x',2)==['A']\nassert authorized_topk([], 'x',0)==[]",
+      "id": "p14-ann-exercise",
+      "hints": [
+        "Exact nearest-neighbor search scores every eligible vector.",
+        "Filtering the top ten global neighbors after retrieval can return no authorized results even when relevant tenant documents exist.",
+        "Create a Qdrant collection with an explicit vector size and distance.",
+        "The local lab includes exact vector search for transparent reference results and an optional real Qdrant backend."
+      ],
+      "explanation": "def authorized_topk(docs,tenant,k):\n    if k<0: raise ValueError('k')\n    return [d['id'] for d in sorted((d for d in docs if d['tenant']==tenant),key=lambda d:(-d['score'],d['id']))[:k]]"
+    },
+    "quiz": {
+      "question": "What is the reference for filtered ANN recall?",
+      "options": [
+        "Exact search over eligible documents",
+        "All global nearest neighbors",
+        "The model answer length"
+      ],
+      "answer": 0,
+      "explanation": "Recall must respect the same authorization and metadata constraints."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What is the reference for filtered ANN recall?",
+      "options": [
+        "Exact search over eligible documents",
+        "All global nearest neighbors",
+        "The model answer length"
+      ],
+      "answer": 0,
+      "explanation": "Recall must respect the same authorization and metadata constraints."
+    },
+    "sources": [
+      "https://qdrant.tech/documentation/concepts/search/",
+      "https://qdrant.tech/documentation/concepts/indexing/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p13-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "ANN",
+      "HNSW",
+      "IVF",
+      "Vector database"
+    ],
+    "interviewIds": [
+      "bridge-embeddings--vector-db-007",
+      "bridge-embeddings--vector-db-008",
+      "bridge-embeddings--vector-db-015",
+      "bridge-embeddings--vector-db-031",
+      "bridge-embeddings--vector-db-032",
+      "bridge-phase-14-5",
+      "bridge-phase-14-6",
+      "bridge-phase-14-7"
+    ]
+  },
+  {
+    "id": "p14-persistence",
+    "phase": 14,
+    "module": "Vector Databases",
+    "title": "Qdrant persistence and payload-filter integration tests",
+    "minutes": 35,
+    "objectives": [
+      "Qdrant persistence and payload-filter integration tests",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects qdrant persistence and payload-filter integration tests with test contracts, failure triage, and evidence for release. Retain a store smoke report containing mode, collection contract, point IDs, filtered query results and restart/deletion checks.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A vector database's operational behavior matters beyond nearest-neighbor arithmetic. Stable IDs make upserts replace the intended point, payloads provide tenant and source metadata, and persistence determines whether indexed evidence survives restart. A local in-memory index cannot demonstrate restart durability.",
+          "The Qdrant lab uses the real client in persistent local mode with explicitly synthetic three-coordinate vectors. This validates store mechanics and authorization filters without pretending the vectors came from a semantic model."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Create a collection with declared dimension and cosine distance, upsert alpha and beta points, then use query_points with a payload Filter requiring tenant=alpha. Close and reopen the client using the same path and repeat the query. Delete one point and assert it no longer appears.",
+          "For a server deployment, Compose supplies a persistent volume and service health checks. Local embedded mode and remote service mode have different concurrency and operational guarantees; label the mode in every artifact."
+        ],
+        "code": "from qdrant_client import QdrantClient,models\nclient=QdrantClient(path='artifacts/qdrant')\nflt=models.Filter(must=[models.FieldCondition(key='tenant',match=models.MatchValue(value='alpha'))])\n# query_points uses the collection's declared metric\n# result=client.query_points('fixtures',query=[1.,0.,0.],query_filter=flt,limit=3)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A test creates the collection in memory, closes it and falsely claims persistence. A client forgets the filter on a secondary retrieval path. Duplicate random IDs accumulate stale versions instead of replacing them.",
+          "Test repeated upserts, deletion, reopen, dimension mismatch and both positive/negative tenant queries. Verify the returned payload against the authenticated scope even after the database filter."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Retain a store smoke report containing mode, collection contract, point IDs, filtered query results and restart/deletion checks. ANN quality tests are separate and require a larger labeled corpus and an exact-search reference.",
+          "For SDETs, isolate database mechanics from embedding quality. A real persistent store over synthetic vectors is honest infrastructure evidence; a semantic retrieval claim additionally requires a trained encoder and relevant-document labels."
+        ]
+      }
+    ],
+    "mistake": "A test creates the collection in memory, closes it and falsely claims persistence. A client forgets the filter on a secondary retrieval path. Duplicate random IDs accumulate stale versions instead of replacing them.",
+    "takeaway": "Retain a store smoke report containing mode, collection contract, point IDs, filtered query results and restart/deletion checks.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def upsert(points,new):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def upsert(points,new):\n    by_id={p['id']:p for p in points}\n    by_id[new['id']]=new\n    return [by_id[k] for k in sorted(by_id)]",
+      "starter": "def upsert(points,new):\n    return []",
+      "tests": "assert upsert([{'id':1,'v':0}],{'id':1,'v':2})==[{'id':1,'v':2}]\nassert len(upsert([{'id':1}],{'id':2}))==2",
+      "id": "p14-persistence-exercise",
+      "hints": [
+        "A vector database's operational behavior matters beyond nearest-neighbor arithmetic.",
+        "A test creates the collection in memory, closes it and falsely claims persistence.",
+        "Create a collection with declared dimension and cosine distance, upsert alpha and beta points, then use query_points with a payload Filter requiring tenant=alpha.",
+        "Retain a store smoke report containing mode, collection contract, point IDs, filtered query results and restart/deletion checks."
+      ],
+      "explanation": "def upsert(points,new):\n    by_id={p['id']:p for p in points}\n    by_id[new['id']]=new\n    return [by_id[k] for k in sorted(by_id)]"
+    },
+    "quiz": {
+      "question": "What proves persistence rather than in-memory correctness?",
+      "options": [
+        "Reopening the same store and verifying data",
+        "One successful query before shutdown",
+        "A collection name"
+      ],
+      "answer": 0,
+      "explanation": "Durability requires the state to survive the process/client lifecycle."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What proves persistence rather than in-memory correctness?",
+      "options": [
+        "Reopening the same store and verifying data",
+        "One successful query before shutdown",
+        "A collection name"
+      ],
+      "answer": 0,
+      "explanation": "Durability requires the state to survive the process/client lifecycle."
+    },
+    "sources": [
+      "https://qdrant.tech/documentation/concepts/search/",
+      "https://qdrant.tech/documentation/concepts/indexing/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p14-ann"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Qdrant",
+      "Payload filter"
+    ],
+    "interviewIds": [
+      "bridge-embeddings--vector-db-007",
+      "bridge-embeddings--vector-db-008",
+      "bridge-embeddings--vector-db-015",
+      "bridge-embeddings--vector-db-031",
+      "bridge-embeddings--vector-db-032",
+      "bridge-phase-14-5",
+      "bridge-phase-14-6",
+      "bridge-phase-14-7"
+    ]
+  },
+  {
+    "id": "p14-checkpoint",
+    "phase": 14,
+    "module": "Vector Databases",
+    "title": "Phase 14 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 14 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 14 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Retain a store smoke report containing mode, collection contract, point IDs, filtered query results and restart/deletion checks.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects qdrant persistence and payload-filter integration tests to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Create a collection with declared dimension and cosine distance, upsert alpha and beta points, then use query_points with a payload Filter requiring tenant=alpha. Close and reopen the client using the same path and repeat the query. Delete one point and assert it no longer appears.",
+          "For a server deployment, Compose supplies a persistent volume and service health checks. Local embedded mode and remote service mode have different concurrency and operational guarantees; label the mode in every artifact.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "from qdrant_client import QdrantClient,models\nclient=QdrantClient(path='artifacts/qdrant')\nflt=models.Filter(must=[models.FieldCondition(key='tenant',match=models.MatchValue(value='alpha'))])\n# query_points uses the collection's declared metric\n# result=client.query_points('fixtures',query=[1.,0.,0.],query_filter=flt,limit=3)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A test creates the collection in memory, closes it and falsely claims persistence. A client forgets the filter on a secondary retrieval path. Duplicate random IDs accumulate stale versions instead of replacing them.",
+          "Test repeated upserts, deletion, reopen, dimension mismatch and both positive/negative tenant queries. Verify the returned payload against the authenticated scope even after the database filter.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Retain a store smoke report containing mode, collection contract, point IDs, filtered query results and restart/deletion checks. ANN quality tests are separate and require a larger labeled corpus and an exact-search reference.",
+          "For SDETs, isolate database mechanics from embedding quality. A real persistent store over synthetic vectors is honest infrastructure evidence; a semantic retrieval claim additionally requires a trained encoder and relevant-document labels.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A test creates the collection in memory, closes it and falsely claims persistence. A client forgets the filter on a secondary retrieval path. Duplicate random IDs accumulate stale versions instead of replacing them.",
+    "takeaway": "Retain a store smoke report containing mode, collection contract, point IDs, filtered query results and restart/deletion checks.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Qdrant persistence and payload-filter integration tests to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nRetain a store smoke report containing mode, collection contract, point IDs, filtered query results and restart/deletion checks.",
+      "id": "p14-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects qdrant persistence and payload-filter integration tests to the shared CI quality platform.",
+        "A test creates the collection in memory, closes it and falsely claims persistence.",
+        "Create a collection with declared dimension and cosine distance, upsert alpha and beta points, then use query_points with a payload Filter requiring tenant=alpha.",
+        "Retain a store smoke report containing mode, collection contract, point IDs, filtered query results and restart/deletion checks."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nRetain a store smoke report containing mode, collection contract, point IDs, filtered query results and restart/deletion checks."
+    },
+    "quiz": {
+      "question": "A candidate for qdrant persistence and payload-filter integration tests meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for qdrant persistence and payload-filter integration tests meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://qdrant.tech/documentation/concepts/search/",
+      "https://qdrant.tech/documentation/concepts/indexing/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p14-persistence"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-embeddings--vector-db-007",
+      "bridge-embeddings--vector-db-008",
+      "bridge-embeddings--vector-db-015",
+      "bridge-embeddings--vector-db-031",
+      "bridge-embeddings--vector-db-032",
+      "bridge-phase-14-5",
+      "bridge-phase-14-6",
+      "bridge-phase-14-7"
+    ]
+  }
+]

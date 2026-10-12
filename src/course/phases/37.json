@@ -1,0 +1,349 @@
+[
+  {
+    "id": "p37-faults",
+    "phase": 37,
+    "module": "Reliability Engineering For AI",
+    "title": "Reliability: controlled faults and graceful degradation",
+    "minutes": 35,
+    "objectives": [
+      "Reliability",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects reliability: controlled faults and graceful degradation with test contracts, failure triage, and evidence for release. A reliability report shows each injected fault, observed status, trace and invariant outcome.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Reliability is the ability to deliver an acceptable outcome despite dependency and input failures. AI failures include provider outage, rate limit, timeout, malformed result, hallucinated evidence, stale index, vector-store outage, broken tools, looping agents and context overflow. Not all failures should be retried.",
+          "Graceful degradation preserves a smaller truthful capability, such as displaying retrieved evidence without a generated explanation. It must be visible to the user and obey the same permissions."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Define a failure matrix with detection, retryability, fallback, user response and recovery evidence. Use deadlines, bounded retries, circuit breakers, index freshness checks, schema validation and step budgets. Record final status as successful, degraded, rejected or failed.",
+          "Inject one failure at a time in deterministic integration tests, then combine realistic correlated failures such as provider rate limits plus queue pressure. Ensure cancelled tasks release resources and duplicate requests cannot duplicate writes."
+        ],
+        "code": "fallback={'status':'degraded','answer':None,'evidence_ids':['D1']}\nassert fallback['answer'] is None",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A fallback invents an explanation when retrieval is unavailable. A timeout handler retries indefinitely because each attempt resets the total deadline. A stale index passes health checks but returns deleted evidence.",
+          "Assert visible degraded status, no unsupported claims, bounded attempts and eventual recovery. Simulate both empty evidence and contradictory evidence, because hallucination defenses depend on more than transport errors."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "A reliability report shows each injected fault, observed status, trace and invariant outcome. Error budgets count user-visible failures over a specified window, with separate safety invariants that cannot be averaged away.",
+          "SDETs should make fault cases executable release checks, not a list of possible risks. The system passes when it behaves predictably under the failures it claims to tolerate."
+        ]
+      }
+    ],
+    "mistake": "A fallback invents an explanation when retrieval is unavailable. A timeout handler retries indefinitely because each attempt resets the total deadline. A stale index passes health checks but returns deleted evidence.",
+    "takeaway": "A reliability report shows each injected fault, observed status, trace and invariant outcome.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def recovery(fault):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def recovery(fault):\n    return {'rate_limit':'bounded_retry','retrieval_outage':'evidence_unavailable','invalid_schema':'reject','loop':'stop','unknown':'escalate'}.get(fault,'escalate')",
+      "starter": "def recovery(fault):\n    return 'retry'",
+      "tests": "assert recovery('loop')=='stop'\nassert recovery('retrieval_outage')=='evidence_unavailable'\nassert recovery('new_fault')=='escalate'",
+      "id": "p37-faults-exercise",
+      "hints": [
+        "Reliability is the ability to deliver an acceptable outcome despite dependency and input failures.",
+        "A fallback invents an explanation when retrieval is unavailable.",
+        "Define a failure matrix with detection, retryability, fallback, user response and recovery evidence.",
+        "A reliability report shows each injected fault, observed status, trace and invariant outcome."
+      ],
+      "explanation": "def recovery(fault):\n    return {'rate_limit':'bounded_retry','retrieval_outage':'evidence_unavailable','invalid_schema':'reject','loop':'stop','unknown':'escalate'}.get(fault,'escalate')"
+    },
+    "quiz": {
+      "question": "What makes a fallback acceptable?",
+      "options": [
+        "Visible reduced capability without invented evidence",
+        "Always returning fluent prose",
+        "Resetting every budget"
+      ],
+      "answer": 0,
+      "explanation": "Degradation must remain truthful, authorized and bounded."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What makes a fallback acceptable?",
+      "options": [
+        "Visible reduced capability without invented evidence",
+        "Always returning fluent prose",
+        "Resetting every budget"
+      ],
+      "answer": 0,
+      "explanation": "Degradation must remain truthful, authorized and bounded."
+    },
+    "sources": [
+      "https://www.python-httpx.org/advanced/timeouts/",
+      "https://docs.python.org/3/library/asyncio-task.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p36-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Graceful degradation",
+      "Error budget",
+      "Recovery"
+    ],
+    "interviewIds": [
+      "bridge-production-012",
+      "bridge-production-013",
+      "bridge-production-029",
+      "bridge-phase-37-3",
+      "bridge-phase-37-4",
+      "bridge-phase-37-5",
+      "bridge-phase-37-6",
+      "bridge-phase-37-7"
+    ]
+  },
+  {
+    "id": "p37-matrix",
+    "phase": 37,
+    "module": "Reliability Engineering For AI",
+    "title": "Turn the failure matrix into executable recovery contracts",
+    "minutes": 35,
+    "objectives": [
+      "Turn the failure matrix into executable recovery contracts",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects turn the failure matrix into executable recovery contracts with test contracts, failure triage, and evidence for release. Acceptance records each fault, expected and observed outcome, trace and recovery evidence.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A failure matrix names each dependency fault, detection signal, allowed recovery and visible result. Provider timeouts, malformed responses, retrieval absence and unsafe tool requests require different handling. Retrying everything treats deterministic invalidity as if it were transient.",
+          "Recovery must preserve the original trust boundary and budget. A fallback with broader access or unsupported claims turns a reliability mechanism into a security or quality regression."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Create one fixture per fault and assert final status, attempt limit, retained evidence and effects. The provider adapter uses an outer async deadline; the tool state machine stops repeated signatures; retrieval absence returns explicit abstention.",
+          "For combined faults, test shared capacity and cancellation. Recheck permissions and approvals after a resumed task. Keep error categories stable in the public API while retaining safe internal diagnostic references."
+        ],
+        "code": "faults={'timeout':'unavailable','missing_context':'abstained','unsafe_write':'denied','loop':'stopped'}\nassert len(set(faults.values()))==4",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A malformed provider response is retried until the deadline but the public response still says success. A fallback copies another tenant's cached answer. A stopped agent's old partial draft is presented as a verified fix.",
+          "Inspect actual state and effect counts, not just error wording. Test that resources are released and that the next healthy request can succeed after the fault is removed."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance records each fault, expected and observed outcome, trace and recovery evidence. A declared tolerance is supported only by an executed case.",
+          "SDETs can run this suite without paid model calls by injecting the adapter/tool boundary. Live chaos experiments, when appropriate, add external-dependency evidence but do not replace deterministic recovery tests."
+        ]
+      }
+    ],
+    "mistake": "A malformed provider response is retried until the deadline but the public response still says success. A fallback copies another tenant's cached answer. A stopped agent's old partial draft is presented as a verified fix.",
+    "takeaway": "Acceptance records each fault, expected and observed outcome, trace and recovery evidence.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def failure_contract(fault,observed):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def failure_contract(fault,observed):\n    expected={'timeout':'unavailable','missing_context':'abstained','unsafe_write':'denied','loop':'stopped'}\n    return fault in expected and observed==expected[fault]",
+      "starter": "def failure_contract(fault,observed):\n    return False",
+      "tests": "assert failure_contract('loop','stopped')\nassert not failure_contract('unsafe_write','complete')\nassert not failure_contract('new','retry')",
+      "id": "p37-matrix-exercise",
+      "hints": [
+        "A failure matrix names each dependency fault, detection signal, allowed recovery and visible result.",
+        "A malformed provider response is retried until the deadline but the public response still says success.",
+        "Create one fixture per fault and assert final status, attempt limit, retained evidence and effects.",
+        "Acceptance records each fault, expected and observed outcome, trace and recovery evidence."
+      ],
+      "explanation": "def failure_contract(fault,observed):\n    expected={'timeout':'unavailable','missing_context':'abstained','unsafe_write':'denied','loop':'stopped'}\n    return fault in expected and observed==expected[fault]"
+    },
+    "quiz": {
+      "question": "What must a reliability fallback preserve?",
+      "options": [
+        "Authorization, truthfulness and total budget",
+        "A promise of success at any cost",
+        "Unrestricted alternate tools"
+      ],
+      "answer": 0,
+      "explanation": "Degradation changes capability, not the system's safety and evidence obligations."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What must a reliability fallback preserve?",
+      "options": [
+        "Authorization, truthfulness and total budget",
+        "A promise of success at any cost",
+        "Unrestricted alternate tools"
+      ],
+      "answer": 0,
+      "explanation": "Degradation changes capability, not the system's safety and evidence obligations."
+    },
+    "sources": [
+      "https://www.python-httpx.org/advanced/timeouts/",
+      "https://docs.python.org/3/library/asyncio-task.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p37-faults"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Failure matrix",
+      "Recovery contract"
+    ],
+    "interviewIds": [
+      "bridge-production-012",
+      "bridge-production-013",
+      "bridge-production-029",
+      "bridge-phase-37-3",
+      "bridge-phase-37-4",
+      "bridge-phase-37-5",
+      "bridge-phase-37-6",
+      "bridge-phase-37-7"
+    ]
+  },
+  {
+    "id": "p37-checkpoint",
+    "phase": 37,
+    "module": "Reliability Engineering For AI",
+    "title": "Phase 37 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 37 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 37 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance records each fault, expected and observed outcome, trace and recovery evidence.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects turn the failure matrix into executable recovery contracts to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Create one fixture per fault and assert final status, attempt limit, retained evidence and effects. The provider adapter uses an outer async deadline; the tool state machine stops repeated signatures; retrieval absence returns explicit abstention.",
+          "For combined faults, test shared capacity and cancellation. Recheck permissions and approvals after a resumed task. Keep error categories stable in the public API while retaining safe internal diagnostic references.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "faults={'timeout':'unavailable','missing_context':'abstained','unsafe_write':'denied','loop':'stopped'}\nassert len(set(faults.values()))==4",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A malformed provider response is retried until the deadline but the public response still says success. A fallback copies another tenant's cached answer. A stopped agent's old partial draft is presented as a verified fix.",
+          "Inspect actual state and effect counts, not just error wording. Test that resources are released and that the next healthy request can succeed after the fault is removed.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance records each fault, expected and observed outcome, trace and recovery evidence. A declared tolerance is supported only by an executed case.",
+          "SDETs can run this suite without paid model calls by injecting the adapter/tool boundary. Live chaos experiments, when appropriate, add external-dependency evidence but do not replace deterministic recovery tests.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A malformed provider response is retried until the deadline but the public response still says success. A fallback copies another tenant's cached answer. A stopped agent's old partial draft is presented as a verified fix.",
+    "takeaway": "Acceptance records each fault, expected and observed outcome, trace and recovery evidence.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Turn the failure matrix into executable recovery contracts to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance records each fault, expected and observed outcome, trace and recovery evidence.",
+      "id": "p37-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects turn the failure matrix into executable recovery contracts to the shared CI quality platform.",
+        "A malformed provider response is retried until the deadline but the public response still says success.",
+        "Create one fixture per fault and assert final status, attempt limit, retained evidence and effects.",
+        "Acceptance records each fault, expected and observed outcome, trace and recovery evidence."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance records each fault, expected and observed outcome, trace and recovery evidence."
+    },
+    "quiz": {
+      "question": "A candidate for turn the failure matrix into executable recovery contracts meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for turn the failure matrix into executable recovery contracts meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://www.python-httpx.org/advanced/timeouts/",
+      "https://docs.python.org/3/library/asyncio-task.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p37-matrix"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-production-012",
+      "bridge-production-013",
+      "bridge-production-029",
+      "bridge-phase-37-3",
+      "bridge-phase-37-4",
+      "bridge-phase-37-5",
+      "bridge-phase-37-6",
+      "bridge-phase-37-7"
+    ]
+  }
+]

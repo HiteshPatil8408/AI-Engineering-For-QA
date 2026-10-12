@@ -1,0 +1,349 @@
+[
+  {
+    "id": "p32-containers",
+    "phase": 32,
+    "module": "Docker",
+    "title": "Docker: reproducible images, non-root runtime and Compose",
+    "minutes": 35,
+    "objectives": [
+      "Docker",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects docker: reproducible images, non-root runtime and compose with test contracts, failure triage, and evidence for release. Deployment evidence includes the image build, API smoke tests and persistent-index restart test when that backend is enabled.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "An image packages filesystem layers and runtime metadata; a container is an isolated running instance. Dockerfile layer order affects dependency cache reuse. Copying dependency manifests before application source lets source-only changes avoid reinstalling dependencies.",
+          "Containers improve reproducibility but do not automatically provide secure isolation, persistent data or correct service discovery. Secrets baked into layers can remain recoverable even if deleted later."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use a pinned base image policy, locked dependencies, a non-root user and a narrow build context. Set an explicit working directory, install dependencies before copying source and launch uvicorn on the container interface. Provide health/readiness endpoints and graceful shutdown.",
+          "Compose connects the API and optional Qdrant on an internal network with named persistent volumes. Keep provider secrets in runtime environment or secret mounts; exclude .env, caches and credentials with .dockerignore. Multi-stage builds can remove compilers from the final runtime."
+        ],
+        "code": "# Dockerfile\nFROM python:3.11-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nUSER 10001\nCMD [\"uvicorn\",\"app:app\",\"--host\",\"0.0.0.0\",\"--port\",\"8000\"]",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "The service listens on 127.0.0.1 inside the container and is unreachable through a published port. A vector collection disappears after restart because no volume was attached. An image contains a copied .env.",
+          "Test build context, non-root identity, port reachability, health checks, volume persistence and stop behavior. Scan the image and verify dependency versions against the lockfile."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Deployment evidence includes the image build, API smoke tests and persistent-index restart test when that backend is enabled. Document fixture-only and live-provider modes explicitly.",
+          "For an SDET, container tests are environment contract tests: the same synthetic request must behave consistently in the virtual environment and container, with configuration supplied externally."
+        ]
+      }
+    ],
+    "mistake": "The service listens on 127.0.0.1 inside the container and is unreachable through a published port. A vector collection disappears after restart because no volume was attached. An image contains a copied .env.",
+    "takeaway": "Deployment evidence includes the image build, API smoke tests and persistent-index restart test when that backend is enabled.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def safe_context(paths):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def safe_context(paths):\n    return [p for p in paths if not any(part in {'.env','.venv','.git'} for part in p.split('/'))]",
+      "starter": "def safe_context(paths):\n    return []",
+      "tests": "assert safe_context(['app.py','.env','.venv/x','data/x'])==['app.py','data/x']",
+      "id": "p32-containers-exercise",
+      "hints": [
+        "An image packages filesystem layers and runtime metadata; a container is an isolated running instance.",
+        "The service listens on 127.0.0.1 inside the container and is unreachable through a published port.",
+        "Use a pinned base image policy, locked dependencies, a non-root user and a narrow build context.",
+        "Deployment evidence includes the image build, API smoke tests and persistent-index restart test when that backend is enabled."
+      ],
+      "explanation": "def safe_context(paths):\n    return [p for p in paths if not any(part in {'.env','.venv','.git'} for part in p.split('/'))]"
+    },
+    "quiz": {
+      "question": "Where should provider secrets enter the container?",
+      "options": [
+        "At runtime through controlled configuration",
+        "In a copied .env layer",
+        "In the Dockerfile command"
+      ],
+      "answer": 0,
+      "explanation": "Build layers and images should remain free of credentials."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Where should provider secrets enter the container?",
+      "options": [
+        "At runtime through controlled configuration",
+        "In a copied .env layer",
+        "In the Dockerfile command"
+      ],
+      "answer": 0,
+      "explanation": "Build layers and images should remain free of credentials."
+    },
+    "sources": [
+      "https://docs.docker.com/build/building/best-practices/",
+      "https://docs.docker.com/compose/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p31-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Docker image",
+      "Container",
+      "Volume"
+    ],
+    "interviewIds": [
+      "bridge-production-002",
+      "bridge-production-003",
+      "bridge-production-019",
+      "bridge-phase-32-3",
+      "bridge-phase-32-4",
+      "bridge-phase-32-5",
+      "bridge-phase-32-6",
+      "bridge-phase-32-7"
+    ]
+  },
+  {
+    "id": "p32-deployment",
+    "phase": 32,
+    "module": "Docker",
+    "title": "Container smoke tests: data paths, ports and persistence",
+    "minutes": 35,
+    "objectives": [
+      "Container smoke tests",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects container smoke tests: data paths, ports and persistence with test contracts, failure triage, and evidence for release. Acceptance evidence includes image identity, non-root identity, endpoint results, dataset path and restart behavior.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A local import working in a virtual environment does not prove the container image works. Working directories, module paths, user permissions and dataset locations can differ. The shared service uses a configured dataset root so its domain code does not depend on the checkout's parent directory layout.",
+          "Build context determines which files are available to COPY. The repository-root context includes local-labs and datasets; a narrow fastapi-only context omits the shared quality package."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Build with the supplied root-context Dockerfile, run as UID 10001 and bind uvicorn to 0.0.0.0. Probe health/readiness and exercise every domain endpoint. Verify that the dataset path is readable under the non-root user and that credentials enter only at runtime.",
+          "For Qdrant server mode, restart the service with its named volume and repeat an authorized query. Read-only API filesystems require temporary/runtime artifacts to use explicitly permitted storage rather than the image layer."
+        ],
+        "code": "docker compose up --build\n# From another terminal, probe /health, /ready and /chat\n# Confirm query 'retry HTTP 429' returns the authorized retry citation",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A Dockerfile copies ../datasets outside its build context and fails only in CI. A service imports the installed fastapi library instead of its app module. A relative data path silently loads no documents and produces abstention for every query.",
+          "Test a known retrieval question inside the container, not merely process startup. Check shutdown, port mapping and persistence. If Docker is unavailable in the development environment, record that execution limitation instead of claiming a smoke pass."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance evidence includes image identity, non-root identity, endpoint results, dataset path and restart behavior. Use the exact tested image for deployment and preserve its compatible rollback configuration.",
+          "For SDETs, environment tests should prove that a hand-computed fixture behaves the same inside and outside the container. This catches packaging defects independently of live model behavior."
+        ]
+      }
+    ],
+    "mistake": "A Dockerfile copies ../datasets outside its build context and fails only in CI. A service imports the installed fastapi library instead of its app module. A relative data path silently loads no documents and produces abstention for every query.",
+    "takeaway": "Acceptance evidence includes image identity, non-root identity, endpoint results, dataset path and restart behavior.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def required_build_files(files):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def required_build_files(files):\n    required={'local-labs/quality','local-labs/fastapi','datasets'}\n    return required<=set(files)",
+      "starter": "def required_build_files(files):\n    return False",
+      "tests": "assert required_build_files(['local-labs/quality','local-labs/fastapi','datasets'])\nassert not required_build_files(['local-labs/fastapi'])",
+      "id": "p32-deployment-exercise",
+      "hints": [
+        "A local import working in a virtual environment does not prove the container image works.",
+        "A Dockerfile copies ../datasets outside its build context and fails only in CI.",
+        "Build with the supplied root-context Dockerfile, run as UID 10001 and bind uvicorn to 0.0.0.0.",
+        "Acceptance evidence includes image identity, non-root identity, endpoint results, dataset path and restart behavior."
+      ],
+      "explanation": "def required_build_files(files):\n    required={'local-labs/quality','local-labs/fastapi','datasets'}\n    return required<=set(files)"
+    },
+    "quiz": {
+      "question": "Which probe detects a missing corpus that health alone misses?",
+      "options": [
+        "A known retrieval question with expected citation",
+        "Only process ID existence",
+        "The image size"
+      ],
+      "answer": 0,
+      "explanation": "An end-to-end fixture verifies data packaging and serving behavior."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which probe detects a missing corpus that health alone misses?",
+      "options": [
+        "A known retrieval question with expected citation",
+        "Only process ID existence",
+        "The image size"
+      ],
+      "answer": 0,
+      "explanation": "An end-to-end fixture verifies data packaging and serving behavior."
+    },
+    "sources": [
+      "https://docs.docker.com/build/building/best-practices/",
+      "https://docs.docker.com/compose/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p32-containers"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Build context",
+      "Container smoke test"
+    ],
+    "interviewIds": [
+      "bridge-production-002",
+      "bridge-production-003",
+      "bridge-production-019",
+      "bridge-phase-32-3",
+      "bridge-phase-32-4",
+      "bridge-phase-32-5",
+      "bridge-phase-32-6",
+      "bridge-phase-32-7"
+    ]
+  },
+  {
+    "id": "p32-checkpoint",
+    "phase": 32,
+    "module": "Docker",
+    "title": "Phase 32 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 32 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 32 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance evidence includes image identity, non-root identity, endpoint results, dataset path and restart behavior.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects container smoke tests: data paths, ports and persistence to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Build with the supplied root-context Dockerfile, run as UID 10001 and bind uvicorn to 0.0.0.0. Probe health/readiness and exercise every domain endpoint. Verify that the dataset path is readable under the non-root user and that credentials enter only at runtime.",
+          "For Qdrant server mode, restart the service with its named volume and repeat an authorized query. Read-only API filesystems require temporary/runtime artifacts to use explicitly permitted storage rather than the image layer.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "docker compose up --build\n# From another terminal, probe /health, /ready and /chat\n# Confirm query 'retry HTTP 429' returns the authorized retry citation",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A Dockerfile copies ../datasets outside its build context and fails only in CI. A service imports the installed fastapi library instead of its app module. A relative data path silently loads no documents and produces abstention for every query.",
+          "Test a known retrieval question inside the container, not merely process startup. Check shutdown, port mapping and persistence. If Docker is unavailable in the development environment, record that execution limitation instead of claiming a smoke pass.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance evidence includes image identity, non-root identity, endpoint results, dataset path and restart behavior. Use the exact tested image for deployment and preserve its compatible rollback configuration.",
+          "For SDETs, environment tests should prove that a hand-computed fixture behaves the same inside and outside the container. This catches packaging defects independently of live model behavior.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A Dockerfile copies ../datasets outside its build context and fails only in CI. A service imports the installed fastapi library instead of its app module. A relative data path silently loads no documents and produces abstention for every query.",
+    "takeaway": "Acceptance evidence includes image identity, non-root identity, endpoint results, dataset path and restart behavior.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Container smoke tests: data paths, ports and persistence to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance evidence includes image identity, non-root identity, endpoint results, dataset path and restart behavior.",
+      "id": "p32-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects container smoke tests: data paths, ports and persistence to the shared CI quality platform.",
+        "A Dockerfile copies ../datasets outside its build context and fails only in CI.",
+        "Build with the supplied root-context Dockerfile, run as UID 10001 and bind uvicorn to 0.0.0.0.",
+        "Acceptance evidence includes image identity, non-root identity, endpoint results, dataset path and restart behavior."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance evidence includes image identity, non-root identity, endpoint results, dataset path and restart behavior."
+    },
+    "quiz": {
+      "question": "A candidate for container smoke tests: data paths, ports and persistence meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for container smoke tests: data paths, ports and persistence meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://docs.docker.com/build/building/best-practices/",
+      "https://docs.docker.com/compose/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p32-deployment"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-production-002",
+      "bridge-production-003",
+      "bridge-production-019",
+      "bridge-phase-32-3",
+      "bridge-phase-32-4",
+      "bridge-phase-32-5",
+      "bridge-phase-32-6",
+      "bridge-phase-32-7"
+    ]
+  }
+]

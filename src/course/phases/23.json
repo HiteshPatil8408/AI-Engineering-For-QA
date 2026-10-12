@@ -1,0 +1,243 @@
+[
+  {
+    "id": "p23-scorers",
+    "phase": 23,
+    "module": "LLM / Chatbot Evaluation",
+    "title": "Chatbot evaluation: deterministic gates and calibrated judges",
+    "minutes": 35,
+    "objectives": [
+      "Chatbot evaluation",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects chatbot evaluation: deterministic gates and calibrated judges with test contracts, failure triage, and evidence for release. A release report shows hard-gate failures, quality dimensions, uncertainty and case-level changes from baseline.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Deterministic checks enforce contracts with crisp truth conditions: JSON validity, enum membership, required fields, resolved citations, forbidden actions, latency and token budgets. Semantic checks assess correctness, relevance, completeness and groundedness against a rubric. Neither replaces the other.",
+          "A chatbot case can pass syntax while failing meaning, or answer correctly while violating privacy. Keep dimensions separate so release decisions reflect product risk rather than a convenient average."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Represent each case with input turns, expected claims, authorized evidence, forbidden content and limits. Run deterministic scorers first and record each reason. A semantic judge receives the case, candidate and rubric in a controlled format with output validation.",
+          "Calibrate judge thresholds against human-rated examples, including false accepts and false rejects. Fix evaluator versions and randomize pairwise order. Run repeated samples when model variation is material to the release decision."
+        ],
+        "code": "checks={'schema':True,'citations':True,'privacy':False}\nrelease_ok=all(checks.values())\nassert not release_ok",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A semantic judge rewards polished verbosity and misses an unsupported citation. An aggregate score gives a safety violation the same weight as a tone mismatch. A secret string appears in evaluator logs even though the user-facing answer was redacted.",
+          "Test evaluator itself with known pass/fail fixtures, invalid outputs and adversarial candidate text. Never execute instructions contained in an evaluated response. Include evaluator failure as a distinct run status."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "A release report shows hard-gate failures, quality dimensions, uncertainty and case-level changes from baseline. Missing or crashed scorers block approval rather than silently producing a zero-weight dimension.",
+          "SDETs can connect this to existing regression tools: pytest for deterministic contracts, calibrated semantic evaluators for meaning, and CI artifacts for inspectable release evidence."
+        ]
+      }
+    ],
+    "mistake": "A semantic judge rewards polished verbosity and misses an unsupported citation. An aggregate score gives a safety violation the same weight as a tone mismatch. A secret string appears in evaluator logs even though the user-facing answer was redacted.",
+    "takeaway": "A release report shows hard-gate failures, quality dimensions, uncertainty and case-level changes from baseline.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def gate(checks,quality,threshold):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def gate(checks,quality,threshold):\n    return bool(checks) and all(v is True for v in checks.values()) and quality>=threshold",
+      "starter": "def gate(checks,quality,threshold):\n    return False",
+      "tests": "assert gate({'schema':True},.9,.8)\nassert not gate({'privacy':False},1,.8)\nassert not gate({},1,.8)\nassert not gate({'schema':True},.7,.8)",
+      "id": "p23-scorers-exercise",
+      "hints": [
+        "Deterministic checks enforce contracts with crisp truth conditions: JSON validity, enum membership, required fields, resolved citations, forbidden actions, latency and token budgets.",
+        "A semantic judge rewards polished verbosity and misses an unsupported citation.",
+        "Represent each case with input turns, expected claims, authorized evidence, forbidden content and limits.",
+        "A release report shows hard-gate failures, quality dimensions, uncertainty and case-level changes from baseline."
+      ],
+      "explanation": "def gate(checks,quality,threshold):\n    return bool(checks) and all(v is True for v in checks.values()) and quality>=threshold"
+    },
+    "quiz": {
+      "question": "Should a high semantic score offset a privacy violation?",
+      "options": [
+        "No: privacy is a hard gate",
+        "Yes: average all scores",
+        "Only for long answers"
+      ],
+      "answer": 0,
+      "explanation": "Product invariants remain mandatory regardless of other quality scores."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Should a high semantic score offset a privacy violation?",
+      "options": [
+        "No: privacy is a hard gate",
+        "Yes: average all scores",
+        "Only for long answers"
+      ],
+      "answer": 0,
+      "explanation": "Product invariants remain mandatory regardless of other quality scores."
+    },
+    "sources": [
+      "https://deepeval.com/docs/getting-started",
+      "https://mlflow.org/docs/latest/genai/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p22-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "LLM-as-a-judge",
+      "Calibration",
+      "Hard gate"
+    ],
+    "interviewIds": [
+      "bridge-ai-evaluation-001",
+      "bridge-ai-evaluation-004",
+      "bridge-ai-evaluation-007",
+      "bridge-ai-evaluation-010",
+      "bridge-ai-evaluation-013",
+      "bridge-ai-evaluation-016",
+      "bridge-ai-evaluation-019",
+      "bridge-ai-evaluation-022"
+    ]
+  },
+  {
+    "id": "p23-checkpoint",
+    "phase": 23,
+    "module": "LLM / Chatbot Evaluation",
+    "title": "Phase 23 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 23 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 23 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. A release report shows hard-gate failures, quality dimensions, uncertainty and case-level changes from baseline.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects chatbot evaluation: deterministic gates and calibrated judges to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Represent each case with input turns, expected claims, authorized evidence, forbidden content and limits. Run deterministic scorers first and record each reason. A semantic judge receives the case, candidate and rubric in a controlled format with output validation.",
+          "Calibrate judge thresholds against human-rated examples, including false accepts and false rejects. Fix evaluator versions and randomize pairwise order. Run repeated samples when model variation is material to the release decision.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "checks={'schema':True,'citations':True,'privacy':False}\nrelease_ok=all(checks.values())\nassert not release_ok",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A semantic judge rewards polished verbosity and misses an unsupported citation. An aggregate score gives a safety violation the same weight as a tone mismatch. A secret string appears in evaluator logs even though the user-facing answer was redacted.",
+          "Test evaluator itself with known pass/fail fixtures, invalid outputs and adversarial candidate text. Never execute instructions contained in an evaluated response. Include evaluator failure as a distinct run status.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "A release report shows hard-gate failures, quality dimensions, uncertainty and case-level changes from baseline. Missing or crashed scorers block approval rather than silently producing a zero-weight dimension.",
+          "SDETs can connect this to existing regression tools: pytest for deterministic contracts, calibrated semantic evaluators for meaning, and CI artifacts for inspectable release evidence.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A semantic judge rewards polished verbosity and misses an unsupported citation. An aggregate score gives a safety violation the same weight as a tone mismatch. A secret string appears in evaluator logs even though the user-facing answer was redacted.",
+    "takeaway": "A release report shows hard-gate failures, quality dimensions, uncertainty and case-level changes from baseline.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Chatbot evaluation: deterministic gates and calibrated judges to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nA release report shows hard-gate failures, quality dimensions, uncertainty and case-level changes from baseline.",
+      "id": "p23-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects chatbot evaluation: deterministic gates and calibrated judges to the shared CI quality platform.",
+        "A semantic judge rewards polished verbosity and misses an unsupported citation.",
+        "Represent each case with input turns, expected claims, authorized evidence, forbidden content and limits.",
+        "A release report shows hard-gate failures, quality dimensions, uncertainty and case-level changes from baseline."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nA release report shows hard-gate failures, quality dimensions, uncertainty and case-level changes from baseline."
+    },
+    "quiz": {
+      "question": "A candidate for chatbot evaluation: deterministic gates and calibrated judges meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for chatbot evaluation: deterministic gates and calibrated judges meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://deepeval.com/docs/getting-started",
+      "https://mlflow.org/docs/latest/genai/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p23-scorers"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-evaluation-001",
+      "bridge-ai-evaluation-004",
+      "bridge-ai-evaluation-007",
+      "bridge-ai-evaluation-010",
+      "bridge-ai-evaluation-013",
+      "bridge-ai-evaluation-016",
+      "bridge-ai-evaluation-019",
+      "bridge-ai-evaluation-022"
+    ]
+  }
+]

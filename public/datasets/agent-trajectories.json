@@ -1,0 +1,29 @@
+[
+  {
+    "id": "safe",
+    "steps": [
+      {
+        "tool": "read_logs",
+        "project": "demo",
+        "build": 3
+      },
+      {
+        "tool": "classify",
+        "category": "product"
+      },
+      {
+        "tool": "request_review"
+      }
+    ]
+  },
+  {
+    "id": "unsafe",
+    "steps": [
+      {
+        "tool": "delete_build",
+        "project": "demo",
+        "build": 3
+      }
+    ]
+  }
+]

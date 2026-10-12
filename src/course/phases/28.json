@@ -1,0 +1,243 @@
+[
+  {
+    "id": "p28-generation",
+    "phase": 28,
+    "module": "AI-Assisted Test Automation",
+    "title": "AI-assisted tests: GraphQL contracts and requirement traceability",
+    "minutes": 35,
+    "objectives": [
+      "AI-assisted tests",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects ai-assisted tests: graphql contracts and requirement traceability with test contracts, failure triage, and evidence for release. The local GraphQL capstone creates candidate cases, validates them and exports pytest-compatible definitions.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Generated tests are candidates that require independent validation. For GraphQL, inspect operations, arguments, required fields, nullability, enum values and authorization rules. A syntactically valid query may fail business rules; an HTTP 200 response may contain GraphQL errors.",
+          "Requirement traceability connects each candidate to the rule it tests. Count unique covered behaviors, not the number of generated files. Positive, negative, boundary, authentication and authorization cases should remain distinct."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Parse the schema and operation AST rather than splitting schema text with fragile string rules. Build a coverage matrix for required arguments, invalid enums, nullable/non-null fields, malformed operations and permission rules. Generate structured case definitions with expected data/errors.",
+          "For REST, use OpenAPI contracts and domain examples. For locator suggestions, validate candidates against the DOM and require uniqueness and stability. Regression selection uses dependency edges and historical risk; it must not exclude mandatory critical tests."
+        ],
+        "code": "response={'data':None,'errors':[{'message':'Unauthorized'}]}\nassert bool(response.get('errors'))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A generated GraphQL test asserts only status 200 and passes when errors contains an authorization failure. A locator suggestion uses a dynamic index that happens to work once. Duplicate paraphrased cases inflate coverage statistics.",
+          "Compile/type-check candidates, execute against synthetic fixtures, inspect assertions and retain requirement IDs. Mutate a required field or expected value to prove the test can detect the intended failure."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The local GraphQL capstone creates candidate cases, validates them and exports pytest-compatible definitions. Its report shows requirement coverage, duplicates, execution failures and rejected unsupported operations.",
+          "An SDET owns acceptance: generated text becomes useful automation only after executable assertions demonstrate the target behavior. Never treat a model's self-reported completeness as test coverage evidence."
+        ]
+      }
+    ],
+    "mistake": "A generated GraphQL test asserts only status 200 and passes when errors contains an authorization failure. A locator suggestion uses a dynamic index that happens to work once. Duplicate paraphrased cases inflate coverage statistics.",
+    "takeaway": "The local GraphQL capstone creates candidate cases, validates them and exports pytest-compatible definitions.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def graphql_ok(response):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def graphql_ok(response):\n    return isinstance(response,dict) and not response.get('errors') and response.get('data') is not None",
+      "starter": "def graphql_ok(response):\n    return False",
+      "tests": "assert graphql_ok({'data':{'item':1}})\nassert not graphql_ok({'data':None,'errors':[{'message':'bad'}]})\nassert not graphql_ok({'data':{'item':1},'errors':[{'message':'partial'}]})",
+      "id": "p28-generation-exercise",
+      "hints": [
+        "Generated tests are candidates that require independent validation.",
+        "A generated GraphQL test asserts only status 200 and passes when errors contains an authorization failure.",
+        "Parse the schema and operation AST rather than splitting schema text with fragile string rules.",
+        "The local GraphQL capstone creates candidate cases, validates them and exports pytest-compatible definitions."
+      ],
+      "explanation": "def graphql_ok(response):\n    return isinstance(response,dict) and not response.get('errors') and response.get('data') is not None"
+    },
+    "quiz": {
+      "question": "Is HTTP 200 sufficient for GraphQL success?",
+      "options": [
+        "No: inspect data and errors",
+        "Yes: transport status is the contract",
+        "Only for mutations"
+      ],
+      "answer": 0,
+      "explanation": "GraphQL execution errors can be returned in a successful HTTP response."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Is HTTP 200 sufficient for GraphQL success?",
+      "options": [
+        "No: inspect data and errors",
+        "Yes: transport status is the contract",
+        "Only for mutations"
+      ],
+      "answer": 0,
+      "explanation": "GraphQL execution errors can be returned in a successful HTTP response."
+    },
+    "sources": [
+      "https://playwright.dev/docs/test-assertions",
+      "https://graphql.org/learn/validation/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p27-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "GraphQL",
+      "Traceability",
+      "Candidate test"
+    ],
+    "interviewIds": [
+      "bridge-ai-testing-006",
+      "bridge-ai-testing-024",
+      "bridge-ai-testing-042",
+      "bridge-phase-28-3",
+      "bridge-phase-28-4",
+      "bridge-phase-28-5",
+      "bridge-phase-28-6",
+      "bridge-phase-28-7"
+    ]
+  },
+  {
+    "id": "p28-checkpoint",
+    "phase": 28,
+    "module": "AI-Assisted Test Automation",
+    "title": "Phase 28 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 28 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 28 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. The local GraphQL capstone creates candidate cases, validates them and exports pytest-compatible definitions.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects ai-assisted tests: graphql contracts and requirement traceability to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Parse the schema and operation AST rather than splitting schema text with fragile string rules. Build a coverage matrix for required arguments, invalid enums, nullable/non-null fields, malformed operations and permission rules. Generate structured case definitions with expected data/errors.",
+          "For REST, use OpenAPI contracts and domain examples. For locator suggestions, validate candidates against the DOM and require uniqueness and stability. Regression selection uses dependency edges and historical risk; it must not exclude mandatory critical tests.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "response={'data':None,'errors':[{'message':'Unauthorized'}]}\nassert bool(response.get('errors'))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A generated GraphQL test asserts only status 200 and passes when errors contains an authorization failure. A locator suggestion uses a dynamic index that happens to work once. Duplicate paraphrased cases inflate coverage statistics.",
+          "Compile/type-check candidates, execute against synthetic fixtures, inspect assertions and retain requirement IDs. Mutate a required field or expected value to prove the test can detect the intended failure.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The local GraphQL capstone creates candidate cases, validates them and exports pytest-compatible definitions. Its report shows requirement coverage, duplicates, execution failures and rejected unsupported operations.",
+          "An SDET owns acceptance: generated text becomes useful automation only after executable assertions demonstrate the target behavior. Never treat a model's self-reported completeness as test coverage evidence.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A generated GraphQL test asserts only status 200 and passes when errors contains an authorization failure. A locator suggestion uses a dynamic index that happens to work once. Duplicate paraphrased cases inflate coverage statistics.",
+    "takeaway": "The local GraphQL capstone creates candidate cases, validates them and exports pytest-compatible definitions.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply AI-assisted tests: GraphQL contracts and requirement traceability to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nThe local GraphQL capstone creates candidate cases, validates them and exports pytest-compatible definitions.",
+      "id": "p28-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects ai-assisted tests: graphql contracts and requirement traceability to the shared CI quality platform.",
+        "A generated GraphQL test asserts only status 200 and passes when errors contains an authorization failure.",
+        "Parse the schema and operation AST rather than splitting schema text with fragile string rules.",
+        "The local GraphQL capstone creates candidate cases, validates them and exports pytest-compatible definitions."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nThe local GraphQL capstone creates candidate cases, validates them and exports pytest-compatible definitions."
+    },
+    "quiz": {
+      "question": "A candidate for ai-assisted tests: graphql contracts and requirement traceability meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for ai-assisted tests: graphql contracts and requirement traceability meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://playwright.dev/docs/test-assertions",
+      "https://graphql.org/learn/validation/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p28-generation"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-006",
+      "bridge-ai-testing-024",
+      "bridge-ai-testing-042",
+      "bridge-phase-28-3",
+      "bridge-phase-28-4",
+      "bridge-phase-28-5",
+      "bridge-phase-28-6",
+      "bridge-phase-28-7"
+    ]
+  }
+]

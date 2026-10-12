@@ -1,0 +1,349 @@
+[
+  {
+    "id": "p21-handoffs",
+    "phase": 21,
+    "module": "Multi-Agent Systems",
+    "title": "Multi-agent coordination: scoped specialists and shared evidence",
+    "minutes": 35,
+    "objectives": [
+      "Multi-agent coordination",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects multi-agent coordination: scoped specialists and shared evidence with test contracts, failure triage, and evidence for release. For failure triage, compare a log specialist and history specialist against one bounded assistant.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Multiple agents are useful when specialties or independently verifiable subtasks justify coordination overhead. A supervisor routes work and integrates results; specialists operate within narrower tools and evidence scopes. Handoffs transfer a typed task, relevant evidence and a remaining budget, not an unrestricted conversation dump.",
+          "More agents can amplify latency, cost, inconsistent conclusions and failure propagation. Compare the design against a single-agent or deterministic baseline before adding roles."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use task IDs, parent IDs, owner, status, evidence IDs and result schemas. Independent read-only analyses can run in parallel; writes and dependent analyses require ordered coordination. The supervisor merges evidence by stable ID and checks contradictions before making a recommendation.",
+          "Allocate a shared total budget rather than giving each specialist a fresh unlimited budget. A specialist failure returns an explicit error or uncertainty; the supervisor must not convert missing work into fabricated success."
+        ],
+        "code": "results=[{'task':'logs','evidence':['F1']},{'task':'history','evidence':['F1','F2']}]\nmerged=sorted({e for r in results for e in r['evidence']})\nassert merged==['F1','F2']",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Two agents edit the same file concurrently, and the supervisor accepts the last result without conflict review. Another agent recursively delegates until the call count explodes. Shared memory containing another tenant's records creates an additional security boundary.",
+          "Test conflicting recommendations, duplicated evidence, failed handoffs, cancellation propagation and shared-budget exhaustion. Use deterministic specialist fixtures to validate orchestration independently from reasoning quality."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "For failure triage, compare a log specialist and history specialist against one bounded assistant. Measure independent evidence gain, completion rate, latency and coordination calls. Keep the simpler design if the extra agents add no useful evidence.",
+          "An SDET report should expose each task's input scope and output provenance. Final correctness cannot conceal an unauthorized specialist action or an unresolved conflicting conclusion."
+        ]
+      }
+    ],
+    "mistake": "Two agents edit the same file concurrently, and the supervisor accepts the last result without conflict review. Another agent recursively delegates until the call count explodes. Shared memory containing another tenant's records creates an additional security boundary.",
+    "takeaway": "For failure triage, compare a log specialist and history specialist against one bounded assistant.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def merge_evidence(results):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def merge_evidence(results):\n    return sorted({e for r in results if r.get('status')=='complete' for e in r.get('evidence',[])})",
+      "starter": "def merge_evidence(results):\n    return []",
+      "tests": "assert merge_evidence([{'status':'complete','evidence':['F2','F1']},{'status':'failed','evidence':['F3']}])==['F1','F2']\nassert merge_evidence([])==[]",
+      "id": "p21-handoffs-exercise",
+      "hints": [
+        "Multiple agents are useful when specialties or independently verifiable subtasks justify coordination overhead.",
+        "Two agents edit the same file concurrently, and the supervisor accepts the last result without conflict review.",
+        "Use task IDs, parent IDs, owner, status, evidence IDs and result schemas.",
+        "For failure triage, compare a log specialist and history specialist against one bounded assistant."
+      ],
+      "explanation": "def merge_evidence(results):\n    return sorted({e for r in results if r.get('status')=='complete' for e in r.get('evidence',[])})"
+    },
+    "quiz": {
+      "question": "When does another agent earn its coordination cost?",
+      "options": [
+        "When it adds measurable independent capability or evidence",
+        "Whenever a task is long",
+        "When it has a different name"
+      ],
+      "answer": 0,
+      "explanation": "Roles should improve an evaluated task outcome, not merely increase the number of participants."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: When does another agent earn its coordination cost?",
+      "options": [
+        "When it adds measurable independent capability or evidence",
+        "Whenever a task is long",
+        "When it has a different name"
+      ],
+      "answer": 0,
+      "explanation": "Roles should improve an evaluated task outcome, not merely increase the number of participants."
+    },
+    "sources": [
+      "https://docs.langchain.com/oss/python/langgraph/overview",
+      "https://docs.langchain.com/oss/python/langchain/multi-agent"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p20-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Supervisor",
+      "Handoff",
+      "Shared budget"
+    ],
+    "interviewIds": [
+      "bridge-agents-003",
+      "bridge-agents-004",
+      "bridge-agents-017",
+      "bridge-agents-045",
+      "bridge-agents-046",
+      "bridge-phase-21-5",
+      "bridge-phase-21-6",
+      "bridge-phase-21-7"
+    ]
+  },
+  {
+    "id": "p21-allocation",
+    "phase": 21,
+    "module": "Multi-Agent Systems",
+    "title": "Coordinate specialist budgets and merge conflicts",
+    "minutes": 35,
+    "objectives": [
+      "Coordinate specialist budgets and merge conflicts",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects coordinate specialist budgets and merge conflicts with test contracts, failure triage, and evidence for release. Release evidence includes task scopes, allocations, actual usage and integrated conclusions.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Parallel specialists can inspect independent evidence, but they share one user task and one resource budget. Giving each specialist the full budget multiplies the possible total cost. Shared state needs an explicit merge policy and evidence provenance; last-writer-wins can hide a conflicting conclusion.",
+          "The supervisor should integrate findings rather than merely concatenate answers. If a log specialist identifies automation timing while a history specialist suggests a product regression, preserve the disagreement and identify the additional evidence needed."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Assign task IDs, scoped inputs, per-task ceilings and a shared remaining allowance. Reserve budget before delegation and settle actual usage afterward. Keep results as typed records with evidence IDs, status and uncertainty. Deduplicate source IDs without discarding which specialist used them.",
+          "Independent reads can run concurrently; dependent analysis and side effects remain ordered. A failed child task returns an explicit failed result, and cancellation propagates to all pending work. The parent cannot mark missing results successful."
+        ],
+        "code": "def reserve(remaining,requested):\n    if not 0<=requested<=remaining:raise ValueError('budget')\n    return remaining-requested",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Two specialists each spend eight calls against a ten-call parent limit. Another specialist writes a conclusion into shared state while a second overwrites it without conflict review. These failures may be invisible in the final prose.",
+          "Test budget reservation, duplicate task IDs, late results after cancellation and conflicting evidence. Compare total steps and latency against a single-agent baseline before retaining the more complex design."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Release evidence includes task scopes, allocations, actual usage and integrated conclusions. Measure whether specialization improves task completion or evidence coverage enough to justify coordination cost.",
+          "For SDETs, orchestration tests should use deterministic specialist results first. This isolates coordination correctness from model behavior and makes race conditions and failure propagation reproducible."
+        ]
+      }
+    ],
+    "mistake": "Two specialists each spend eight calls against a ten-call parent limit. Another specialist writes a conclusion into shared state while a second overwrites it without conflict review. These failures may be invisible in the final prose.",
+    "takeaway": "Release evidence includes task scopes, allocations, actual usage and integrated conclusions.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def allocate(total,requests):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def allocate(total,requests):\n    if total<0 or any(r<0 for r in requests) or sum(requests)>total:raise ValueError('budget')\n    return total-sum(requests)",
+      "starter": "def allocate(total,requests):\n    return 0",
+      "tests": "assert allocate(10,[3,4])==3\ntry:allocate(10,[8,8]);assert False\nexcept ValueError:pass",
+      "id": "p21-allocation-exercise",
+      "hints": [
+        "Parallel specialists can inspect independent evidence, but they share one user task and one resource budget.",
+        "Two specialists each spend eight calls against a ten-call parent limit.",
+        "Assign task IDs, scoped inputs, per-task ceilings and a shared remaining allowance.",
+        "Release evidence includes task scopes, allocations, actual usage and integrated conclusions."
+      ],
+      "explanation": "def allocate(total,requests):\n    if total<0 or any(r<0 for r in requests) or sum(requests)>total:raise ValueError('budget')\n    return total-sum(requests)"
+    },
+    "quiz": {
+      "question": "What should happen to contradictory specialist findings?",
+      "options": [
+        "Preserve the conflict and seek discriminating evidence",
+        "Keep whichever answer arrived last",
+        "Average their prose"
+      ],
+      "answer": 0,
+      "explanation": "Coordination requires evidence-aware integration, not blind overwrite."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What should happen to contradictory specialist findings?",
+      "options": [
+        "Preserve the conflict and seek discriminating evidence",
+        "Keep whichever answer arrived last",
+        "Average their prose"
+      ],
+      "answer": 0,
+      "explanation": "Coordination requires evidence-aware integration, not blind overwrite."
+    },
+    "sources": [
+      "https://docs.langchain.com/oss/python/langgraph/overview",
+      "https://docs.langchain.com/oss/python/langchain/multi-agent"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p21-handoffs"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Budget reservation",
+      "Conflict resolution"
+    ],
+    "interviewIds": [
+      "bridge-agents-003",
+      "bridge-agents-004",
+      "bridge-agents-017",
+      "bridge-agents-045",
+      "bridge-agents-046",
+      "bridge-phase-21-5",
+      "bridge-phase-21-6",
+      "bridge-phase-21-7"
+    ]
+  },
+  {
+    "id": "p21-checkpoint",
+    "phase": 21,
+    "module": "Multi-Agent Systems",
+    "title": "Phase 21 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 21 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 21 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Release evidence includes task scopes, allocations, actual usage and integrated conclusions.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects coordinate specialist budgets and merge conflicts to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Assign task IDs, scoped inputs, per-task ceilings and a shared remaining allowance. Reserve budget before delegation and settle actual usage afterward. Keep results as typed records with evidence IDs, status and uncertainty. Deduplicate source IDs without discarding which specialist used them.",
+          "Independent reads can run concurrently; dependent analysis and side effects remain ordered. A failed child task returns an explicit failed result, and cancellation propagates to all pending work. The parent cannot mark missing results successful.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "def reserve(remaining,requested):\n    if not 0<=requested<=remaining:raise ValueError('budget')\n    return remaining-requested",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Two specialists each spend eight calls against a ten-call parent limit. Another specialist writes a conclusion into shared state while a second overwrites it without conflict review. These failures may be invisible in the final prose.",
+          "Test budget reservation, duplicate task IDs, late results after cancellation and conflicting evidence. Compare total steps and latency against a single-agent baseline before retaining the more complex design.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Release evidence includes task scopes, allocations, actual usage and integrated conclusions. Measure whether specialization improves task completion or evidence coverage enough to justify coordination cost.",
+          "For SDETs, orchestration tests should use deterministic specialist results first. This isolates coordination correctness from model behavior and makes race conditions and failure propagation reproducible.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "Two specialists each spend eight calls against a ten-call parent limit. Another specialist writes a conclusion into shared state while a second overwrites it without conflict review. These failures may be invisible in the final prose.",
+    "takeaway": "Release evidence includes task scopes, allocations, actual usage and integrated conclusions.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Coordinate specialist budgets and merge conflicts to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nRelease evidence includes task scopes, allocations, actual usage and integrated conclusions.",
+      "id": "p21-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects coordinate specialist budgets and merge conflicts to the shared CI quality platform.",
+        "Two specialists each spend eight calls against a ten-call parent limit.",
+        "Assign task IDs, scoped inputs, per-task ceilings and a shared remaining allowance.",
+        "Release evidence includes task scopes, allocations, actual usage and integrated conclusions."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nRelease evidence includes task scopes, allocations, actual usage and integrated conclusions."
+    },
+    "quiz": {
+      "question": "A candidate for coordinate specialist budgets and merge conflicts meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for coordinate specialist budgets and merge conflicts meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://docs.langchain.com/oss/python/langgraph/overview",
+      "https://docs.langchain.com/oss/python/langchain/multi-agent"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p21-allocation"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-agents-003",
+      "bridge-agents-004",
+      "bridge-agents-017",
+      "bridge-agents-045",
+      "bridge-agents-046",
+      "bridge-phase-21-5",
+      "bridge-phase-21-6",
+      "bridge-phase-21-7"
+    ]
+  }
+]

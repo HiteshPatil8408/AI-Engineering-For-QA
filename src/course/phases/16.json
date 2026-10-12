@@ -1,0 +1,351 @@
+[
+  {
+    "id": "p16-fusion",
+    "phase": 16,
+    "module": "Advanced RAG",
+    "title": "Advanced retrieval: hybrid ranking and reciprocal rank fusion",
+    "minutes": 35,
+    "objectives": [
+      "Advanced retrieval",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects advanced retrieval: hybrid ranking and reciprocal rank fusion with test contracts, failure triage, and evidence for release. Incremental indexing needs freshness and deletion guarantees; Graph RAG represents relationships for multi-hop questions, while multimodal retrieval needs matching modalities and evidence provenance.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Sparse retrieval such as BM25 rewards lexical evidence including rare identifiers. Dense retrieval can recover paraphrases. Hybrid retrieval combines these complementary candidate lists. Reciprocal rank fusion scores a document by summing 1/(c+rank) across ranked lists, avoiding direct comparison of incompatible raw score scales.",
+          "A cross-encoder reranker scores query-document pairs with richer joint context, usually at greater latency. Retrieve enough candidates for recall, then rerank a bounded pool for precision."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Union sparse and dense IDs, compute reciprocal rank contributions, sort with a stable tie break and retain the top candidates. Apply permission filters in both retrieval paths and again before context construction. Reranking must never reintroduce forbidden candidates.",
+          "Query rewriting, multi-query retrieval and HyDE can expand recall, but generated rewrites can change intent. Parent-child retrieval returns precise child matches plus coherent parent context. Compression should preserve evidence required for the answer rather than summarize away a negation."
+        ],
+        "code": "def rrf(lists,c=60):\n    scores={}\n    for ranked in lists:\n        for rank,doc in enumerate(ranked,1):\n            scores[doc]=scores.get(doc,0)+1/(c+rank)\n    return sorted(scores,key=lambda d:(-scores[d],d))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A dense query for HTTP 401 retrieves a semantically similar 403 guide but loses the exact error distinction. Conversely a lexical query for intermittent authentication fails to find a paraphrased expired-token document.",
+          "Run ablations for sparse, dense, fusion and reranking on the same queries. Inspect zero-hit, conflicting-evidence, multi-hop and tenant-isolation slices. Adding every technique without measuring its marginal value increases latency and debugging difficulty."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Incremental indexing needs freshness and deletion guarantees; Graph RAG represents relationships for multi-hop questions, while multimodal retrieval needs matching modalities and evidence provenance. These are architecture choices, not universal upgrades.",
+          "Use a retrieval-debug report showing candidate ranks at every stage. SDETs should identify whether a miss began in ingestion, candidate retrieval, fusion, reranking, context packing or generation before changing the prompt."
+        ]
+      }
+    ],
+    "mistake": "A dense query for HTTP 401 retrieves a semantically similar 403 guide but loses the exact error distinction. Conversely a lexical query for intermittent authentication fails to find a paraphrased expired-token document.",
+    "takeaway": "Incremental indexing needs freshness and deletion guarantees; Graph RAG represents relationships for multi-hop questions, while multimodal retrieval needs matching modalities and evidence provenance.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def rrf(lists,c=60):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def rrf(lists,c=60):\n    if c<0: raise ValueError('c')\n    scores={}\n    for ranked in lists:\n        for rank,doc in enumerate(dict.fromkeys(ranked),1):\n            scores[doc]=scores.get(doc,0)+1/(c+rank)\n    return sorted(scores,key=lambda d:(-scores[d],d))",
+      "starter": "def rrf(lists,c=60):\n    return []",
+      "tests": "assert rrf([['A','B'],['B','C']])[0]=='B'\nassert rrf([])==[]\nassert rrf([['A','A']])==['A']",
+      "id": "p16-fusion-exercise",
+      "hints": [
+        "Sparse retrieval such as BM25 rewards lexical evidence including rare identifiers.",
+        "A dense query for HTTP 401 retrieves a semantically similar 403 guide but loses the exact error distinction.",
+        "Union sparse and dense IDs, compute reciprocal rank contributions, sort with a stable tie break and retain the top candidates.",
+        "Incremental indexing needs freshness and deletion guarantees; Graph RAG represents relationships for multi-hop questions, while multimodal retrieval needs matching modalities and evidence provenance."
+      ],
+      "explanation": "def rrf(lists,c=60):\n    if c<0: raise ValueError('c')\n    scores={}\n    for ranked in lists:\n        for rank,doc in enumerate(dict.fromkeys(ranked),1):\n            scores[doc]=scores.get(doc,0)+1/(c+rank)\n    return sorted(scores,key=lambda d:(-scores[d],d))"
+    },
+    "quiz": {
+      "question": "Why fuse ranks rather than raw BM25 and cosine scores?",
+      "options": [
+        "Their scales are not directly comparable",
+        "Ranks prove factual correctness",
+        "Fusion removes authorization requirements"
+      ],
+      "answer": 0,
+      "explanation": "Rank fusion combines ordering evidence without assuming equivalent score calibration."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Why fuse ranks rather than raw BM25 and cosine scores?",
+      "options": [
+        "Their scales are not directly comparable",
+        "Ranks prove factual correctness",
+        "Fusion removes authorization requirements"
+      ],
+      "answer": 0,
+      "explanation": "Rank fusion combines ordering evidence without assuming equivalent score calibration."
+    },
+    "sources": [
+      "https://qdrant.tech/documentation/concepts/hybrid-queries/",
+      "https://sbert.net/examples/cross_encoder/applications/README.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p15-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "BM25",
+      "Reciprocal rank fusion",
+      "Reranker"
+    ],
+    "interviewIds": [
+      "bridge-rag-003",
+      "bridge-rag-004",
+      "bridge-rag-015",
+      "bridge-rag-039",
+      "bridge-rag-040",
+      "bridge-phase-16-5",
+      "bridge-phase-16-6",
+      "bridge-phase-16-7"
+    ],
+    "demo": "retrieval"
+  },
+  {
+    "id": "p16-freshness",
+    "phase": 16,
+    "module": "Advanced RAG",
+    "title": "Freshness, deletion and incremental indexing",
+    "minutes": 35,
+    "objectives": [
+      "Freshness, deletion and incremental indexing",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects freshness, deletion and incremental indexing with test contracts, failure triage, and evidence for release. Define and test a freshness SLO using synthetic updates and timestamps.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A document store and its search index can diverge. Source deletion, permission revocation or a new version must propagate to retrieval before the service claims fresh authorized evidence. Incremental indexing updates changed records without rebuilding everything, but needs a consistent generation and deletion policy.",
+          "Freshness is a measurable lag between source change and serving visibility. A healthy database connection says nothing about whether the current index reflects required changes."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use source version, content hash, tenant and deleted status to compute an ingestion delta. Upsert stable IDs or replace the prior chunk set atomically; mark deleted records unavailable immediately and remove their vectors. Switch serving generations only after consistency checks.",
+          "A query trace records source/index versions. Permissions are revalidated at retrieval time so stale payloads cannot authorize a revoked document. Cache invalidation includes index generation and permission scope."
+        ],
+        "code": "current={'D1':{'version':2,'deleted':False}}\nincoming={'id':'D1','version':1}\nassert incoming['version']<current['D1']['version']",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "New chunks are added but old chunks are never removed, producing contradictory answers. A tombstone is cleared accidentally when a retry replays an earlier ingest event. A source permission change fails to invalidate cached context.",
+          "Test update ordering, duplicate events, out-of-order versions, deletion/reingestion and permission revocation. Reject an older source version when a newer version is already committed."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Define and test a freshness SLO using synthetic updates and timestamps. Retain old compatible indexes for rollback while ensuring revoked content is blocked across every generation.",
+          "SDETs should inspect served IDs after changes rather than trusting ingestion success logs. A release passes only when updated/deleted evidence behaves correctly through the complete retrieval and cache path."
+        ]
+      }
+    ],
+    "mistake": "New chunks are added but old chunks are never removed, producing contradictory answers. A tombstone is cleared accidentally when a retry replays an earlier ingest event. A source permission change fails to invalidate cached context.",
+    "takeaway": "Define and test a freshness SLO using synthetic updates and timestamps.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def apply_event(state,event):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def apply_event(state,event):\n    prior=state.get(event['id'])\n    if prior and event['version']<=prior['version']:return state.copy()\n    return {**state,event['id']:{'version':event['version'],'deleted':event.get('deleted',False)}}",
+      "starter": "def apply_event(state,event):\n    return state",
+      "tests": "s={'D1':{'version':2,'deleted':True}}\nassert apply_event(s,{'id':'D1','version':1})==s\nassert apply_event(s,{'id':'D1','version':3,'deleted':False})['D1']['version']==3",
+      "id": "p16-freshness-exercise",
+      "hints": [
+        "A document store and its search index can diverge.",
+        "New chunks are added but old chunks are never removed, producing contradictory answers.",
+        "Use source version, content hash, tenant and deleted status to compute an ingestion delta.",
+        "Define and test a freshness SLO using synthetic updates and timestamps."
+      ],
+      "explanation": "def apply_event(state,event):\n    prior=state.get(event['id'])\n    if prior and event['version']<=prior['version']:return state.copy()\n    return {**state,event['id']:{'version':event['version'],'deleted':event.get('deleted',False)}}"
+    },
+    "quiz": {
+      "question": "What prevents a stale retry from resurrecting deleted evidence?",
+      "options": [
+        "Monotonic version handling and tombstone policy",
+        "A longer prompt",
+        "A higher top-k"
+      ],
+      "answer": 0,
+      "explanation": "Out-of-order ingest events must not overwrite a newer deletion state."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What prevents a stale retry from resurrecting deleted evidence?",
+      "options": [
+        "Monotonic version handling and tombstone policy",
+        "A longer prompt",
+        "A higher top-k"
+      ],
+      "answer": 0,
+      "explanation": "Out-of-order ingest events must not overwrite a newer deletion state."
+    },
+    "sources": [
+      "https://qdrant.tech/documentation/concepts/hybrid-queries/",
+      "https://sbert.net/examples/cross_encoder/applications/README.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p16-fusion"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Tombstone",
+      "Incremental indexing",
+      "Freshness"
+    ],
+    "interviewIds": [
+      "bridge-rag-003",
+      "bridge-rag-004",
+      "bridge-rag-015",
+      "bridge-rag-039",
+      "bridge-rag-040",
+      "bridge-phase-16-5",
+      "bridge-phase-16-6",
+      "bridge-phase-16-7"
+    ]
+  },
+  {
+    "id": "p16-checkpoint",
+    "phase": 16,
+    "module": "Advanced RAG",
+    "title": "Phase 16 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 16 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 16 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Define and test a freshness SLO using synthetic updates and timestamps.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects freshness, deletion and incremental indexing to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use source version, content hash, tenant and deleted status to compute an ingestion delta. Upsert stable IDs or replace the prior chunk set atomically; mark deleted records unavailable immediately and remove their vectors. Switch serving generations only after consistency checks.",
+          "A query trace records source/index versions. Permissions are revalidated at retrieval time so stale payloads cannot authorize a revoked document. Cache invalidation includes index generation and permission scope.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "current={'D1':{'version':2,'deleted':False}}\nincoming={'id':'D1','version':1}\nassert incoming['version']<current['D1']['version']",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "New chunks are added but old chunks are never removed, producing contradictory answers. A tombstone is cleared accidentally when a retry replays an earlier ingest event. A source permission change fails to invalidate cached context.",
+          "Test update ordering, duplicate events, out-of-order versions, deletion/reingestion and permission revocation. Reject an older source version when a newer version is already committed.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Define and test a freshness SLO using synthetic updates and timestamps. Retain old compatible indexes for rollback while ensuring revoked content is blocked across every generation.",
+          "SDETs should inspect served IDs after changes rather than trusting ingestion success logs. A release passes only when updated/deleted evidence behaves correctly through the complete retrieval and cache path.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "New chunks are added but old chunks are never removed, producing contradictory answers. A tombstone is cleared accidentally when a retry replays an earlier ingest event. A source permission change fails to invalidate cached context.",
+    "takeaway": "Define and test a freshness SLO using synthetic updates and timestamps.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Freshness, deletion and incremental indexing to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nDefine and test a freshness SLO using synthetic updates and timestamps.",
+      "id": "p16-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects freshness, deletion and incremental indexing to the shared CI quality platform.",
+        "New chunks are added but old chunks are never removed, producing contradictory answers.",
+        "Use source version, content hash, tenant and deleted status to compute an ingestion delta.",
+        "Define and test a freshness SLO using synthetic updates and timestamps."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nDefine and test a freshness SLO using synthetic updates and timestamps."
+    },
+    "quiz": {
+      "question": "A candidate for freshness, deletion and incremental indexing meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for freshness, deletion and incremental indexing meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://qdrant.tech/documentation/concepts/hybrid-queries/",
+      "https://sbert.net/examples/cross_encoder/applications/README.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p16-freshness"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-rag-003",
+      "bridge-rag-004",
+      "bridge-rag-015",
+      "bridge-rag-039",
+      "bridge-rag-040",
+      "bridge-phase-16-5",
+      "bridge-phase-16-6",
+      "bridge-phase-16-7"
+    ]
+  }
+]

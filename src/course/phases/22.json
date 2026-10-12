@@ -1,0 +1,667 @@
+[
+  {
+    "id": "p22-sessions",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Chatbots: tenant-scoped sessions and multi-turn evidence",
+    "minutes": 35,
+    "objectives": [
+      "Chatbots",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects chatbots: tenant-scoped sessions and multi-turn evidence with test contracts, failure triage, and evidence for release. Create multi-turn cases with ambiguous references and expected clarification or answer behavior.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A chatbot must retain enough conversational state to resolve follow-up requests while avoiding cross-session leakage. Store messages under a session scoped to tenant and principal. Distinguish user intent, retrieved evidence and assistant claims; earlier assistant text is not automatically a trusted source.",
+          "A follow-up such as what about the next build requires resolving which test and build the user means. Ask a clarification when ambiguity affects the operation rather than guessing an unauthorized or destructive action."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Keep a typed session with subject IDs, evidence references, last validated intent and a bounded message history. Context packing prioritizes current instructions and verified evidence. Summaries must preserve uncertainty and citations; revalidate permissions when retrieving saved evidence.",
+          "Stream presentation text while treating the final structured answer as the durable result. Return a visible fallback for missing context, unsupported questions or retrieval outage. Persist only approved data with retention and deletion rules."
+        ],
+        "code": "def session_key(tenant,user,session):\n    return (tenant,user,session)\nassert session_key('a','u','s')!=session_key('b','u','s')",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A session ID is accepted without checking its owner, allowing a second user to read history. A compressed summary turns a tentative cause into a confirmed fact. A retry appends the same user message twice and changes context.",
+          "Test cross-tenant session access, repeated request IDs, pronoun resolution, topic switches, deletion and context overflow. Verify that a revoked document does not remain available through cached session context."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Create multi-turn cases with ambiguous references and expected clarification or answer behavior. Score context retention, contradiction, citation support and task completion separately.",
+          "For an SDET, conversation tests are stateful integration tests: each turn has preconditions and expected state changes. Replay them deterministically for application contracts and with controlled live runs for semantic behavior."
+        ]
+      }
+    ],
+    "mistake": "A session ID is accepted without checking its owner, allowing a second user to read history. A compressed summary turns a tentative cause into a confirmed fact. A retry appends the same user message twice and changes context.",
+    "takeaway": "Create multi-turn cases with ambiguous references and expected clarification or answer behavior.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def context(messages,budget):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def context(messages,budget):\n    if budget<0:raise ValueError('budget')\n    kept=[];used=0\n    for m in reversed(messages):\n        if used+len(m)>budget:break\n        kept.append(m);used+=len(m)\n    return list(reversed(kept))",
+      "starter": "def context(messages,budget):\n    # Character-budget teaching baseline, not a production tokenizer\n    return []",
+      "tests": "assert context(['old','new'],3)==['new']\nassert context(['long'],2)==[]\nassert context([],0)==[]",
+      "id": "p22-sessions-exercise",
+      "hints": [
+        "A chatbot must retain enough conversational state to resolve follow-up requests while avoiding cross-session leakage.",
+        "A session ID is accepted without checking its owner, allowing a second user to read history.",
+        "Keep a typed session with subject IDs, evidence references, last validated intent and a bounded message history.",
+        "Create multi-turn cases with ambiguous references and expected clarification or answer behavior."
+      ],
+      "explanation": "def context(messages,budget):\n    if budget<0:raise ValueError('budget')\n    kept=[];used=0\n    for m in reversed(messages):\n        if used+len(m)>budget:break\n        kept.append(m);used+=len(m)\n    return list(reversed(kept))"
+    },
+    "quiz": {
+      "question": "What is unsafe to treat as verified evidence?",
+      "options": [
+        "An earlier assistant claim without a source",
+        "An authorized source record",
+        "A validated citation lookup"
+      ],
+      "answer": 0,
+      "explanation": "Conversation history can contain unsupported claims and must retain its provenance."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What is unsafe to treat as verified evidence?",
+      "options": [
+        "An earlier assistant claim without a source",
+        "An authorized source record",
+        "A validated citation lookup"
+      ],
+      "answer": 0,
+      "explanation": "Conversation history can contain unsupported claims and must retain its provenance."
+    },
+    "sources": [
+      "https://docs.langchain.com/oss/python/langgraph/overview",
+      "https://developers.openai.com/api/docs/guides/conversation-state"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p21-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Session",
+      "Context management",
+      "Abstention"
+    ],
+    "interviewIds": [
+      "bridge-agents-005",
+      "bridge-agents-006",
+      "bridge-agents-007",
+      "bridge-agents-047",
+      "bridge-agents-048",
+      "bridge-phase-22-5",
+      "bridge-phase-22-6",
+      "bridge-phase-22-7"
+    ]
+  },
+  {
+    "id": "p22-identity",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Conversation ownership, expiry and bounded storage",
+    "minutes": 35,
+    "objectives": [
+      "Conversation ownership, expiry and bounded storage",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects conversation ownership, expiry and bounded storage with test contracts, failure triage, and evidence for release. Acceptance shows isolated histories, bounded growth and explicit lifecycle outcomes.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A session identifier is a reference, not proof of ownership. Scope conversation state by authenticated tenant, principal and session, then revalidate access on every turn. Otherwise a guessed session ID can expose another user's history. Expiry and deletion are data-governance contracts as well as memory controls.",
+          "The fixture service uses explicit synthetic principals and a bounded in-memory store. This demonstrates scope and lifecycle mechanics without claiming a production identity provider or durable database."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The Conversations class uses a tuple key, expiry timestamps, a maximum session count and a lock around updates. It retains at most twelve messages. New sessions at capacity are rejected visibly; expired sessions are removed before admission.",
+          "Never accept tenant/user from model arguments to choose state. For a persistent deployment, store the same ownership fields and apply retention/deletion to messages, summaries and cached evidence. Recheck document permissions before using prior evidence."
+        ],
+        "code": "key=(tenant,user,session)\n# Existing messages are not retrieved with session ID alone\n# local-labs/quality/chat.py bounds state and enforces expiry",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Two tenants reuse session s and the implementation keys only by s. A summary survives after the messages were deleted. Concurrent turns lose one user's update because state mutation is not synchronized.",
+          "Test cross-tenant and cross-principal access, expiry boundaries, deletion, capacity and concurrent updates. A session may be valid while its prior evidence is no longer authorized."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance shows isolated histories, bounded growth and explicit lifecycle outcomes. The local tests use an injected clock so expiry is deterministic and fast.",
+          "SDETs can apply stateful API test discipline: establish identity and preconditions, issue a turn, inspect the allowed state change and verify an unauthorized principal cannot observe or modify it."
+        ]
+      }
+    ],
+    "mistake": "Two tenants reuse session s and the implementation keys only by s. A summary survives after the messages were deleted. Concurrent turns lose one user's update because state mutation is not synchronized.",
+    "takeaway": "Acceptance shows isolated histories, bounded growth and explicit lifecycle outcomes.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def session_access(record,tenant,user,now):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def session_access(record,tenant,user,now):\n    return record['tenant']==tenant and record['user']==user and record['expires']>now",
+      "starter": "def session_access(record,tenant,user,now):\n    return False",
+      "tests": "r={'tenant':'a','user':'u','expires':10}\nassert session_access(r,'a','u',9)\nassert not session_access(r,'b','u',9)\nassert not session_access(r,'a','u',10)",
+      "id": "p22-identity-exercise",
+      "hints": [
+        "A session identifier is a reference, not proof of ownership.",
+        "Two tenants reuse session s and the implementation keys only by s.",
+        "The Conversations class uses a tuple key, expiry timestamps, a maximum session count and a lock around updates.",
+        "Acceptance shows isolated histories, bounded growth and explicit lifecycle outcomes."
+      ],
+      "explanation": "def session_access(record,tenant,user,now):\n    return record['tenant']==tenant and record['user']==user and record['expires']>now"
+    },
+    "quiz": {
+      "question": "What does a session ID alone establish?",
+      "options": [
+        "Only a reference, not ownership",
+        "Authenticated identity",
+        "Permanent permission to old evidence"
+      ],
+      "answer": 0,
+      "explanation": "Ownership comes from authenticated scope and access validation."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What does a session ID alone establish?",
+      "options": [
+        "Only a reference, not ownership",
+        "Authenticated identity",
+        "Permanent permission to old evidence"
+      ],
+      "answer": 0,
+      "explanation": "Ownership comes from authenticated scope and access validation."
+    },
+    "sources": [
+      "https://docs.langchain.com/oss/python/langgraph/overview",
+      "https://developers.openai.com/api/docs/guides/conversation-state"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p22-sessions"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Session ownership",
+      "Retention"
+    ],
+    "interviewIds": [
+      "bridge-agents-005",
+      "bridge-agents-006",
+      "bridge-agents-007",
+      "bridge-agents-047",
+      "bridge-agents-048",
+      "bridge-phase-22-5",
+      "bridge-phase-22-6",
+      "bridge-phase-22-7"
+    ]
+  },
+  {
+    "id": "p22-followups",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Multi-turn intent: resolve references or ask a clarification",
+    "minutes": 35,
+    "objectives": [
+      "Multi-turn intent",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects multi-turn intent: resolve references or ask a clarification with test contracts, failure triage, and evidence for release. Acceptance includes expected clarification, current-scope retrieval and explicit subject provenance for each turn.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A follow-up can depend on a prior subject: explain that, what about the next build, or does it affect checkout. Resolving the reference is part of the task contract. When multiple subjects are possible, clarification is safer and more useful than silently choosing one.",
+          "Earlier assistant statements are not authoritative facts. Retain the last validated user subject and evidence references separately from generated prose, especially when compressing history."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The deterministic fixture chatbot detects a bounded set of pronoun follow-ups, reuses the last supported user topic and performs retrieval again under current tenant permissions. With no known subject, it returns a clarification status and no citations. This policy is labeled as a fixture baseline, not general language understanding.",
+          "Build multi-turn cases with topic switches, missing subjects and contradictory evidence. A live model can classify intent or propose a rewrite, but the application validates subject IDs, permissions and operation scope before execution."
+        ],
+        "code": "# First turn: 'Explain that' -> clarification\n# After supported 'retry HTTP 429': 'Explain that' -> scoped re-retrieval\npython -m pytest local-labs/tests/test_quality.py -k conversation",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A summarizer changes may be a database issue into confirmed database issue. A follow-up about that uses another session's subject. A topic switch leaves the old subject active and produces an irrelevant answer.",
+          "Test the resolved query/subject as well as final answer quality. Keep uncertainty in summaries, and ensure no-answer turns do not fabricate a new subject that later turns treat as verified."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes expected clarification, current-scope retrieval and explicit subject provenance for each turn. Score context retention, contradiction and supported task completion separately.",
+          "For SDETs, a conversation is a sequence of state transitions with assertions at every step. A final plausible answer does not prove earlier ambiguity or ownership was handled correctly."
+        ]
+      }
+    ],
+    "mistake": "A summarizer changes may be a database issue into confirmed database issue. A follow-up about that uses another session's subject. A topic switch leaves the old subject active and produces an irrelevant answer.",
+    "takeaway": "Acceptance includes expected clarification, current-scope retrieval and explicit subject provenance for each turn.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def resolve(subject,followup,is_reference):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def resolve(subject,followup,is_reference):\n    if is_reference and not subject:return {'status':'clarification','query':None}\n    return {'status':'ready','query':subject+' '+followup if is_reference else followup}",
+      "starter": "def resolve(subject,followup,is_reference):\n    return {}",
+      "tests": "assert resolve(None,'that',True)['status']=='clarification'\nassert resolve('HTTP 429','explain that',True)['query']=='HTTP 429 explain that'\nassert resolve('old','new topic',False)['query']=='new topic'",
+      "id": "p22-followups-exercise",
+      "hints": [
+        "A follow-up can depend on a prior subject: explain that, what about the next build, or does it affect checkout.",
+        "A summarizer changes may be a database issue into confirmed database issue.",
+        "The deterministic fixture chatbot detects a bounded set of pronoun follow-ups, reuses the last supported user topic and performs retrieval again under current tenant permissions.",
+        "Acceptance includes expected clarification, current-scope retrieval and explicit subject provenance for each turn."
+      ],
+      "explanation": "def resolve(subject,followup,is_reference):\n    if is_reference and not subject:return {'status':'clarification','query':None}\n    return {'status':'ready','query':subject+' '+followup if is_reference else followup}"
+    },
+    "quiz": {
+      "question": "Which prior content should ground a follow-up?",
+      "options": [
+        "Validated subject/evidence, not unsupported assistant claims",
+        "Any earlier confident sentence",
+        "Another user\u2019s session summary"
+      ],
+      "answer": 0,
+      "explanation": "The state must preserve provenance and uncertainty."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which prior content should ground a follow-up?",
+      "options": [
+        "Validated subject/evidence, not unsupported assistant claims",
+        "Any earlier confident sentence",
+        "Another user\u2019s session summary"
+      ],
+      "answer": 0,
+      "explanation": "The state must preserve provenance and uncertainty."
+    },
+    "sources": [
+      "https://docs.langchain.com/oss/python/langgraph/overview",
+      "https://developers.openai.com/api/docs/guides/conversation-state"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p22-identity"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Reference resolution",
+      "Clarification"
+    ],
+    "interviewIds": [
+      "bridge-agents-005",
+      "bridge-agents-006",
+      "bridge-agents-007",
+      "bridge-agents-047",
+      "bridge-agents-048",
+      "bridge-phase-22-5",
+      "bridge-phase-22-6",
+      "bridge-phase-22-7"
+    ]
+  },
+  {
+    "id": "p22-packing",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Bound message history without losing the evidence contract",
+    "minutes": 35,
+    "objectives": [
+      "Bound message history without losing the evidence contract",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects bound message history without losing the evidence contract with test contracts, failure triage, and evidence for release. Acceptance proves bounded history and preservation of essential task/evidence fields.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Message history grows with every turn and competes with current instructions, retrieved evidence and output budget. A bounded context policy chooses what to retain and what to summarize. Dropping messages can remove a necessary constraint; summaries can distort uncertainty or citations.",
+          "Use the model's tokenizer for production token budgets. Character count and message count are useful teaching controls but must be labeled as approximations."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Reserve tokens for instructions and completion, include the latest task and authorized evidence, then select relevant prior turns. Store subject/evidence state outside the compressed prose so permission and uncertainty checks remain explicit.",
+          "The fixture store caps message count and re-retrieves evidence; it does not claim token-optimal context selection. For a live adapter, count the actual serialized request and reject or clarify when essential evidence cannot fit instead of truncating blindly."
+        ],
+        "code": "messages=messages[-12:]\n# A production token budget must count serialized messages with the chosen tokenizer",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A last-N-message policy drops the original user restriction but retains a long assistant explanation. A summary includes a revoked source. Context packing silently excludes the only relevant chunk while the report blames generation.",
+          "Test long conversations, essential early constraints, missing sources and permission changes. Retain packed evidence IDs and context policy version in traces."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance proves bounded history and preservation of essential task/evidence fields. Compare task completion before and after compression on paired multi-turn cases.",
+          "SDETs should separate storage retention from model context selection: a message may remain stored but not be supplied to a model. Both policies need explicit tests and deletion behavior."
+        ]
+      }
+    ],
+    "mistake": "A last-N-message policy drops the original user restriction but retains a long assistant explanation. A summary includes a revoked source. Context packing silently excludes the only relevant chunk while the report blames generation.",
+    "takeaway": "Acceptance proves bounded history and preservation of essential task/evidence fields.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def retain_messages(messages,limit):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def retain_messages(messages,limit):\n    if limit<0:raise ValueError('limit')\n    return messages[-limit:] if limit else []",
+      "starter": "def retain_messages(messages,limit):\n    return messages",
+      "tests": "assert retain_messages([1,2,3],2)==[2,3]\nassert retain_messages([1],0)==[]\ntry:retain_messages([], -1);assert False\nexcept ValueError:pass",
+      "id": "p22-packing-exercise",
+      "hints": [
+        "Message history grows with every turn and competes with current instructions, retrieved evidence and output budget.",
+        "A last-N-message policy drops the original user restriction but retains a long assistant explanation.",
+        "Reserve tokens for instructions and completion, include the latest task and authorized evidence, then select relevant prior turns.",
+        "Acceptance proves bounded history and preservation of essential task/evidence fields."
+      ],
+      "explanation": "def retain_messages(messages,limit):\n    if limit<0:raise ValueError('limit')\n    return messages[-limit:] if limit else []"
+    },
+    "quiz": {
+      "question": "Is a message-count cap a production token budget?",
+      "options": [
+        "No: tokenization and serialized content must be counted",
+        "Yes: every message has equal length",
+        "Only for assistant messages"
+      ],
+      "answer": 0,
+      "explanation": "Message sizes vary; actual model input requires tokenizer-aware accounting."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Is a message-count cap a production token budget?",
+      "options": [
+        "No: tokenization and serialized content must be counted",
+        "Yes: every message has equal length",
+        "Only for assistant messages"
+      ],
+      "answer": 0,
+      "explanation": "Message sizes vary; actual model input requires tokenizer-aware accounting."
+    },
+    "sources": [
+      "https://docs.langchain.com/oss/python/langgraph/overview",
+      "https://developers.openai.com/api/docs/guides/conversation-state"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p22-followups"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Conversation summary",
+      "Context budget"
+    ],
+    "interviewIds": [
+      "bridge-agents-005",
+      "bridge-agents-006",
+      "bridge-agents-007",
+      "bridge-agents-047",
+      "bridge-agents-048",
+      "bridge-phase-22-5",
+      "bridge-phase-22-6",
+      "bridge-phase-22-7"
+    ]
+  },
+  {
+    "id": "p22-response-state",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Response states: answer, clarification, abstention and failure",
+    "minutes": 35,
+    "objectives": [
+      "Response states",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects response states: answer, clarification, abstention and failure with test contracts, failure triage, and evidence for release. Acceptance tests assert state and provenance in addition to answer semantics.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A chatbot has more valid outcomes than a fluent answer. Clarification requests missing intent information; abstention indicates insufficient authorized evidence; refusal handles a disallowed request; unavailable/degraded status describes a dependency problem. Mixing these states makes user behavior and evaluation ambiguous.",
+          "Streaming presentation is provisional until a complete response passes validation. Partial text must not be cached or stored as a verified final answer."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use a typed response with status, answer, citations, mode and session reference. Assert status-specific invariants: an answered result has supporting citations, an abstained result has no invented answer, and a clarification asks for the missing subject.",
+          "A streaming client tracks delta events, completion and error, then commits only the validated final object. Persist request IDs to prevent duplicate turn insertion on retry. Cancellation must release provider and session resources."
+        ],
+        "code": "response={'status':'abstained','answer':None,'citations':[]}\nassert response['answer'] is None",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A network failure is presented as no evidence, hiding the real outage. An incomplete stream is marked answered because its first token arrived. A retried request appends the same question twice.",
+          "Test state mapping, truncated streams, duplicate request IDs and cancellation. Ensure the UI gives a visible path to clarify or retry without implying a completed task."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance tests assert state and provenance in addition to answer semantics. Report counts by outcome so a high abstention rate cannot hide poor task completion, and an outage cannot look like safe uncertainty.",
+          "For SDETs, stable outer response states are deterministic API contracts even when the model-generated inner text varies. These states support useful review and production alerts."
+        ]
+      }
+    ],
+    "mistake": "A network failure is presented as no evidence, hiding the real outage. An incomplete stream is marked answered because its first token arrived. A retried request appends the same question twice.",
+    "takeaway": "Acceptance tests assert state and provenance in addition to answer semantics.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def response_valid(r):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def response_valid(r):\n    status=r.get('status')\n    if status=='answered':return bool(r.get('answer')) and bool(r.get('citations'))\n    if status=='abstained':return r.get('answer') is None and not r.get('citations')\n    if status=='clarification':return bool(r.get('answer')) and not r.get('citations')\n    return False",
+      "starter": "def response_valid(r):\n    return False",
+      "tests": "assert response_valid({'status':'answered','answer':'x','citations':['D1']})\nassert not response_valid({'status':'answered','answer':'x','citations':[]})\nassert response_valid({'status':'abstained','answer':None,'citations':[]})",
+      "id": "p22-response-state-exercise",
+      "hints": [
+        "A chatbot has more valid outcomes than a fluent answer.",
+        "A network failure is presented as no evidence, hiding the real outage.",
+        "Use a typed response with status, answer, citations, mode and session reference.",
+        "Acceptance tests assert state and provenance in addition to answer semantics."
+      ],
+      "explanation": "def response_valid(r):\n    status=r.get('status')\n    if status=='answered':return bool(r.get('answer')) and bool(r.get('citations'))\n    if status=='abstained':return r.get('answer') is None and not r.get('citations')\n    if status=='clarification':return bool(r.get('answer')) and not r.get('citations')\n    return False"
+    },
+    "quiz": {
+      "question": "When can a streaming answer become the durable result?",
+      "options": [
+        "After completion and validation",
+        "At the first delta",
+        "When it sounds confident"
+      ],
+      "answer": 0,
+      "explanation": "Partial streams can fail or contain invalid/incomplete data."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: When can a streaming answer become the durable result?",
+      "options": [
+        "After completion and validation",
+        "At the first delta",
+        "When it sounds confident"
+      ],
+      "answer": 0,
+      "explanation": "Partial streams can fail or contain invalid/incomplete data."
+    },
+    "sources": [
+      "https://docs.langchain.com/oss/python/langgraph/overview",
+      "https://developers.openai.com/api/docs/guides/conversation-state"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p22-packing"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Response state",
+      "Partial result"
+    ],
+    "interviewIds": [
+      "bridge-agents-005",
+      "bridge-agents-006",
+      "bridge-agents-007",
+      "bridge-agents-047",
+      "bridge-agents-048",
+      "bridge-phase-22-5",
+      "bridge-phase-22-6",
+      "bridge-phase-22-7"
+    ]
+  },
+  {
+    "id": "p22-checkpoint",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Phase 22 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 22 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 22 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance tests assert state and provenance in addition to answer semantics.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects response states: answer, clarification, abstention and failure to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use a typed response with status, answer, citations, mode and session reference. Assert status-specific invariants: an answered result has supporting citations, an abstained result has no invented answer, and a clarification asks for the missing subject.",
+          "A streaming client tracks delta events, completion and error, then commits only the validated final object. Persist request IDs to prevent duplicate turn insertion on retry. Cancellation must release provider and session resources.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "response={'status':'abstained','answer':None,'citations':[]}\nassert response['answer'] is None",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A network failure is presented as no evidence, hiding the real outage. An incomplete stream is marked answered because its first token arrived. A retried request appends the same question twice.",
+          "Test state mapping, truncated streams, duplicate request IDs and cancellation. Ensure the UI gives a visible path to clarify or retry without implying a completed task.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance tests assert state and provenance in addition to answer semantics. Report counts by outcome so a high abstention rate cannot hide poor task completion, and an outage cannot look like safe uncertainty.",
+          "For SDETs, stable outer response states are deterministic API contracts even when the model-generated inner text varies. These states support useful review and production alerts.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A network failure is presented as no evidence, hiding the real outage. An incomplete stream is marked answered because its first token arrived. A retried request appends the same question twice.",
+    "takeaway": "Acceptance tests assert state and provenance in addition to answer semantics.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Response states: answer, clarification, abstention and failure to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance tests assert state and provenance in addition to answer semantics.",
+      "id": "p22-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects response states: answer, clarification, abstention and failure to the shared CI quality platform.",
+        "A network failure is presented as no evidence, hiding the real outage.",
+        "Use a typed response with status, answer, citations, mode and session reference.",
+        "Acceptance tests assert state and provenance in addition to answer semantics."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance tests assert state and provenance in addition to answer semantics."
+    },
+    "quiz": {
+      "question": "A candidate for response states: answer, clarification, abstention and failure meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for response states: answer, clarification, abstention and failure meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://docs.langchain.com/oss/python/langgraph/overview",
+      "https://developers.openai.com/api/docs/guides/conversation-state"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p22-response-state"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-agents-005",
+      "bridge-agents-006",
+      "bridge-agents-007",
+      "bridge-agents-047",
+      "bridge-agents-048",
+      "bridge-phase-22-5",
+      "bridge-phase-22-6",
+      "bridge-phase-22-7"
+    ]
+  }
+]

@@ -1,0 +1,798 @@
+[
+  {
+    "id": "p42-graphql",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "GraphQL test generation: schema-to-executable coverage",
+    "minutes": 35,
+    "objectives": [
+      "GraphQL test generation",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects graphql test generation: schema-to-executable coverage with test contracts, failure triage, and evidence for release. Acceptance requires parse/validation success for intended valid cases, expected errors for invalid cases, no duplicate case IDs, complete requirement traceability and successful execution of exported candidates.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "The generator receives a synthetic schema and query or mutation. Its job is to propose tests tied to schema and business rules, not to execute arbitrary generated code. Required arguments, nullability and enums are structural contracts; authentication, ownership and quantity limits require independent domain rules.",
+          "The portfolio result must be reproducible from the supplied synthetic fixtures and declared configuration. Keep a deterministic baseline visible alongside any live-provider results."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Parse the operation and schema with graphql-core, generate structured case definitions and validate each operation. Add explicit positive, omitted-required, invalid-enum, boundary and authorization cases. Export candidate tests with requirement IDs and execute them against the synthetic resolver before accepting the artifact.",
+          "The repository labs provide the domain entry points and fixture cases. Run the acceptance checks before recording project completion and keep the generated run ID in your field notes."
+        ],
+        "code": "# Local acceptance workflow\npython -m pytest local-labs\npython local-labs/evals/runner.py --output artifacts/evaluation\n# Inspect JSON verdict and escaped HTML case report",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "HTTP 200 may contain GraphQL errors. A generated case with no meaningful assertion is rejected even if execution succeeds. Mutate a resolver rule to prove the accepted suite detects its target behavior; compare unique requirement coverage rather than raw candidate count.",
+          "Trace the actual effect and retain the counterexample as a regression fixture. Fixing presentation alone does not establish that the application boundary is safe."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires parse/validation success for intended valid cases, expected errors for invalid cases, no duplicate case IDs, complete requirement traceability and successful execution of exported candidates. Include a rejected candidate and explain the independent check that caught it.",
+          "Prepare a technical deep dive explaining one rejected design, one detected regression and the tradeoff behind the final implementation. Separate fixture contract evidence from live model quality claims."
+        ]
+      }
+    ],
+    "mistake": "HTTP 200 may contain GraphQL errors. A generated case with no meaningful assertion is rejected even if execution succeeds. Mutate a resolver rule to prove the accepted suite detects its target behavior; compare unique requirement coverage rather than raw candidate count.",
+    "takeaway": "Acceptance requires parse/validation success for intended valid cases, expected errors for invalid cases, no duplicate case IDs, complete requirement traceability and successful execution of exported candidates.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Write your acceptance memo: link a reproducible run, explain a measured failure, the boundary that fixes it, and the release/rollback decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Reproducible evidence",
+          "terms": [
+            "dataset",
+            "run"
+          ]
+        },
+        {
+          "label": "Failure and enforcement",
+          "terms": [
+            "failure",
+            "boundary"
+          ]
+        },
+        {
+          "label": "Release plan",
+          "terms": [
+            "release",
+            "rollback"
+          ]
+        }
+      ],
+      "solution": "Acceptance requires parse/validation success for intended valid cases, expected errors for invalid cases, no duplicate case IDs, complete requirement traceability and successful execution of exported candidates. Include a rejected candidate and explain the independent check that caught it.",
+      "id": "p42-graphql-exercise",
+      "hints": [
+        "The generator receives a synthetic schema and query or mutation.",
+        "HTTP 200 may contain GraphQL errors.",
+        "Parse the operation and schema with graphql-core, generate structured case definitions and validate each operation.",
+        "Acceptance requires parse/validation success for intended valid cases, expected errors for invalid cases, no duplicate case IDs, complete requirement traceability and successful execution of exported candidates."
+      ],
+      "explanation": "Acceptance requires parse/validation success for intended valid cases, expected errors for invalid cases, no duplicate case IDs, complete requirement traceability and successful execution of exported candidates. Include a rejected candidate and explain the independent check that caught it."
+    },
+    "quiz": {
+      "question": "What demonstrates this project is ready for review?",
+      "options": [
+        "Reproducible acceptance evidence with failure cases",
+        "A polished diagram alone",
+        "A model saying the project works"
+      ],
+      "answer": 0,
+      "explanation": "Reviewable artifacts and independent checks establish the claimed behavior."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What demonstrates this project is ready for review?",
+      "options": [
+        "Reproducible acceptance evidence with failure cases",
+        "A polished diagram alone",
+        "A model saying the project works"
+      ],
+      "answer": 0,
+      "explanation": "Reviewable artifacts and independent checks establish the claimed behavior."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p41-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Acceptance evidence"
+    ],
+    "interviewIds": [
+      "bridge-ai-testing-014",
+      "bridge-ai-testing-015",
+      "bridge-ai-testing-016",
+      "bridge-phase-42-3",
+      "bridge-phase-42-4",
+      "bridge-phase-42-5",
+      "bridge-phase-42-6",
+      "bridge-phase-42-7"
+    ]
+  },
+  {
+    "id": "p42-ast",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "Inspect an operation with a real GraphQL parser",
+    "minutes": 35,
+    "objectives": [
+      "Inspect an operation with a real GraphQL parser",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects inspect an operation with a real graphql parser with test contracts, failure triage, and evidence for release. Acceptance requires operation-derived candidates, preserved field selections/aliases, correct variable handling and explicit rejection of unsupported input.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Schema validation checks field names, argument types, required values and selection structure before execution. Business rules such as quantity range and authorization execute in resolvers. The candidate generator must inspect the supplied operation rather than return unrelated fixed examples.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Parse with graphql-core, validate against the fixture schema and inspect the root field and arguments. The guided generator supports one root item or createItem operation, including variables that are expanded into literal fixture candidates. Unsupported structures are rejected explicitly.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python -m pytest local-labs/tests/test_quality.py -k candidates_derive",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A string-based splitter can confuse nested selections, aliases or quoted values. A generator returning mutation cases for an item query is disconnected from its input. Inspect exported cases to ensure their root operation matches the request.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires operation-derived candidates, preserved field selections/aliases, correct variable handling and explicit rejection of unsupported input. Schema validation and resolver behavior must have separate tests.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "A string-based splitter can confuse nested selections, aliases or quoted values. A generator returning mutation cases for an item query is disconnected from its input. Inspect exported cases to ensure their root operation matches the request.",
+    "takeaway": "Acceptance requires operation-derived candidates, preserved field selections/aliases, correct variable handling and explicit rejection of unsupported input.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the inspect an operation with a real graphql parser stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires operation-derived candidates, preserved field selections/aliases, correct variable handling and explicit rejection of unsupported input. Schema validation and resolver behavior must have separate tests.",
+      "id": "p42-ast-exercise",
+      "hints": [
+        "Schema validation checks field names, argument types, required values and selection structure before execution.",
+        "A string-based splitter can confuse nested selections, aliases or quoted values.",
+        "Parse with graphql-core, validate against the fixture schema and inspect the root field and arguments.",
+        "Acceptance requires operation-derived candidates, preserved field selections/aliases, correct variable handling and explicit rejection of unsupported input."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires operation-derived candidates, preserved field selections/aliases, correct variable handling and explicit rejection of unsupported input. Schema validation and resolver behavior must have separate tests."
+    },
+    "quiz": {
+      "question": "The inspect an operation with a real graphql parser stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The inspect an operation with a real graphql parser stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p42-graphql"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-014",
+      "bridge-ai-testing-015",
+      "bridge-ai-testing-016",
+      "bridge-phase-42-3",
+      "bridge-phase-42-4",
+      "bridge-phase-42-5",
+      "bridge-phase-42-6",
+      "bridge-phase-42-7"
+    ]
+  },
+  {
+    "id": "p42-cases",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "Generate traceable schema and business counterexamples",
+    "minutes": 35,
+    "objectives": [
+      "Generate traceable schema and business counterexamples",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects generate traceable schema and business counterexamples with test contracts, failure triage, and evidence for release. Acceptance requires each negative case to reach the intended validation layer and each positive case to assert meaningful selected data.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Each candidate names the requirement it checks. For createItem, missing quantity and null quantity test schema constraints; quantities zero and 101 test the resolver boundary; invalid Role tests enum validation; viewer identity tests authorization. These failures have different causes.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Generate cases from the input AST and mutate one intended property per case. Keep an independent expected result for the positive selection. Serialize arguments safely and preserve a stable case ID and requirement ID in exports.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python -m pytest local-labs/tests/test_quality.py -k graphql",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Replacing a variable value while leaving an unused variable definition can cause validation failure before the intended business rule. That false positive means the test does not exercise its stated requirement. Materialize variables consistently before creating negative variants.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires each negative case to reach the intended validation layer and each positive case to assert meaningful selected data. Review duplicates by requirement and input, not merely by generated names.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "Replacing a variable value while leaving an unused variable definition can cause validation failure before the intended business rule. That false positive means the test does not exercise its stated requirement. Materialize variables consistently before creating negative variants.",
+    "takeaway": "Acceptance requires each negative case to reach the intended validation layer and each positive case to assert meaningful selected data.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the generate traceable schema and business counterexamples stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires each negative case to reach the intended validation layer and each positive case to assert meaningful selected data. Review duplicates by requirement and input, not merely by generated names.",
+      "id": "p42-cases-exercise",
+      "hints": [
+        "Each candidate names the requirement it checks.",
+        "Replacing a variable value while leaving an unused variable definition can cause validation failure before the intended business rule.",
+        "Generate cases from the input AST and mutate one intended property per case.",
+        "Acceptance requires each negative case to reach the intended validation layer and each positive case to assert meaningful selected data."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires each negative case to reach the intended validation layer and each positive case to assert meaningful selected data. Review duplicates by requirement and input, not merely by generated names."
+    },
+    "quiz": {
+      "question": "The generate traceable schema and business counterexamples stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The generate traceable schema and business counterexamples stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p42-ast"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-014",
+      "bridge-ai-testing-015",
+      "bridge-ai-testing-016",
+      "bridge-phase-42-3",
+      "bridge-phase-42-4",
+      "bridge-phase-42-5",
+      "bridge-phase-42-6",
+      "bridge-phase-42-7"
+    ]
+  },
+  {
+    "id": "p42-oracles",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "Execute candidate assertions and challenge the oracle",
+    "minutes": 35,
+    "objectives": [
+      "Execute candidate assertions and challenge the oracle",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects execute candidate assertions and challenge the oracle with test contracts, failure triage, and evidence for release. Acceptance includes executable positive/negative checks, useful assertions, mutation evidence and no use of production services.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Execution verifies whether the candidate's expectation matches the fixture contract. GraphQL transport success is distinct from execution success: errors may coexist with an HTTP 200 response. Tests must inspect returned data and errors rather than only status.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run candidates against the synthetic resolver with explicit principal identity. Compare selected fields to independent expected values. Mutate the quantity or role rule and confirm the related case fails, while unrelated cases remain stable.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python -m pytest local-labs/tests/test_quality.py -k generated_tests_execute",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "If a test computes its expected answer by calling the same resolver, both can share the same defect. A negative case that accepts any error may miss a wrong-layer failure. Inspect error categories and preserve the intended requirement.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes executable positive/negative checks, useful assertions, mutation evidence and no use of production services. Generated candidates are reviewed artifacts until these independent checks pass.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "If a test computes its expected answer by calling the same resolver, both can share the same defect. A negative case that accepts any error may miss a wrong-layer failure. Inspect error categories and preserve the intended requirement.",
+    "takeaway": "Acceptance includes executable positive/negative checks, useful assertions, mutation evidence and no use of production services.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the execute candidate assertions and challenge the oracle stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance includes executable positive/negative checks, useful assertions, mutation evidence and no use of production services. Generated candidates are reviewed artifacts until these independent checks pass.",
+      "id": "p42-oracles-exercise",
+      "hints": [
+        "Execution verifies whether the candidate's expectation matches the fixture contract.",
+        "If a test computes its expected answer by calling the same resolver, both can share the same defect.",
+        "Run candidates against the synthetic resolver with explicit principal identity.",
+        "Acceptance includes executable positive/negative checks, useful assertions, mutation evidence and no use of production services."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance includes executable positive/negative checks, useful assertions, mutation evidence and no use of production services. Generated candidates are reviewed artifacts until these independent checks pass."
+    },
+    "quiz": {
+      "question": "The execute candidate assertions and challenge the oracle stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The execute candidate assertions and challenge the oracle stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p42-cases"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-014",
+      "bridge-ai-testing-015",
+      "bridge-ai-testing-016",
+      "bridge-phase-42-3",
+      "bridge-phase-42-4",
+      "bridge-phase-42-5",
+      "bridge-phase-42-6",
+      "bridge-phase-42-7"
+    ]
+  },
+  {
+    "id": "p42-export",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "Export a runnable test artifact and CI coverage report",
+    "minutes": 35,
+    "objectives": [
+      "Export a runnable test artifact and CI coverage report",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects export a runnable test artifact and ci coverage report with test contracts, failure triage, and evidence for release. Acceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A usable generator delivers executable tests, not just prose. The artifact must retain the original operation, materialized variables, requirement IDs and expected values. A reader should run it in the declared fixture environment without manual reconstruction.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Export Python with data represented safely, import the controlled fixture executor and parametrize cases by stable ID. Compile the artifact, execute every case and write a coverage matrix linking requirements to results. Store the source operation beside the report.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python -m pytest local-labs/tests -q\npython local-labs/evals/runner.py --output artifacts/graphql-release",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A generated file can contain syntax errors or an unsafe interpolated string. A report can claim coverage for a case that was never executed. Reject duplicate IDs and incomplete result sets before using the artifact as release evidence.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken. Explain where schema-derived coverage ends and domain-specific business requirements begin.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "A generated file can contain syntax errors or an unsafe interpolated string. A report can claim coverage for a case that was never executed. Reject duplicate IDs and incomplete result sets before using the artifact as release evidence.",
+    "takeaway": "Acceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the export a runnable test artifact and ci coverage report stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken. Explain where schema-derived coverage ends and domain-specific business requirements begin.",
+      "id": "p42-export-exercise",
+      "hints": [
+        "A usable generator delivers executable tests, not just prose.",
+        "A generated file can contain syntax errors or an unsafe interpolated string.",
+        "Export Python with data represented safely, import the controlled fixture executor and parametrize cases by stable ID.",
+        "Acceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken. Explain where schema-derived coverage ends and domain-specific business requirements begin."
+    },
+    "quiz": {
+      "question": "The export a runnable test artifact and ci coverage report stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The export a runnable test artifact and ci coverage report stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p42-oracles"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-014",
+      "bridge-ai-testing-015",
+      "bridge-ai-testing-016",
+      "bridge-phase-42-3",
+      "bridge-phase-42-4",
+      "bridge-phase-42-5",
+      "bridge-phase-42-6",
+      "bridge-phase-42-7"
+    ]
+  },
+  {
+    "id": "p42-checkpoint",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "Phase 42 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 42 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 42 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects export a runnable test artifact and ci coverage report to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Export Python with data represented safely, import the controlled fixture executor and parametrize cases by stable ID. Compile the artifact, execute every case and write a coverage matrix linking requirements to results. Store the source operation beside the report.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "python -m pytest local-labs/tests -q\npython local-labs/evals/runner.py --output artifacts/graphql-release",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A generated file can contain syntax errors or an unsafe interpolated string. A report can claim coverage for a case that was never executed. Reject duplicate IDs and incomplete result sets before using the artifact as release evidence.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken. Explain where schema-derived coverage ends and domain-specific business requirements begin.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A generated file can contain syntax errors or an unsafe interpolated string. A report can claim coverage for a case that was never executed. Reject duplicate IDs and incomplete result sets before using the artifact as release evidence.",
+    "takeaway": "Acceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Export a runnable test artifact and CI coverage report to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken.",
+      "id": "p42-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects export a runnable test artifact and ci coverage report to the shared CI quality platform.",
+        "A generated file can contain syntax errors or an unsafe interpolated string.",
+        "Export Python with data represented safely, import the controlled fixture executor and parametrize cases by stable ID.",
+        "Acceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance requires compile/import success, complete execution, requirement traceability and a failing CI outcome when a candidate assertion is broken."
+    },
+    "quiz": {
+      "question": "A candidate for export a runnable test artifact and ci coverage report meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for export a runnable test artifact and ci coverage report meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p42-export"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-014",
+      "bridge-ai-testing-015",
+      "bridge-ai-testing-016",
+      "bridge-phase-42-3",
+      "bridge-phase-42-4",
+      "bridge-phase-42-5",
+      "bridge-phase-42-6",
+      "bridge-phase-42-7"
+    ]
+  }
+]

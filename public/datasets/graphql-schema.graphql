@@ -1,0 +1,9 @@
+type TestRun {
+  id: ID!
+  name: String!
+  status: String!
+  duration: Float
+}
+type Query {
+  testRuns(buildId: ID!): [TestRun!]!
+}

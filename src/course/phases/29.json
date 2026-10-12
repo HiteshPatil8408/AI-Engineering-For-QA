@@ -1,0 +1,349 @@
+[
+  {
+    "id": "p29-verification",
+    "phase": 29,
+    "module": "Testing AI-Generated Code",
+    "title": "Verify generated code: independent oracles and mutation checks",
+    "minutes": 35,
+    "objectives": [
+      "Verify generated code",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects verify generated code: independent oracles and mutation checks with test contracts, failure triage, and evidence for release. Candidate acceptance includes executable results, rejected mutations, reviewed dependencies and a human explanation of tradeoffs.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Generated code can import nonexistent APIs, mishandle edge cases or encode the wrong requirement. A compile/type check establishes basic structural compatibility, not correctness. Unit tests check isolated behavior; integration tests check real contracts; static and dependency checks address additional risks.",
+          "The model that wrote a function should not be the only authority judging it. Use independent requirements, trusted fixtures and known counterexamples as test oracles."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run format/lint/type checks, targeted unit tests and integration tests in a sandbox before review. Inspect dependencies and API versions against official documentation. Keep secrets and production services unavailable to candidate code.",
+          "Mutation testing changes a relevant operator or return value and checks whether the suite fails. A surviving mutation reveals a possible assertion gap, though equivalent mutations need review. For a generated classifier, mutate category mapping and UNKNOWN handling."
+        ],
+        "code": "def allowed(role):return role=='admin'\nassert allowed('admin') and not allowed('viewer')",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A generated test copies the same faulty formula as the implementation, so both agree. Another test asserts only that a function returns something. A hallucinated library import fails only after deployment because no import smoke test ran.",
+          "Use boundary values, negative cases and independently computed expectations. Review failing mutations by requirement, and ensure the suite catches permission bypasses as well as numerical errors."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Candidate acceptance includes executable results, rejected mutations, reviewed dependencies and a human explanation of tradeoffs. Keep generated provenance for audit but evaluate quality by the same standards as handwritten code.",
+          "SDETs should distinguish a generator's confidence from test evidence. Code is accepted when independent checks demonstrate the specified behavior, not when a model claims it is production ready."
+        ]
+      }
+    ],
+    "mistake": "A generated test copies the same faulty formula as the implementation, so both agree. Another test asserts only that a function returns something. A hallucinated library import fails only after deployment because no import smoke test ran.",
+    "takeaway": "Candidate acceptance includes executable results, rejected mutations, reviewed dependencies and a human explanation of tradeoffs.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def catches_mutant(test_inputs,expected,mutant):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def catches_mutant(test_inputs,expected,mutant):\n    if len(test_inputs)!=len(expected):raise ValueError('length')\n    return any(mutant(x)!=y for x,y in zip(test_inputs,expected))",
+      "starter": "def catches_mutant(test_inputs,expected,mutant):\n    return False",
+      "tests": "assert catches_mutant([1,2],[2,4],lambda x:x+1)\nassert not catches_mutant([1],[2],lambda x:x+1)",
+      "id": "p29-verification-exercise",
+      "hints": [
+        "Generated code can import nonexistent APIs, mishandle edge cases or encode the wrong requirement.",
+        "A generated test copies the same faulty formula as the implementation, so both agree.",
+        "Run format/lint/type checks, targeted unit tests and integration tests in a sandbox before review.",
+        "Candidate acceptance includes executable results, rejected mutations, reviewed dependencies and a human explanation of tradeoffs."
+      ],
+      "explanation": "def catches_mutant(test_inputs,expected,mutant):\n    if len(test_inputs)!=len(expected):raise ValueError('length')\n    return any(mutant(x)!=y for x,y in zip(test_inputs,expected))"
+    },
+    "quiz": {
+      "question": "What does a surviving relevant mutation suggest?",
+      "options": [
+        "An assertion or input coverage gap",
+        "The code is certainly correct",
+        "The model needs a longer answer"
+      ],
+      "answer": 0,
+      "explanation": "The suite did not distinguish the changed behavior; investigate whether it matters to a requirement."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What does a surviving relevant mutation suggest?",
+      "options": [
+        "An assertion or input coverage gap",
+        "The code is certainly correct",
+        "The model needs a longer answer"
+      ],
+      "answer": 0,
+      "explanation": "The suite did not distinguish the changed behavior; investigate whether it matters to a requirement."
+    },
+    "sources": [
+      "https://playwright.dev/docs/test-assertions",
+      "https://docs.pytest.org/en/stable/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p28-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Test oracle",
+      "Mutation testing",
+      "Static analysis"
+    ],
+    "interviewIds": [
+      "bridge-ai-testing-007",
+      "bridge-ai-testing-008",
+      "bridge-ai-testing-025",
+      "bridge-phase-29-3",
+      "bridge-phase-29-4",
+      "bridge-phase-29-5",
+      "bridge-phase-29-6",
+      "bridge-phase-29-7"
+    ]
+  },
+  {
+    "id": "p29-dependencies",
+    "phase": 29,
+    "module": "Testing AI-Generated Code",
+    "title": "Generated dependencies: import checks and sandbox boundaries",
+    "minutes": 35,
+    "objectives": [
+      "Generated dependencies",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects generated dependencies: import checks and sandbox boundaries with test contracts, failure triage, and evidence for release. Acceptance combines compatible dependencies, meaningful behavior tests, reviewed effects and actual isolation appropriate to the environment.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A generated function can rely on a nonexistent library or an obsolete method even when the algorithm sounds correct. Dependency manifests, lockfiles, import smoke tests and official API checks establish compatibility. Static inspection can identify suspicious calls, but it is not a complete sandbox.",
+          "Generated candidates must run without production credentials, with resource limits and controlled network/filesystem access. A model's instruction to behave safely does not isolate the process."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Parse Python with ast before execution, review imports and reject unsupported dependencies. Run type/compile checks and focused tests in a disposable environment. Lock accepted versions and inspect transitive dependency advisories.",
+          "AST-based rules can detect direct eval/exec or os.system calls for review, but aliases, dynamic imports and indirect effects can evade simple patterns. Use operating-system/container isolation for enforcement and label lexical/static checks as screening."
+        ],
+        "code": "import ast\ntree=ast.parse('import imaginary_package')\nimports=[n.names[0].name for n in ast.walk(tree) if isinstance(n,ast.Import)]\nassert imports==['imaginary_package']",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A test suite never imports the generated module, so a hallucinated import remains hidden. A deny list blocks the string subprocess while a dynamically assembled command still executes. Installing every generated dependency expands supply-chain risk.",
+          "Test import failure and API mismatch explicitly. Keep an allowlisted dependency set for candidate tasks, and inspect a deliberately evasive example to understand why screening cannot guarantee containment."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance combines compatible dependencies, meaningful behavior tests, reviewed effects and actual isolation appropriate to the environment. The browser worker limits runtime and keeps credentials absent; local code needs its own controlled execution environment.",
+          "For SDETs, distinguish test discovery from execution: a file can exist without its assertions ever running. Verify a known failing candidate makes the pipeline fail before trusting generated-code coverage."
+        ]
+      }
+    ],
+    "mistake": "A test suite never imports the generated module, so a hallucinated import remains hidden. A deny list blocks the string subprocess while a dynamically assembled command still executes. Installing every generated dependency expands supply-chain risk.",
+    "takeaway": "Acceptance combines compatible dependencies, meaningful behavior tests, reviewed effects and actual isolation appropriate to the environment.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def imports_in(code):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def imports_in(code):\n    import ast\n    tree=ast.parse(code);out=[]\n    for node in ast.walk(tree):\n        if isinstance(node,ast.Import):out.extend(n.name.split('.')[0] for n in node.names)\n        elif isinstance(node,ast.ImportFrom) and node.module:out.append(node.module.split('.')[0])\n    return sorted(set(out))",
+      "starter": "def imports_in(code):\n    return []",
+      "tests": "assert imports_in('import os, json\\nfrom pathlib import Path')==['json','os','pathlib']\nassert imports_in('x=1')==[]",
+      "id": "p29-dependencies-exercise",
+      "hints": [
+        "A generated function can rely on a nonexistent library or an obsolete method even when the algorithm sounds correct.",
+        "A test suite never imports the generated module, so a hallucinated import remains hidden.",
+        "Parse Python with ast before execution, review imports and reject unsupported dependencies.",
+        "Acceptance combines compatible dependencies, meaningful behavior tests, reviewed effects and actual isolation appropriate to the environment."
+      ],
+      "explanation": "def imports_in(code):\n    import ast\n    tree=ast.parse(code);out=[]\n    for node in ast.walk(tree):\n        if isinstance(node,ast.Import):out.extend(n.name.split('.')[0] for n in node.names)\n        elif isinstance(node,ast.ImportFrom) and node.module:out.append(node.module.split('.')[0])\n    return sorted(set(out))"
+    },
+    "quiz": {
+      "question": "Is a simple AST deny list a complete execution sandbox?",
+      "options": [
+        "No: it is screening with known blind spots",
+        "Yes: Python cannot call indirect functions",
+        "Only if the prompt is strict"
+      ],
+      "answer": 0,
+      "explanation": "Static patterns cannot enforce all runtime effects; isolation provides a separate boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Is a simple AST deny list a complete execution sandbox?",
+      "options": [
+        "No: it is screening with known blind spots",
+        "Yes: Python cannot call indirect functions",
+        "Only if the prompt is strict"
+      ],
+      "answer": 0,
+      "explanation": "Static patterns cannot enforce all runtime effects; isolation provides a separate boundary."
+    },
+    "sources": [
+      "https://playwright.dev/docs/test-assertions",
+      "https://docs.pytest.org/en/stable/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p29-verification"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Dependency lock",
+      "Sandbox"
+    ],
+    "interviewIds": [
+      "bridge-ai-testing-007",
+      "bridge-ai-testing-008",
+      "bridge-ai-testing-025",
+      "bridge-phase-29-3",
+      "bridge-phase-29-4",
+      "bridge-phase-29-5",
+      "bridge-phase-29-6",
+      "bridge-phase-29-7"
+    ]
+  },
+  {
+    "id": "p29-checkpoint",
+    "phase": 29,
+    "module": "Testing AI-Generated Code",
+    "title": "Phase 29 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 29 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 29 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance combines compatible dependencies, meaningful behavior tests, reviewed effects and actual isolation appropriate to the environment.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects generated dependencies: import checks and sandbox boundaries to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Parse Python with ast before execution, review imports and reject unsupported dependencies. Run type/compile checks and focused tests in a disposable environment. Lock accepted versions and inspect transitive dependency advisories.",
+          "AST-based rules can detect direct eval/exec or os.system calls for review, but aliases, dynamic imports and indirect effects can evade simple patterns. Use operating-system/container isolation for enforcement and label lexical/static checks as screening.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "import ast\ntree=ast.parse('import imaginary_package')\nimports=[n.names[0].name for n in ast.walk(tree) if isinstance(n,ast.Import)]\nassert imports==['imaginary_package']",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A test suite never imports the generated module, so a hallucinated import remains hidden. A deny list blocks the string subprocess while a dynamically assembled command still executes. Installing every generated dependency expands supply-chain risk.",
+          "Test import failure and API mismatch explicitly. Keep an allowlisted dependency set for candidate tasks, and inspect a deliberately evasive example to understand why screening cannot guarantee containment.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance combines compatible dependencies, meaningful behavior tests, reviewed effects and actual isolation appropriate to the environment. The browser worker limits runtime and keeps credentials absent; local code needs its own controlled execution environment.",
+          "For SDETs, distinguish test discovery from execution: a file can exist without its assertions ever running. Verify a known failing candidate makes the pipeline fail before trusting generated-code coverage.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A test suite never imports the generated module, so a hallucinated import remains hidden. A deny list blocks the string subprocess while a dynamically assembled command still executes. Installing every generated dependency expands supply-chain risk.",
+    "takeaway": "Acceptance combines compatible dependencies, meaningful behavior tests, reviewed effects and actual isolation appropriate to the environment.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Generated dependencies: import checks and sandbox boundaries to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance combines compatible dependencies, meaningful behavior tests, reviewed effects and actual isolation appropriate to the environment.",
+      "id": "p29-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects generated dependencies: import checks and sandbox boundaries to the shared CI quality platform.",
+        "A test suite never imports the generated module, so a hallucinated import remains hidden.",
+        "Parse Python with ast before execution, review imports and reject unsupported dependencies.",
+        "Acceptance combines compatible dependencies, meaningful behavior tests, reviewed effects and actual isolation appropriate to the environment."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance combines compatible dependencies, meaningful behavior tests, reviewed effects and actual isolation appropriate to the environment."
+    },
+    "quiz": {
+      "question": "A candidate for generated dependencies: import checks and sandbox boundaries meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for generated dependencies: import checks and sandbox boundaries meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://playwright.dev/docs/test-assertions",
+      "https://docs.pytest.org/en/stable/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p29-dependencies"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-007",
+      "bridge-ai-testing-008",
+      "bridge-ai-testing-025",
+      "bridge-phase-29-3",
+      "bridge-phase-29-4",
+      "bridge-phase-29-5",
+      "bridge-phase-29-6",
+      "bridge-phase-29-7"
+    ]
+  }
+]

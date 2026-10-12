@@ -1,0 +1,21 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: local-labs/Dockerfile
+    ports: ["8000:8000"]
+    environment:
+      LAB_API_TOKEN: ${LAB_API_TOKEN:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+  qdrant:
+    image: qdrant/qdrant:v1.17.0
+    profiles: ["vector-store"]
+    volumes: ["qdrant-data:/qdrant/storage"]
+    ports: ["127.0.0.1:6333:6333"]
+volumes:
+  qdrant-data:

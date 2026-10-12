@@ -1,0 +1,1470 @@
+[
+  {
+    "id": "orientation",
+    "phase": 0,
+    "module": "Your new engineering role",
+    "title": "From SDET to AI quality engineer",
+    "minutes": 30,
+    "objectives": [
+      "Distinguish testing with AI from testing AI",
+      "Map existing SDET skills to probabilistic systems",
+      "Identify the evidence needed to release an AI feature"
+    ],
+    "relevance": "You already understand contracts, coverage, regression, and release risk. AI extends these skills to systems where valid answers can vary between runs.",
+    "sections": [
+      {
+        "title": "Two tracks, one engineering mindset",
+        "paragraphs": [
+          "Track A uses AI to improve software testing: generating API test candidates, classifying CI failures, or proposing missing edge cases. The generated artifacts still need review and deterministic execution.",
+          "Track B tests the AI application itself: whether a chatbot stays grounded, whether retrieval finds the right document, and whether an agent calls an authorized tool. Treat its output as evidence to evaluate, not a trustworthy oracle."
+        ]
+      },
+      {
+        "title": "Deterministic contracts, probabilistic behavior",
+        "paragraphs": [
+          "A REST endpoint may promise an exact status code and schema. A chatbot can express the same correct answer in many ways. Separate hard invariants (valid JSON, no forbidden tool, citation points to supplied evidence) from quality rubrics (helpfulness, completeness, groundedness).",
+          "Freeze representative test inputs and application versions. Run repeated samples when variation matters. Record outputs, scores, cost, latency, and failure categories. One passing response is not proof of reliability."
+        ]
+      },
+      {
+        "title": "Your learning path",
+        "paragraphs": [
+          "Build Python, data, SQL, and statistical foundations before abstractions. Then learn embeddings and retrieval before RAG frameworks; tool calling before agents; evaluation before release.",
+          "An AI engineer assembles useful model-powered systems. An ML engineer develops model training and serving pipelines. A data scientist investigates data and experiments. An AI quality engineer designs evidence and controls across those systems. Roles overlap; judge work by its purpose."
+        ]
+      }
+    ],
+    "mistake": "Using exact text equality for every LLM response rejects good paraphrases and misses groundedness failures.",
+    "takeaway": "Preserve deterministic invariants and measure uncertain behavior across a representative dataset.",
+    "exercise": {
+      "id": "orientation-exercise",
+      "kind": "classification",
+      "prompt": "Classify these 15 engineering tasks. Consider the primary purpose of each task.",
+      "answer": "",
+      "explanation": "Building an AI helper belongs to AI engineering; evaluating its output belongs to testing AI; training its learned classifier belongs to ML engineering.",
+      "hints": [
+        "Start with the invariant: distinguish testing with ai from testing ai.",
+        "Consider this constraint: Using exact text equality for every LLM response rejects good paraphrases and misses groundedness failures.",
+        "Work through a tiny example before generalizing. Preserve deterministic invariants and measure uncertain behavior across a representative dataset.",
+        "Building an AI helper belongs to AI engineering; evaluating its output belongs to testing AI; training its learned classifier belongs to ML engineering."
+      ],
+      "options": [
+        "Traditional SDET",
+        "Using AI for testing",
+        "Testing AI",
+        "ML engineering",
+        "AI engineering"
+      ],
+      "tasks": [
+        {
+          "text": "Assert REST status 201",
+          "answer": "Traditional SDET"
+        },
+        {
+          "text": "Write a Playwright login test",
+          "answer": "Traditional SDET"
+        },
+        {
+          "text": "Verify a database migration",
+          "answer": "Traditional SDET"
+        },
+        {
+          "text": "Use an LLM to draft API cases",
+          "answer": "Using AI for testing"
+        },
+        {
+          "text": "Summarize CI logs with an LLM",
+          "answer": "Using AI for testing"
+        },
+        {
+          "text": "Suggest locator repairs with AI",
+          "answer": "Using AI for testing"
+        },
+        {
+          "text": "Measure chatbot groundedness",
+          "answer": "Testing AI"
+        },
+        {
+          "text": "Validate agent tool arguments",
+          "answer": "Testing AI"
+        },
+        {
+          "text": "Run prompt-injection cases",
+          "answer": "Testing AI"
+        },
+        {
+          "text": "Train a failure classifier",
+          "answer": "ML engineering"
+        },
+        {
+          "text": "Tune a learned model threshold",
+          "answer": "ML engineering"
+        },
+        {
+          "text": "Cross-validate model features",
+          "answer": "ML engineering"
+        },
+        {
+          "text": "Build a retrieval chatbot",
+          "answer": "AI engineering"
+        },
+        {
+          "text": "Integrate a model API",
+          "answer": "AI engineering"
+        },
+        {
+          "text": "Implement an agent workflow",
+          "answer": "AI engineering"
+        }
+      ]
+    },
+    "quiz": {
+      "question": "A chatbot gives five different correct paraphrases. What do you assert?",
+      "options": [
+        "Exact string equality",
+        "Meaning, evidence, schema, and forbidden behavior",
+        "Only response length"
+      ],
+      "answer": 1,
+      "explanation": "Correctness should tolerate phrasing variation while enforcing measurable contracts."
+    },
+    "checkpoint": {
+      "question": "An AI test generator creates 80 tests. What proves value?",
+      "options": [
+        "The number of generated tests",
+        "Reviewed coverage and execution against meaningful faults",
+        "An eloquent explanation"
+      ],
+      "answer": 1,
+      "explanation": "Measure whether generated tests expose faults and cover risks."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/",
+      "https://www.nist.gov/itl/ai-risk-management-framework"
+    ]
+  },
+  {
+    "id": "environment",
+    "phase": 0,
+    "module": "Your new engineering role",
+    "title": "A reproducible engineering workspace",
+    "minutes": 26,
+    "objectives": [
+      "Isolate dependencies in a virtual environment",
+      "Separate experiments from production modules",
+      "Keep secrets out of browser applications"
+    ],
+    "relevance": "A reproducible lab turns a notebook experiment into a testable CI artifact that colleagues can run.",
+    "sections": [
+      {
+        "title": "An environment is part of the program",
+        "paragraphs": [
+          "Use a project-specific virtual environment. Select its interpreter in VS Code. Keep dependency declarations in the repository and record the Python version in your README. A package imported from your global machine can hide a missing dependency.",
+          "A notebook is useful for inspecting data and plots. Move durable logic into importable modules with tests. Git should track source and small synthetic datasets, not virtual environments or secret files."
+        ],
+        "code": "python -m venv .venv\n# Linux / macOS\nsource .venv/bin/activate\npython -m pip install pytest\npython -m pytest"
+      },
+      {
+        "title": "Static safe mode and local labs",
+        "paragraphs": [
+          "The course executes educational Python and SQL in your browser. It has no provider key and no model API requirement. Optional local labs use a Python process on your machine.",
+          "A browser bundle is downloadable by every visitor. An environment variable prefixed for Vite client use is still public after bundling. Keep provider credentials exclusively in local processes or a properly authenticated server."
+        ],
+        "code": "import os\napi_key = os.environ.get(\"OPENAI_API_KEY\")\n# Never print api_key or commit a populated .env file."
+      }
+    ],
+    "mistake": "Committing .env or putting a provider key into a VITE_ variable exposes the secret.",
+    "takeaway": "A clean checkout plus documented setup should reproduce your test results.",
+    "exercise": {
+      "id": "environment-exercise",
+      "kind": "order",
+      "prompt": "Put workspace setup in a reproducible order.",
+      "answer": "Create virtual environment|Activate interpreter|Install declared dependencies|Run tests",
+      "explanation": "Create isolation first, activate it, then install into it and verify the application.",
+      "hints": [
+        "Start with the invariant: isolate dependencies in a virtual environment.",
+        "Consider this constraint: Committing .env or putting a provider key into a VITE_ variable exposes the secret.",
+        "Work through a tiny example before generalizing. A clean checkout plus documented setup should reproduce your test results.",
+        "Create isolation first, activate it, then install into it and verify the application."
+      ],
+      "options": [
+        "Run tests",
+        "Install declared dependencies",
+        "Create virtual environment",
+        "Activate interpreter"
+      ]
+    },
+    "quiz": {
+      "question": "Where should a provider key live?",
+      "options": [
+        "In a VITE_API_KEY variable",
+        "In local server environment variables",
+        "In localStorage"
+      ],
+      "answer": 1,
+      "explanation": "The browser and its storage are inspectable; keep keys outside the client bundle."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": ["https://docs.python.org/3/tutorial/venv.html"]
+  },
+  {
+    "id": "python-values",
+    "phase": 1,
+    "module": "Python fundamentals",
+    "title": "Values, collections, and API contracts",
+    "minutes": 26,
+    "objectives": [
+      "Choose the right collection for a test result",
+      "Understand mutable objects and missing fields",
+      "Normalize external values at a contract boundary"
+    ],
+    "relevance": "Test reports and API responses arrive as nested data. The first quality boundary is explicit, predictable normalization.",
+    "sections": [
+      {
+        "title": "Python values are objects",
+        "paragraphs": [
+          "Names bind to objects; they are not storage boxes with fixed types. Integers, floats, strings, booleans, and None represent distinct meanings. The string \"false\" is truthy because it is non-empty. Never convert an API flag with bool(raw) when raw might be a string.",
+          "Lists preserve order and allow mutation; tuples represent fixed ordered records; dictionaries map keys to values; sets store unique hashable values. Choose a set for duplicate test IDs and a list for ordered execution results."
+        ],
+        "code": "result = {\"name\": \"login\", \"status\": \"failed\", \"duration\": 4.5}\nfailed_ids = {\"login\", \"checkout\", \"login\"}\nprint(len(failed_ids))  # 2\nprint(result.get(\"retries\", 0))  # 0"
+      },
+      {
+        "title": "Aliasing and boundary validation",
+        "paragraphs": [
+          "Assigning a list to another name does not copy it. Mutating through either name changes the same object. A shallow copy only copies the outer collection; nested dictionaries still share identity.",
+          "Use direct indexing for a required field when absence is an error. Use .get for optional values only when a default has a defined meaning. Validate status values before computing pass rate; silently treating unknown status as pass corrupts metrics."
+        ],
+        "code": "original = [{\"status\": \"failed\"}]\ncopy = original.copy()\ncopy[0][\"status\"] = \"passed\"\nprint(original[0][\"status\"])  # passed"
+      }
+    ],
+    "mistake": "A shallow list copy still shares nested dictionaries.",
+    "takeaway": "Model the data contract before transforming the data.",
+    "exercise": {
+      "id": "python-values-exercise",
+      "kind": "choice",
+      "prompt": "What does original[0][\"status\"] print after the shallow-copy example?",
+      "answer": "passed",
+      "explanation": "The copied list references the same inner dictionary. Use a deep copy or construct new records when isolation is needed.",
+      "hints": [
+        "Start with the invariant: choose the right collection for a test result.",
+        "Consider this constraint: A shallow list copy still shares nested dictionaries.",
+        "Work through a tiny example before generalizing. Model the data contract before transforming the data.",
+        "The copied list references the same inner dictionary. Use a deep copy or construct new records when isolation is needed."
+      ],
+      "options": ["failed", "passed", "None", "Raises TypeError"]
+    },
+    "quiz": {
+      "question": "Which collection deduplicates test IDs?",
+      "options": ["List", "Set", "Tuple"],
+      "answer": 1,
+      "explanation": "A set stores each unique hashable value once."
+    },
+    "checkpoint": {
+      "question": "A required status field is missing. What is the best boundary behavior?",
+      "options": [
+        "Assume passed",
+        "Reject or explicitly quarantine the record",
+        "Always default to failed"
+      ],
+      "answer": 1,
+      "explanation": "Missing required data is a contract violation, not an implicit outcome."
+    },
+    "sources": ["https://docs.python.org/3/tutorial/"]
+  },
+  {
+    "id": "python-control",
+    "phase": 1,
+    "module": "Python fundamentals",
+    "title": "Filter, transform, and summarize test runs",
+    "minutes": 26,
+    "objectives": [
+      "Use loops and comprehensions for explicit transformations",
+      "Implement a pure function with clear return values",
+      "Handle empty inputs deliberately"
+    ],
+    "relevance": "A small pure analyzer is easier to unit test than a script that reads files, mutates globals, and prints everything.",
+    "sections": [
+      {
+        "title": "From API response to useful evidence",
+        "paragraphs": [
+          "An if statement branches by a condition. A for loop iterates over objects directly. A comprehension expresses a simple filter and transformation together; keep complex business decisions in a named function.",
+          "A function should have an explicit contract: inputs, output shape, and exceptional cases. Parameters are local names. return sends a value to the caller; print only writes a display message."
+        ],
+        "code": "runs = [{\"name\": \"login\", \"status\": \"failed\"},\n        {\"name\": \"search\", \"status\": \"passed\"}]\nfailed = [r[\"name\"] for r in runs if r[\"status\"] == \"failed\"]\nprint(failed)"
+      },
+      {
+        "title": "Empty input and scope",
+        "paragraphs": [
+          "A pass rate for no test executions is undefined; return None or raise a domain error rather than claiming 100%. Use type hints to communicate that possibility.",
+          "Avoid hidden globals and mutable default arguments. A default list is created once when the function is defined, so repeated calls can unintentionally share state. Use None and create a new list inside the function."
+        ],
+        "code": "def pass_rate(runs):\n    if not runs:\n        return None\n    return sum(r[\"status\"] == \"passed\" for r in runs) / len(runs)"
+      }
+    ],
+    "mistake": "A function that prints a result but never returns it gives the caller None.",
+    "takeaway": "Pure transformations let you test the contract independently of files and APIs.",
+    "exercise": {
+      "id": "python-control-exercise",
+      "kind": "python",
+      "prompt": "Implement failed_names(runs). Return failed test names in input order; do not mutate the input.",
+      "answer": "",
+      "explanation": "The filter must compare status to \"failed\", map to name, and return a new list.",
+      "hints": [
+        "Start with the invariant: use loops and comprehensions for explicit transformations.",
+        "Consider this constraint: A function that prints a result but never returns it gives the caller None.",
+        "Work through a tiny example before generalizing. Pure transformations let you test the contract independently of files and APIs.",
+        "The filter must compare status to \"failed\", map to name, and return a new list."
+      ],
+      "starter": "def failed_names(runs):\n    # Return a list of failed test names\n    return []\n\nprint(failed_names([{\"name\": \"login\", \"status\": \"failed\"}]))",
+      "tests": "from copy import deepcopy\na = [{\"name\":\"login\",\"status\":\"failed\"},{\"name\":\"search\",\"status\":\"passed\"},{\"name\":\"pay\",\"status\":\"failed\"}]\nb = deepcopy(a)\nassert failed_names(a) == [\"login\", \"pay\"], \"Preserve order and filter failures\"\nassert failed_names([]) == [], \"Empty input should produce an empty list\"\nassert a == b, \"Do not mutate input\"",
+      "solution": "def failed_names(runs):\n    return [r[\"name\"] for r in runs if r[\"status\"] == \"failed\"]"
+    },
+    "quiz": {
+      "question": "What value does a function return without a return statement?",
+      "options": ["0", "None", "Its last expression"],
+      "answer": 1,
+      "explanation": "Python implicitly returns None."
+    },
+    "checkpoint": {
+      "question": "Why avoid a list as a default argument?",
+      "options": [
+        "Lists cannot be arguments",
+        "It is shared across calls",
+        "It always copies input"
+      ],
+      "answer": 1,
+      "explanation": "Default values are evaluated once when the function is defined."
+    },
+    "sources": ["https://docs.python.org/3/tutorial/"]
+  },
+  {
+    "id": "python-functions",
+    "phase": 1,
+    "module": "Python fundamentals",
+    "title": "Functions, arguments, and maintainable modules",
+    "minutes": 26,
+    "objectives": [
+      "Use keyword-only arguments for important options",
+      "Understand module import behavior and scope",
+      "Separate I/O from transformation logic"
+    ],
+    "relevance": "Reusable test utilities need stable public interfaces and predictable imports.",
+    "sections": [
+      {
+        "title": "Design an explicit interface",
+        "paragraphs": [
+          "Positional arguments fit obvious small inputs. Keyword-only arguments make policy visible at the call site: summarize(runs, slow_threshold=3.0). The * marker in a function signature makes following parameters keyword-only.",
+          "Local scope belongs to each function call. Read-only access to a global configuration can look convenient, but passing configuration makes tests independent and deterministic."
+        ],
+        "code": "def slow_tests(runs, *, threshold=3.0):\n    return [r[\"name\"] for r in runs if r[\"duration\"] > threshold]\n\nprint(slow_tests([{ \"name\": \"checkout\", \"duration\": 4.2}], threshold=4.0))"
+      },
+      {
+        "title": "Modules should be safe to import",
+        "paragraphs": [
+          "A module executes its top-level statements when imported. Guard CLI entry points with if __name__ == \"__main__\" so imports do not read files or start network requests. Packages group related modules; keep core logic separate from transport and presentation.",
+          "Decorators wrap functions, so preserve metadata with functools.wraps. Generators yield values lazily and avoid holding every record in memory, but they are consumed once. Materialize a list if downstream operations need multiple passes."
+        ],
+        "code": "def failures(records):\n    for record in records:\n        if record[\"status\"] == \"failed\":\n            yield record\n\nif __name__ == \"__main__\":\n    print(list(failures([])))"
+      }
+    ],
+    "mistake": "Iterating over an exhausted generator again produces no values.",
+    "takeaway": "Use explicit arguments and import-safe modules to keep test utilities reusable.",
+    "exercise": {
+      "id": "python-functions-exercise",
+      "kind": "choice",
+      "prompt": "A generator yielded three failures. You iterate over it again. What happens?",
+      "answer": "It yields no records",
+      "explanation": "Generators retain iteration state and are exhausted after consumption.",
+      "hints": [
+        "Start with the invariant: use keyword-only arguments for important options.",
+        "Consider this constraint: Iterating over an exhausted generator again produces no values.",
+        "Work through a tiny example before generalizing. Use explicit arguments and import-safe modules to keep test utilities reusable.",
+        "Generators retain iteration state and are exhausted after consumption."
+      ],
+      "options": [
+        "It yields the same three failures",
+        "It yields no records",
+        "It raises ImportError"
+      ]
+    },
+    "quiz": {
+      "question": "What does the * in def f(runs, *, threshold=3) do?",
+      "options": [
+        "Makes runs optional",
+        "Makes threshold keyword-only",
+        "Multiplies the arguments"
+      ],
+      "answer": 1,
+      "explanation": "Parameters after * must be named at the call site."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": ["https://docs.python.org/3/tutorial/"]
+  },
+  {
+    "id": "python-production",
+    "phase": 1,
+    "module": "Production Python",
+    "title": "Types, validation, and error boundaries",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish type hints from runtime validation",
+      "Represent domain records with dataclasses",
+      "Catch errors at the layer that can handle them"
+    ],
+    "relevance": "Invalid API data should fail at the boundary instead of creating misleading CI analytics.",
+    "sections": [
+      {
+        "title": "Type hints describe, validation enforces",
+        "paragraphs": [
+          "A type hint helps tooling find incompatible calls; Python does not automatically reject a wrong runtime value. A dataclass reduces boilerplate for domain objects but also does not validate fields automatically.",
+          "Validate external JSON with explicit checks or a schema library such as Pydantic in local labs. Separate transport errors, parsing errors, and domain validation errors so a retry policy can distinguish temporary failures from bad requests."
+        ],
+        "code": "from dataclasses import dataclass\n\n@dataclass(frozen=True)\nclass TestResult:\n    name: str\n    status: str\n    duration: float\n\ndef validate(result):\n    if result.status not in {\"passed\", \"failed\", \"skipped\"}:\n        raise ValueError(\"unknown status\")\n    if result.duration < 0:\n        raise ValueError(\"negative duration\")\n    return result"
+      },
+      {
+        "title": "Reliable I/O and concurrency",
+        "paragraphs": [
+          "Use pathlib for portable paths and context managers to guarantee file cleanup. Log event metadata without credentials or private payloads. JSON parsing is not schema validation.",
+          "async/await helps overlap I/O, not accelerate CPU work. Use bounded concurrency to avoid flooding a service. Propagate cancellation and set timeouts; broad except Exception plus an empty return makes service failures look like successful zero-result runs."
+        ],
+        "code": "import json\nfrom pathlib import Path\n\nwith Path(\"test-results.json\").open(encoding=\"utf-8\") as stream:\n    records = json.load(stream)"
+      }
+    ],
+    "mistake": "Catching every exception and returning [] hides outages as valid empty datasets.",
+    "takeaway": "Validate at boundaries and preserve error meaning.",
+    "exercise": {
+      "id": "python-production-exercise",
+      "kind": "python",
+      "prompt": "Implement validate_duration(value): accept non-negative int/float values, reject booleans, negatives, and other types with ValueError.",
+      "answer": "",
+      "explanation": "bool is a subclass of int. Reject bool before checking numeric types; then enforce non-negativity.",
+      "hints": [
+        "Start with the invariant: distinguish type hints from runtime validation.",
+        "Consider this constraint: Catching every exception and returning [] hides outages as valid empty datasets.",
+        "Work through a tiny example before generalizing. Validate at boundaries and preserve error meaning.",
+        "bool is a subclass of int. Reject bool before checking numeric types; then enforce non-negativity."
+      ],
+      "starter": "def validate_duration(value):\n    return value\n\nprint(validate_duration(4.5))",
+      "tests": "assert validate_duration(0) == 0\nassert validate_duration(4.5) == 4.5\nfor v in [-1, True, \"4.5\", None]:\n    try:\n        validate_duration(v)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(f\"Expected ValueError for {v!r}\")",
+      "solution": "def validate_duration(value):\n    if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:\n        raise ValueError(\"Expected a non-negative numeric duration\")\n    return value"
+    },
+    "quiz": {
+      "question": "Do Python type hints enforce JSON types at runtime?",
+      "options": [
+        "Always",
+        "No, validation must be explicit",
+        "Only for dictionaries"
+      ],
+      "answer": 1,
+      "explanation": "Type annotations are not an automatic runtime validator."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": ["https://docs.python.org/3/tutorial/"]
+  },
+  {
+    "id": "python-tests",
+    "phase": 1,
+    "module": "Python testing",
+    "title": "Test the analyzer, including what can break",
+    "minutes": 26,
+    "objectives": [
+      "Design boundary tests with pytest",
+      "Use parametrization and fixtures deliberately",
+      "Mock external dependencies at their boundary"
+    ],
+    "relevance": "Your existing SDET skills apply directly: test small functions deterministically and integration points separately.",
+    "sections": [
+      {
+        "title": "Useful tests specify behavior",
+        "paragraphs": [
+          "pytest discovers test_ functions and reports assertion differences. Parametrization describes a set of cases without duplicated code. A fixture owns setup and cleanup; avoid session-scoped mutable objects that leak state between tests.",
+          "Test empty input, one record, mixed outcomes, duplicate test names, invalid duration, and ties in slowest tests. A passing line-coverage target does not prove these behaviors."
+        ],
+        "code": "import pytest\n\n@pytest.mark.parametrize(\"runs, expected\", [\n    ([], []),\n    ([{\"name\": \"login\", \"status\": \"failed\"}], [\"login\"]),\n    ([{\"name\": \"search\", \"status\": \"passed\"}], []),\n])\ndef test_failed_names(runs, expected):\n    assert failed_names(runs) == expected"
+      },
+      {
+        "title": "Mocks and properties",
+        "paragraphs": [
+          "Mock the HTTP client, not the internal implementation you want to test. monkeypatch can replace environment values or functions for one test. Test real schema validation against malformed synthetic API responses.",
+          "A property is an invariant over many inputs: the failure count is between zero and total count; reordering results should not change a rate. Property-based tests generate cases to challenge those invariants, complementing carefully chosen examples."
+        ]
+      }
+    ],
+    "mistake": "A mock that returns the same answer the implementation expects can pass while the real integration is broken.",
+    "takeaway": "Test behavior at boundaries and use properties to explore more inputs.",
+    "exercise": {
+      "id": "python-tests-exercise",
+      "kind": "choice",
+      "prompt": "Which test catches hidden state between calls?",
+      "answer": "Call the analyzer twice with different inputs and assert independent results",
+      "explanation": "Repeated calls reveal shared mutable defaults and global accumulators.",
+      "hints": [
+        "Start with the invariant: design boundary tests with pytest.",
+        "Consider this constraint: A mock that returns the same answer the implementation expects can pass while the real integration is broken.",
+        "Work through a tiny example before generalizing. Test behavior at boundaries and use properties to explore more inputs.",
+        "Repeated calls reveal shared mutable defaults and global accumulators."
+      ],
+      "options": [
+        "Assert only that no exception occurs",
+        "Call the analyzer twice with different inputs and assert independent results",
+        "Mock the analyzer itself"
+      ]
+    },
+    "quiz": {
+      "question": "What should you mock when testing a result analyzer with an API source?",
+      "options": [
+        "The transformation function",
+        "The external API boundary",
+        "All assertions"
+      ],
+      "answer": 1,
+      "explanation": "Keep the behavior under test real and isolate external I/O."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": ["https://docs.python.org/3/tutorial/"]
+  },
+  {
+    "id": "numpy-arrays",
+    "phase": 2,
+    "module": "Numerical computing",
+    "title": "Arrays, shapes, and vectorized metrics",
+    "minutes": 26,
+    "objectives": [
+      "Interpret array shape and axes",
+      "Use boolean masks and aggregation",
+      "Understand broadcasting instead of guessing"
+    ],
+    "relevance": "Embedding batches and latency metrics use array operations. A wrong axis gives plausible but incorrect quality reports.",
+    "sections": [
+      {
+        "title": "Shape describes your contract",
+        "paragraphs": [
+          "A NumPy ndarray stores typed values in a multidimensional shape. A matrix shaped (runs, tests) has one row per run. sum(axis=0) reduces the run axis and produces one value per test. sum(axis=1) produces one value per run.",
+          "Vectorized operations apply across arrays efficiently. A boolean mask selects observations. Slices can share memory with the original array, so use .copy() when mutation should be isolated."
+        ],
+        "code": "import numpy as np\npassed = np.array([[1, 0, 1], [1, 1, 0]])\nprint(passed.shape)  # (2, 3)\nprint(passed.mean(axis=0))  # rate for each test"
+      },
+      {
+        "title": "Broadcasting rules",
+        "paragraphs": [
+          "NumPy compares trailing dimensions. Dimensions match when equal or when one is 1. An array of shape (3,) can be added to (2, 3); an array of shape (2,) cannot without reshaping to (2, 1).",
+          "The result may be valid mathematically but wrong semantically. Label axes before operations. Explicitly choose floating-point dtype before division or normalization; integer storage can truncate derived values."
+        ],
+        "code": "latency = np.array([[100., 200., 300.], [120., 220., 330.]])\nbaseline = np.array([100., 200., 300.])\nprint(latency / baseline)"
+      }
+    ],
+    "mistake": "Broadcasting a baseline along the wrong axis silently compares unrelated observations.",
+    "takeaway": "Write the meaning of each axis alongside its shape.",
+    "exercise": {
+      "id": "numpy-arrays-exercise",
+      "kind": "choice",
+      "prompt": "A passed matrix has shape (10 runs, 4 tests). Which expression returns four pass rates?",
+      "answer": "passed.mean(axis=0)",
+      "explanation": "Reducing axis 0 averages over runs and leaves the test axis.",
+      "hints": [
+        "Start with the invariant: interpret array shape and axes.",
+        "Consider this constraint: Broadcasting a baseline along the wrong axis silently compares unrelated observations.",
+        "Work through a tiny example before generalizing. Write the meaning of each axis alongside its shape.",
+        "Reducing axis 0 averages over runs and leaves the test axis."
+      ],
+      "options": ["passed.mean(axis=0)", "passed.mean(axis=1)", "passed.sum()"]
+    },
+    "quiz": {
+      "question": "Can shapes (2, 3) and (2,) broadcast directly?",
+      "options": ["Yes", "No", "Only with integer dtype"],
+      "answer": 1,
+      "explanation": "Their trailing dimensions 3 and 2 are incompatible."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://numpy.org/doc/stable/user/basics.broadcasting.html",
+      "https://numpy.org/doc/stable/user/absolute_beginners.html"
+    ]
+  },
+  {
+    "id": "numpy-cosine",
+    "phase": 2,
+    "module": "Numerical computing",
+    "title": "Cosine similarity from first principles",
+    "minutes": 26,
+    "objectives": [
+      "Compute dot product and vector norms",
+      "Distinguish direction from magnitude",
+      "Handle zero vectors explicitly"
+    ],
+    "relevance": "Semantically similar failures may have different text. Vector similarity is a useful candidate signal, but it is not proof of the same root cause.",
+    "sections": [
+      {
+        "title": "A vector is a representation",
+        "paragraphs": [
+          "A vector is an ordered list of numeric coordinates. An embedding model learns representations whose geometry can capture useful relationships. The synthetic vectors in this lab are hand-designed for arithmetic practice; they are not real semantic embeddings.",
+          "The dot product sums pairwise coordinate products. A norm measures length. Cosine similarity divides the dot product by both lengths, so it compares direction. Cosine 1 means the same direction; 0 is orthogonal; -1 is opposite."
+        ],
+        "code": "import numpy as np\na = np.array([1., 2., 0.])\nb = np.array([2., 4., 0.])\nprint(np.dot(a, b))  # 10\nprint(np.linalg.norm(a))  # sqrt(5)"
+      },
+      {
+        "title": "Normalization and distance",
+        "paragraphs": [
+          "A unit vector is v / norm(v). For unit vectors the dot product equals cosine similarity. Squared Euclidean distance between unit vectors is 2 - 2*cosine, so they induce the same ranking. Unnormalized dot product also rewards magnitude.",
+          "A zero vector has no direction, so cosine is undefined. Reject it or apply a documented fallback. Do not divide by zero and hope NaN sorting will produce sensible retrieval results."
+        ]
+      }
+    ],
+    "mistake": "Vectors from different models or dimensions are not comparable, even if their text looks related.",
+    "takeaway": "Similarity is a geometric candidate signal that still needs domain validation.",
+    "exercise": {
+      "id": "numpy-cosine-exercise",
+      "kind": "python",
+      "prompt": "Implement cosine(a, b) with NumPy. Raise ValueError for zero vectors or shape mismatch.",
+      "answer": "",
+      "explanation": "Use dot(a,b)/(norm(a)*norm(b)); check equal shapes and nonzero norms first.",
+      "hints": [
+        "Start with the invariant: compute dot product and vector norms.",
+        "Consider this constraint: Vectors from different models or dimensions are not comparable, even if their text looks related.",
+        "Work through a tiny example before generalizing. Similarity is a geometric candidate signal that still needs domain validation.",
+        "Use dot(a,b)/(norm(a)*norm(b)); check equal shapes and nonzero norms first."
+      ],
+      "starter": "import numpy as np\n\ndef cosine(a, b):\n    a, b = np.asarray(a, dtype=float), np.asarray(b, dtype=float)\n    return 0.0\n\nprint(cosine([1, 2, 0], [2, 4, 0]))",
+      "tests": "assert abs(cosine([1,2,0],[2,4,0])-1) < 1e-9\nassert abs(cosine([1,0],[0,1])) < 1e-9\nassert abs(cosine([1,0],[-1,0])+1) < 1e-9\nfor a,b in [([0,0],[1,0]),([1,2],[1,2,3])]:\n    try:\n        cosine(a,b)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"Reject undefined comparisons\")",
+      "solution": "import numpy as np\ndef cosine(a, b):\n    a, b = np.asarray(a, dtype=float), np.asarray(b, dtype=float)\n    if a.shape != b.shape:\n        raise ValueError(\"Shape mismatch\")\n    denom = np.linalg.norm(a) * np.linalg.norm(b)\n    if denom == 0:\n        raise ValueError(\"Zero vector\")\n    return float(np.dot(a, b) / denom)"
+    },
+    "quiz": {
+      "question": "When does dot product equal cosine similarity?",
+      "options": [
+        "Always",
+        "When both vectors have unit norm",
+        "When both vectors contain integers"
+      ],
+      "answer": 1,
+      "explanation": "Unit norms make the cosine denominator equal to one."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://numpy.org/doc/stable/reference/generated/numpy.dot.html",
+      "https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html"
+    ]
+  },
+  {
+    "id": "numpy-sampling",
+    "phase": 2,
+    "module": "Numerical computing",
+    "title": "Sampling, masks, and reproducible experiments",
+    "minutes": 26,
+    "objectives": [
+      "Use a seeded random generator",
+      "Separate deterministic fixtures from statistical samples",
+      "Choose representative slices for evaluation"
+    ],
+    "relevance": "Reproducible synthetic CI history helps compare analyzer versions without depending on proprietary data.",
+    "sections": [
+      {
+        "title": "Random does not mean uncontrolled",
+        "paragraphs": [
+          "Use np.random.default_rng(seed) and keep the seed with the experiment. A fixed seed helps reproduce one sample but does not prove stability across samples. Sample multiple seeds when estimating uncertainty.",
+          "A mask such as durations > 5 identifies slow observations; np.percentile returns a tail summary. The mean can hide a small group of severe outliers, so retain raw observations and relevant segments."
+        ],
+        "code": "import numpy as np\nrng = np.random.default_rng(42)\ndurations = rng.lognormal(mean=1, sigma=0.5, size=100)\nprint(np.percentile(durations, 95))\nprint(durations[durations > 5].size)"
+      },
+      {
+        "title": "Representative samples",
+        "paragraphs": [
+          "Sampling only successful production interactions creates survivorship bias. Include unsuccessful requests, rare categories, long inputs, empty retrieval, and adversarial inputs in separately labeled slices.",
+          "Keep training, tuning, and final evaluation samples separate. Changing a prompt repeatedly against the final evaluation set effectively trains your decisions on that set."
+        ]
+      }
+    ],
+    "mistake": "A fixed seed gives repeatability, not a guarantee that the sample represents production.",
+    "takeaway": "Version both the sampling method and the resulting evaluation dataset.",
+    "exercise": {
+      "id": "numpy-sampling-exercise",
+      "kind": "choice",
+      "prompt": "Your evaluation set contains only successful chatbot interactions. What is the main issue?",
+      "answer": "Survivorship bias",
+      "explanation": "Filtering for success removes precisely the failures you need to understand.",
+      "hints": [
+        "Start with the invariant: use a seeded random generator.",
+        "Consider this constraint: A fixed seed gives repeatability, not a guarantee that the sample represents production.",
+        "Work through a tiny example before generalizing. Version both the sampling method and the resulting evaluation dataset.",
+        "Filtering for success removes precisely the failures you need to understand."
+      ],
+      "options": [
+        "Too many dimensions",
+        "Survivorship bias",
+        "A low random seed"
+      ]
+    },
+    "quiz": {
+      "question": "What does a fixed seed provide?",
+      "options": [
+        "Representative data automatically",
+        "Repeatable sampling under the same implementation",
+        "Proof of statistical significance"
+      ],
+      "answer": 1,
+      "explanation": "Repeatability and representativeness are different properties."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": ["https://numpy.org/doc/stable/reference/random/generator.html"]
+  },
+  {
+    "id": "pandas-clean",
+    "phase": 3,
+    "module": "CI data analysis",
+    "title": "Clean test history without hiding defects",
+    "minutes": 26,
+    "objectives": [
+      "Inspect DataFrame schema and missing values",
+      "Distinguish duplicates from legitimate retries",
+      "Define missing-value policies before aggregation"
+    ],
+    "relevance": "A polished CI dashboard is misleading if ingestion silently drops flaky retries or imputes missing outcomes as success.",
+    "sections": [
+      {
+        "title": "Inspect before transforming",
+        "paragraphs": [
+          "A DataFrame is a labeled table; each column is a Series. Start with head(), info(), dtypes, and isna().sum(). Read CSV with explicit types when identifiers have leading zeros. Parse timestamps with a defined timezone.",
+          "Selecting df[\"duration\"] gives a Series; df[[\"duration\"]] gives a DataFrame. Use .loc for explicit row and column selection. Copy a filtered slice before modifying it when isolation is required."
+        ],
+        "code": "import pandas as pd\ndf = pd.DataFrame([\n    {\"test\": \"login\", \"build\": 1, \"status\": \"failed\", \"duration\": 4.5},\n    {\"test\": \"login\", \"build\": 2, \"status\": \"passed\", \"duration\": None},\n])\nprint(df.isna().sum())\nprint(df.loc[df[\"status\"] == \"failed\", [\"test\", \"build\"]])"
+      },
+      {
+        "title": "Missing and duplicate records",
+        "paragraphs": [
+          "A missing duration should remain unknown for latency analysis, not become zero. A missing status should be quarantined or counted separately. Preserve the denominator used in every metric.",
+          "Deduplicate by the ingestion identity, not merely by test name. Two executions of the same test in one build can be intentional retries. A stable key might include build_id, test_id, attempt, and environment. Keep raw data and document every cleaning decision."
+        ]
+      }
+    ],
+    "mistake": "drop_duplicates(\"test\") destroys historical runs and can erase flakiness.",
+    "takeaway": "Data cleaning must preserve the events that explain quality problems.",
+    "exercise": {
+      "id": "pandas-clean-exercise",
+      "kind": "choice",
+      "prompt": "A run has a known failed status but an unknown duration. What should you do?",
+      "answer": "Keep it for failure metrics; exclude and report it for latency metrics",
+      "explanation": "Missing latency does not erase an observed failure. Different metrics need explicit denominators.",
+      "hints": [
+        "Start with the invariant: inspect dataframe schema and missing values.",
+        "Consider this constraint: drop_duplicates(\"test\") destroys historical runs and can erase flakiness.",
+        "Work through a tiny example before generalizing. Data cleaning must preserve the events that explain quality problems.",
+        "Missing latency does not erase an observed failure. Different metrics need explicit denominators."
+      ],
+      "options": [
+        "Replace duration with zero",
+        "Drop it from every report",
+        "Keep it for failure metrics; exclude and report it for latency metrics"
+      ]
+    },
+    "quiz": {
+      "question": "What identifies a retry distinctly?",
+      "options": [
+        "Only test name",
+        "Build, test, attempt, and environment",
+        "Only status"
+      ],
+      "answer": 1,
+      "explanation": "Execution identity must distinguish meaningful repetitions."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://pandas.pydata.org/docs/user_guide/missing_data.html",
+      "https://pandas.pydata.org/docs/getting_started/intro_tutorials/index.html"
+    ]
+  },
+  {
+    "id": "pandas-group",
+    "phase": 3,
+    "module": "CI data analysis",
+    "title": "Pass rates and flaky-test analysis",
+    "minutes": 26,
+    "objectives": [
+      "Aggregate by meaningful groups",
+      "Keep run rate separate from test rate",
+      "Use mixed outcomes as evidence, not a verdict"
+    ],
+    "relevance": "A test that both passes and fails is a triage candidate. Confirm controlled conditions before labeling it flaky.",
+    "sections": [
+      {
+        "title": "Groupby makes the denominator explicit",
+        "paragraphs": [
+          "Create a passed indicator and take its mean within each test group. This measures run-level pass rate. A test-level report answers a different question: how many distinct tests exhibit a behavior? Name the denominator in your report.",
+          "A mixed-outcome test has at least one pass and one fail in the observation window. Different code versions, environments, or test data can explain that pattern. Analyze repeated runs under comparable conditions before asserting nondeterministic flakiness."
+        ],
+        "code": "import pandas as pd\ndf = pd.DataFrame({\"test\": [\"login\", \"login\", \"search\"],\n                   \"status\": [\"failed\", \"passed\", \"passed\"]})\ndf[\"passed\"] = df[\"status\"].eq(\"passed\")\nprint(df.groupby(\"test\")[\"passed\"].mean())"
+      },
+      {
+        "title": "Build a CI health report",
+        "paragraphs": [
+          "Aggregate counts, median duration, and p95 by module and build. Retain failed-first-attempt rate separately from eventual pass rate so retries cannot hide instability.",
+          "Sort by impact, not merely count: consider failure frequency, business criticality, added retry time, and reproducibility. Use pivot tables for build-by-module summaries and convert timestamps before resampling."
+        ]
+      }
+    ],
+    "mistake": "A test passing after a retry is not evidence that its original failure was harmless.",
+    "takeaway": "Report first-attempt outcomes and retries separately.",
+    "exercise": {
+      "id": "pandas-group-exercise",
+      "kind": "python",
+      "prompt": "Implement pass_rates(df) returning a dictionary of per-test pass rates. The DataFrame has test and status columns.",
+      "answer": "",
+      "explanation": "Create a boolean passed column, group by test, take its mean, and convert to a dictionary.",
+      "hints": [
+        "Start with the invariant: aggregate by meaningful groups.",
+        "Consider this constraint: A test passing after a retry is not evidence that its original failure was harmless.",
+        "Work through a tiny example before generalizing. Report first-attempt outcomes and retries separately.",
+        "Create a boolean passed column, group by test, take its mean, and convert to a dictionary."
+      ],
+      "starter": "import pandas as pd\n\ndef pass_rates(df):\n    return {}\n\ndf = pd.DataFrame({\"test\": [\"login\", \"login\"], \"status\": [\"failed\", \"passed\"]})\nprint(pass_rates(df))",
+      "tests": "import pandas as pd\ndf = pd.DataFrame({\"test\":[\"a\",\"a\",\"b\"],\"status\":[\"passed\",\"failed\",\"failed\"]})\nassert pass_rates(df) == {\"a\":0.5,\"b\":0.0}\nassert pass_rates(pd.DataFrame(columns=[\"test\",\"status\"])) == {}",
+      "solution": "def pass_rates(df):\n    return df.assign(passed=df[\"status\"].eq(\"passed\")).groupby(\"test\")[\"passed\"].mean().to_dict()"
+    },
+    "quiz": {
+      "question": "A test passed once and failed once across different releases. Is it definitely flaky?",
+      "options": [
+        "Yes",
+        "No; compare conditions and reproduce",
+        "Only if it is slow"
+      ],
+      "answer": 1,
+      "explanation": "Changing releases can introduce a real deterministic regression."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": ["https://pandas.pydata.org/docs/user_guide/groupby.html"]
+  },
+  {
+    "id": "pandas-joins",
+    "phase": 3,
+    "module": "CI data analysis",
+    "title": "Joins, time windows, and regression signals",
+    "minutes": 26,
+    "objectives": [
+      "Validate merge cardinality",
+      "Compare duration trends within a test",
+      "Avoid leakage from future observations"
+    ],
+    "relevance": "Bad joins duplicate failures; uncontrolled comparisons make harmless dataset changes look like performance regressions.",
+    "sections": [
+      {
+        "title": "A join is a cardinality contract",
+        "paragraphs": [
+          "Join executions to test metadata by stable test_id. validate=\"many_to_one\" asserts that each metadata key appears once. A many-to-many join multiplies matching rows and inflates counts; inspect unmatched keys with indicator=True.",
+          "Use a left join to retain unknown tests for investigation. An inner join silently removes records with missing metadata. Group by environment and build when comparing performance."
+        ],
+        "code": "# runs.merge(cases, on=\"test_id\", how=\"left\",\n#            validate=\"many_to_one\", indicator=True)\nimport pandas as pd\nruns = pd.DataFrame({\"test_id\": [1,1,2], \"duration\": [2.,3.,1.]})\ncases = pd.DataFrame({\"test_id\": [1,2], \"module\": [\"auth\",\"search\"]})\nprint(runs.merge(cases, on=\"test_id\", validate=\"many_to_one\"))"
+      },
+      {
+        "title": "Time is an ordering constraint",
+        "paragraphs": [
+          "Sort within a test by timestamp before shift() or rolling(). Use lagged features when predicting a future failure; a rolling window that includes the outcome leaks future information.",
+          "For a latency trend, compare median and tail within stable workloads and report sample sizes. A different mix of tests can change overall mean even when each test has unchanged latency."
+        ]
+      }
+    ],
+    "mistake": "A duplicate metadata key can multiply execution rows without raising an error unless cardinality is checked.",
+    "takeaway": "Assert join cardinality and align time before calculating trends.",
+    "exercise": {
+      "id": "pandas-joins-exercise",
+      "kind": "choice",
+      "prompt": "Every test_run should match one test_cases row. Which merge validation fits?",
+      "answer": "many_to_one",
+      "explanation": "Many runs can refer to one case, but each case key must be unique.",
+      "hints": [
+        "Start with the invariant: validate merge cardinality.",
+        "Consider this constraint: A duplicate metadata key can multiply execution rows without raising an error unless cardinality is checked.",
+        "Work through a tiny example before generalizing. Assert join cardinality and align time before calculating trends.",
+        "Many runs can refer to one case, but each case key must be unique."
+      ],
+      "options": ["one_to_one", "many_to_one", "many_to_many"]
+    },
+    "quiz": {
+      "question": "Why sort before shift() per test?",
+      "options": [
+        "Sorting saves memory",
+        "Lag must correspond to chronological order",
+        "It converts strings to timestamps"
+      ],
+      "answer": 1,
+      "explanation": "shift uses row order; it cannot infer time order."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": ["https://pandas.pydata.org/docs/user_guide/merging.html"]
+  },
+  {
+    "id": "sql-basics",
+    "phase": 4,
+    "module": "Relational analysis",
+    "title": "Query test runs with explicit semantics",
+    "minutes": 26,
+    "objectives": [
+      "Filter before grouping when appropriate",
+      "Distinguish WHERE from HAVING",
+      "Use NULL-aware aggregates"
+    ],
+    "relevance": "SQL lets you investigate CI and service evidence near its source, with clear relational contracts.",
+    "sections": [
+      {
+        "title": "Rows, filters, and groups",
+        "paragraphs": [
+          "SELECT chooses expressions; FROM supplies relations; WHERE filters rows; GROUP BY forms groups; HAVING filters groups; ORDER BY orders the final result. Without ORDER BY, row order is not guaranteed.",
+          "COUNT(*) counts rows. COUNT(duration) counts non-NULL durations. AVG(duration) ignores NULL. SQL comparisons with NULL produce unknown; use IS NULL, not = NULL."
+        ],
+        "code": "SELECT test_id, COUNT(*) AS runs,\n       SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failures\nFROM test_runs\nGROUP BY test_id\nHAVING COUNT(*) >= 2\nORDER BY test_id;"
+      },
+      {
+        "title": "The browser database",
+        "paragraphs": [
+          "The lab seeds fictional builds, test_cases, test_runs, failures, and defects in DuckDB-WASM. No server receives your SQL. You can inspect data with SELECT * FROM test_runs.",
+          "Use GROUP BY for counts by module, CASE for indicators, and HAVING for minimum sample size. A CTE gives an intermediate result a meaningful name. It improves readability but does not necessarily force materialization."
+        ]
+      }
+    ],
+    "mistake": "COUNT(duration) can be smaller than COUNT(*) when duration is unknown.",
+    "takeaway": "Make NULL behavior and denominators visible in every metric.",
+    "exercise": {
+      "id": "sql-basics-exercise",
+      "kind": "sql",
+      "prompt": "Return test_id and failures for every test with at least one failed run. Sort by test_id.",
+      "answer": "",
+      "explanation": "Filter failed rows, group by test_id, count rows, and sort deterministically.",
+      "hints": [
+        "Start with the invariant: filter before grouping when appropriate.",
+        "Consider this constraint: COUNT(duration) can be smaller than COUNT(*) when duration is unknown.",
+        "Work through a tiny example before generalizing. Make NULL behavior and denominators visible in every metric.",
+        "Filter failed rows, group by test_id, count rows, and sort deterministically."
+      ],
+      "starter": "SELECT test_id, COUNT(*) AS failures\nFROM test_runs\n-- Add the failure filter and grouping\nORDER BY test_id;",
+      "tests": "[{\"test_id\":1,\"failures\":2},{\"test_id\":2,\"failures\":1},{\"test_id\":3,\"failures\":3}]",
+      "solution": "SELECT test_id, COUNT(*) AS failures\nFROM test_runs\nWHERE status = 'failed'\nGROUP BY test_id\nORDER BY test_id;"
+    },
+    "quiz": {
+      "question": "Which clause filters aggregate groups?",
+      "options": ["WHERE", "HAVING", "SELECT"],
+      "answer": 1,
+      "explanation": "WHERE operates on input rows; HAVING filters grouped results."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": ["https://duckdb.org/docs/stable/sql/query_syntax/select.html"]
+  },
+  {
+    "id": "sql-joins",
+    "phase": 4,
+    "module": "Relational analysis",
+    "title": "Join failures to builds and defects",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish inner and outer joins",
+      "Preserve unmatched rows for investigation",
+      "Avoid accidental join multiplication"
+    ],
+    "relevance": "Defect correlation requires faithful event relationships. A bad join can fabricate a spike in product failures.",
+    "sections": [
+      {
+        "title": "Preserving evidence",
+        "paragraphs": [
+          "INNER JOIN retains matching pairs only. LEFT JOIN retains every left row and fills absent right fields with NULL. RIGHT JOIN is the symmetric concept; it can usually be rewritten as a left join with reversed tables.",
+          "Filtering a right-hand column in WHERE after a left join can remove the unmatched rows and effectively behave like an inner join. Put the match restriction in ON when retaining all left rows is the goal."
+        ],
+        "code": "SELECT tc.name, COUNT(tr.run_id) AS executions\nFROM test_cases tc\nLEFT JOIN test_runs tr ON tc.test_id = tr.test_id\nGROUP BY tc.test_id, tc.name\nORDER BY tc.name;"
+      },
+      {
+        "title": "Correlation is not causal attribution",
+        "paragraphs": [
+          "Join failures to defects using an explicit defect_id when available. A shared time window or module is weaker evidence; describe it as correlation. Multiple defects per failure need a linking table and deliberate counting of distinct failure IDs.",
+          "UNION removes duplicate rows; UNION ALL preserves them. Do not use UNION as a bandage for an incorrect join. Indexes and query plans help diagnose performance, but measure scanned rows and join cardinalities before guessing."
+        ]
+      }
+    ],
+    "mistake": "COUNT(*) after a left join counts the preserved unmatched row; count a right-hand ID for actual matches.",
+    "takeaway": "Choose a join by the evidence you must preserve.",
+    "exercise": {
+      "id": "sql-joins-exercise",
+      "kind": "choice",
+      "prompt": "How do you count actual executions while retaining cases with zero executions?",
+      "answer": "LEFT JOIN and COUNT(tr.run_id)",
+      "explanation": "COUNT of a nullable right-hand identifier returns zero for an unmatched case.",
+      "hints": [
+        "Start with the invariant: distinguish inner and outer joins.",
+        "Consider this constraint: COUNT(*) after a left join counts the preserved unmatched row; count a right-hand ID for actual matches.",
+        "Work through a tiny example before generalizing. Choose a join by the evidence you must preserve.",
+        "COUNT of a nullable right-hand identifier returns zero for an unmatched case."
+      ],
+      "options": [
+        "INNER JOIN and COUNT(*)",
+        "LEFT JOIN and COUNT(*)",
+        "LEFT JOIN and COUNT(tr.run_id)"
+      ]
+    },
+    "quiz": {
+      "question": "Where should a right-table filter go to preserve all left rows?",
+      "options": ["In the ON condition", "Always in WHERE", "In ORDER BY"],
+      "answer": 0,
+      "explanation": "A WHERE condition can eliminate NULL rows created by the outer join."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": ["https://duckdb.org/docs/stable/sql/query_syntax/from.html"]
+  },
+  {
+    "id": "sql-windows",
+    "phase": 4,
+    "module": "Relational analysis",
+    "title": "Latest results, ranks, and failure streaks",
+    "minutes": 26,
+    "objectives": [
+      "Use window functions without collapsing rows",
+      "Make ordering deterministic",
+      "Find latest execution per test with a CTE"
+    ],
+    "relevance": "Latest-state dashboards and consecutive-failure alerts depend on per-test ordering, not global timestamps.",
+    "sections": [
+      {
+        "title": "Windows preserve rows",
+        "paragraphs": [
+          "GROUP BY reduces multiple rows to a group. A window function annotates each row using its partition. ROW_NUMBER() gives a unique sequence within a partition; RANK() gives ties the same rank and leaves gaps.",
+          "Use PARTITION BY test_id for independent sequences. Order by build_id DESC and run_id DESC to break ties deterministically. Filter row number in an outer query or QUALIFY."
+        ],
+        "code": "WITH ranked AS (\n  SELECT *, ROW_NUMBER() OVER (\n    PARTITION BY test_id ORDER BY build_id DESC, run_id DESC\n  ) AS rn\n  FROM test_runs\n)\nSELECT test_id, status FROM ranked WHERE rn = 1 ORDER BY test_id;"
+      },
+      {
+        "title": "Lag and failure streaks",
+        "paragraphs": [
+          "LAG(status) reads the previous row within the ordered partition; LEAD reads the next. Three consecutive executions failing is not always three consecutive builds: retries can add rows and missing builds create gaps.",
+          "Define a build-level status policy first, then check the current and previous two statuses plus consecutive build identifiers. Production build IDs may not be sequential; join to a build calendar or explicit sequence."
+        ]
+      }
+    ],
+    "mistake": "Ordering only by timestamp when timestamps tie makes the selected latest row unstable.",
+    "takeaway": "Define the unit of sequence and provide a stable tie breaker.",
+    "exercise": {
+      "id": "sql-windows-exercise",
+      "kind": "sql",
+      "prompt": "Return test_id and status for each test\u2019s latest result. Latest means highest build_id, then run_id. Sort by test_id.",
+      "answer": "",
+      "explanation": "Partition by test_id, assign descending row numbers, and select rn=1 in the outer query.",
+      "hints": [
+        "Start with the invariant: use window functions without collapsing rows.",
+        "Consider this constraint: Ordering only by timestamp when timestamps tie makes the selected latest row unstable.",
+        "Work through a tiny example before generalizing. Define the unit of sequence and provide a stable tie breaker.",
+        "Partition by test_id, assign descending row numbers, and select rn=1 in the outer query."
+      ],
+      "starter": "WITH ranked AS (\n  SELECT *, ROW_NUMBER() OVER (ORDER BY build_id DESC) AS rn\n  FROM test_runs\n)\nSELECT test_id, status FROM ranked WHERE rn = 1 ORDER BY test_id;",
+      "tests": "[{\"test_id\":1,\"status\":\"passed\"},{\"test_id\":2,\"status\":\"passed\"},{\"test_id\":3,\"status\":\"failed\"}]",
+      "solution": "WITH ranked AS (\n SELECT *, ROW_NUMBER() OVER (PARTITION BY test_id ORDER BY build_id DESC, run_id DESC) AS rn\n FROM test_runs\n)\nSELECT test_id, status FROM ranked WHERE rn = 1 ORDER BY test_id;"
+    },
+    "quiz": {
+      "question": "What is the key difference between GROUP BY and window functions?",
+      "options": [
+        "Windows annotate rather than collapse rows",
+        "Windows cannot sort",
+        "GROUP BY preserves every input row"
+      ],
+      "answer": 0,
+      "explanation": "A window calculates across related rows while keeping their identity."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://duckdb.org/docs/stable/sql/functions/window_functions.html"
+    ]
+  },
+  {
+    "id": "stats-descriptive",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Distributions, percentiles, and misleading averages",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish population from sample",
+      "Use median and p95 for skewed latency",
+      "Understand variance and standard deviation"
+    ],
+    "relevance": "Reliability reports need to describe the customer experience beyond a single average.",
+    "sections": [
+      {
+        "title": "Location and spread",
+        "paragraphs": [
+          "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+          "Variance summarizes squared deviations from the mean; standard deviation returns to the original unit. Sample variance commonly uses n-1 to estimate population variance. Percentiles summarize tails, but estimates depend on sample size and interpolation policy."
+        ],
+        "code": "import statistics\nlatency = [100, 110, 120, 125, 900]\nprint(statistics.mean(latency))  # 271\nprint(statistics.median(latency))  # 120"
+      },
+      {
+        "title": "Measure the distribution, not just one number",
+        "paragraphs": [
+          "Latency is often right-skewed: many fast responses and a few slow ones. A normal-distribution assumption may be a poor fit. Plot or inspect the observed distribution before choosing a method.",
+          "A p95 from 20 requests is fragile. Report sample count, workload, measurement window, and error rate. Excluding timeouts improves reported latency while hiding the worst outcomes; report them separately and state the censoring policy."
+        ]
+      }
+    ],
+    "mistake": "An average latency improvement can coexist with a worse tail and more timeouts.",
+    "takeaway": "Report central tendency, spread, tails, and failure count together.",
+    "exercise": {
+      "id": "stats-descriptive-exercise",
+      "kind": "choice",
+      "prompt": "Latencies are 100, 110, 120, 125, and 900 ms. What is the median?",
+      "answer": "120 ms",
+      "explanation": "Sort the five values and take the middle value.",
+      "hints": [
+        "Start with the invariant: distinguish population from sample.",
+        "Consider this constraint: An average latency improvement can coexist with a worse tail and more timeouts.",
+        "Work through a tiny example before generalizing. Report central tendency, spread, tails, and failure count together.",
+        "Sort the five values and take the middle value."
+      ],
+      "options": ["271 ms", "120 ms", "900 ms"]
+    },
+    "quiz": {
+      "question": "Why is p95 from 20 observations uncertain?",
+      "options": [
+        "Percentiles are never useful",
+        "Very few observations inform the tail",
+        "The mean is always better"
+      ],
+      "answer": 1,
+      "explanation": "A small number of tail observations makes the estimate unstable."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": ["https://docs.python.org/3/library/statistics.html"]
+  },
+  {
+    "id": "stats-probability",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Conditional probability and base rates",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish P(alert|defect) from P(defect|alert)",
+      "Use base rates when interpreting classifiers",
+      "Recognize dependence between repeated outcomes"
+    ],
+    "relevance": "A failure triage model with impressive recall can still overwhelm engineers with false alerts when product defects are rare.",
+    "sections": [
+      {
+        "title": "A probability needs a denominator",
+        "paragraphs": [
+          "P(A|B) is the probability of A among cases where B occurred. It differs from P(B|A). Recall asks how many actual defects were flagged; precision asks how many flags were actual defects.",
+          "Suppose 1% of 10,000 failures are product defects. A detector catches 90 of 100 defects and falsely flags 5% of the 9,900 others, or 495 cases. Precision is 90/(90+495), about 15.4%, despite 90% recall."
+        ]
+      },
+      {
+        "title": "Bernoulli and binomial models",
+        "paragraphs": [
+          "A single binary outcome can be modeled as Bernoulli with probability p. The binomial counts successes in n independent trials with the same p. These assumptions matter: repeated chatbot turns from the same conversation can be correlated.",
+          "Repeated flaky-test runs under shared infrastructure may fail together during an outage. Treating them as independent evidence produces overly narrow confidence intervals. Resample or analyze at the independent unit, such as build or conversation."
+        ]
+      }
+    ],
+    "mistake": "High recall does not guarantee that a positive prediction is likely to be a true defect.",
+    "takeaway": "Use the production base rate and analyze the correct independent unit.",
+    "exercise": {
+      "id": "stats-probability-exercise",
+      "kind": "choice",
+      "prompt": "A detector finds 90 true defects and produces 495 false alarms. Approximate precision?",
+      "answer": "15.4%",
+      "explanation": "Precision = true positives / all positive predictions = 90/585.",
+      "hints": [
+        "Start with the invariant: distinguish p(alert|defect) from p(defect|alert).",
+        "Consider this constraint: High recall does not guarantee that a positive prediction is likely to be a true defect.",
+        "Work through a tiny example before generalizing. Use the production base rate and analyze the correct independent unit.",
+        "Precision = true positives / all positive predictions = 90/585."
+      ],
+      "options": ["90%", "15.4%", "99%"]
+    },
+    "quiz": {
+      "question": "Which independence assumption is most questionable?",
+      "options": [
+        "Different independently sampled requests",
+        "Ten turns from the same conversation",
+        "Separate randomized users"
+      ],
+      "answer": 1,
+      "explanation": "Turns share context and are likely correlated."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://www.itl.nist.gov/div898/handbook/eda/section3/eda366i.htm"
+    ]
+  },
+  {
+    "id": "stats-comparison",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Is 85% really better than 82%?",
+    "minutes": 30,
+    "objectives": [
+      "Separate effect size from uncertainty",
+      "Design paired model comparisons",
+      "Avoid interpreting p-values as truth probabilities"
+    ],
+    "relevance": "A small eval-score increase should not trigger a model migration unless the benefit is credible and useful.",
+    "sections": [
+      {
+        "title": "The missing information",
+        "paragraphs": [
+          "Model A scores 82% and B scores 85%. The observed difference is three percentage points. Without sample size, dataset composition, pairing, repeated runs, and uncertainty, you cannot judge whether the difference generalizes.",
+          "Evaluate both versions on the same held-out cases to reduce noise from case difficulty. Analyze per-case differences. A paired bootstrap resamples case IDs and recomputes the mean difference; keep conversational clusters together."
+        ]
+      },
+      {
+        "title": "Statistical versus practical significance",
+        "paragraphs": [
+          "A confidence interval expresses uncertainty under a sampling procedure; it is not a probability that this specific fixed parameter lies in the realized interval. A p-value measures how incompatible the observations are with a specified null model, not the chance that the null is true.",
+          "Predefine a minimum worthwhile effect and release constraints for latency, cost, safety, and critical slices. A statistically detectable one-point improvement may be worthless if it doubles cost. A non-significant result is not proof of equivalence."
+        ]
+      },
+      {
+        "title": "Experiment discipline",
+        "paragraphs": [
+          "A false positive (Type I error) rejects a true null. A false negative (Type II error) misses a real effect. Repeatedly checking many prompt variants until one passes increases false-positive risk.",
+          "State the hypothesis and stopping rule first. Keep a final untouched evaluation set, report all important slices, and investigate disagreements with human review. Never cherry-pick the most favorable judge configuration."
+        ]
+      }
+    ],
+    "mistake": "A higher point estimate alone does not establish a reliable or useful improvement.",
+    "takeaway": "Compare paired outcomes, uncertainty, practical effect, and release constraints.",
+    "exercise": {
+      "id": "stats-comparison-exercise",
+      "kind": "choice",
+      "prompt": "A scores 82%, B 85%. What is the best next step?",
+      "answer": "Inspect paired sample size, uncertainty, and critical slices",
+      "explanation": "The point difference is incomplete evidence. Use the same held-out cases and inspect uncertainty and operational tradeoffs.",
+      "hints": [
+        "Start with the invariant: separate effect size from uncertainty.",
+        "Consider this constraint: A higher point estimate alone does not establish a reliable or useful improvement.",
+        "Work through a tiny example before generalizing. Compare paired outcomes, uncertainty, practical effect, and release constraints.",
+        "The point difference is incomplete evidence. Use the same held-out cases and inspect uncertainty and operational tradeoffs."
+      ],
+      "options": [
+        "Ship B immediately",
+        "Inspect paired sample size, uncertainty, and critical slices",
+        "Assume no difference exists"
+      ]
+    },
+    "quiz": {
+      "question": "A p-value of 0.03 means what?",
+      "options": [
+        "The null has 3% probability of being true",
+        "The result is relatively incompatible with the specified null model",
+        "B is 97% accurate"
+      ],
+      "answer": 1,
+      "explanation": "It describes evidence under a null model, not a posterior probability."
+    },
+    "checkpoint": {
+      "question": "B improves mean score but worsens a safety-critical slice. What should happen?",
+      "options": [
+        "Ship based on the mean",
+        "Investigate and enforce the predefined safety gate",
+        "Delete that slice"
+      ],
+      "answer": 1,
+      "explanation": "A critical release constraint cannot be averaged away."
+    },
+    "sources": [
+      "https://www.itl.nist.gov/div898/handbook/prc/section1/prc1.htm"
+    ]
+  },
+  {
+    "id": "stats-bootstrap",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Bootstrap evaluation differences",
+    "minutes": 26,
+    "objectives": [
+      "Resample paired cases with replacement",
+      "Compute an interval for score difference",
+      "State limitations of your evaluation sample"
+    ],
+    "relevance": "Resampling provides an accessible way to quantify uncertainty while preserving per-case model comparisons.",
+    "sections": [
+      {
+        "title": "The resampling idea",
+        "paragraphs": [
+          "A bootstrap treats your observed independent cases as an empirical population. Sample n case indices with replacement, calculate a statistic, repeat many times, and summarize the resulting distribution.",
+          "For paired evaluation, compute B-A for each case before resampling. Do not sample A and B independently when their scores correspond to the same cases. A percentile interval is useful for exploration but can be inaccurate in small or biased samples."
+        ],
+        "code": "import numpy as np\ndiff = np.array([0, 1, -1, 0, 1, 0, 1, 0], dtype=float)\nrng = np.random.default_rng(42)\nmeans = [rng.choice(diff, size=len(diff), replace=True).mean()\n         for _ in range(2000)]\nprint(np.percentile(means, [2.5, 97.5]))"
+      },
+      {
+        "title": "What an interval cannot fix",
+        "paragraphs": [
+          "Bootstrap does not repair a biased dataset, a miscalibrated judge, or leakage from tuning on evaluation cases. A narrow interval around a biased score is still misleading.",
+          "For latency, evaluate comparable workloads and resample independent sessions when requests share a session. For correctness, retain human-adjudicated failures and report uncertainty for critical slices separately."
+        ]
+      }
+    ],
+    "mistake": "Resampling individual turns from one conversation breaks the independence assumption.",
+    "takeaway": "The independent sampling unit determines what confidence means.",
+    "exercise": {
+      "id": "stats-bootstrap-exercise",
+      "kind": "python",
+      "prompt": "Implement paired_differences(a, b): return a NumPy array of b-a. Reject unequal shapes.",
+      "answer": "",
+      "explanation": "Convert both inputs to arrays, assert shape equality, then subtract a from b.",
+      "hints": [
+        "Start with the invariant: resample paired cases with replacement.",
+        "Consider this constraint: Resampling individual turns from one conversation breaks the independence assumption.",
+        "Work through a tiny example before generalizing. The independent sampling unit determines what confidence means.",
+        "Convert both inputs to arrays, assert shape equality, then subtract a from b."
+      ],
+      "starter": "import numpy as np\n\ndef paired_differences(a, b):\n    return np.array([])\n\nprint(paired_differences([0, 1], [1, 1]))",
+      "tests": "import numpy as np\nassert np.array_equal(paired_differences([0,1],[1,1]), np.array([1,0]))\nassert np.array_equal(paired_differences([1,0],[0,1]), np.array([-1,1]))\ntry:\n    paired_differences([1],[1,0])\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError(\"Reject unequal shapes\")",
+      "solution": "import numpy as np\ndef paired_differences(a, b):\n    a, b = np.asarray(a), np.asarray(b)\n    if a.shape != b.shape:\n        raise ValueError(\"Shape mismatch\")\n    return b - a"
+    },
+    "quiz": {
+      "question": "What does bootstrap fail to repair?",
+      "options": [
+        "Sampling uncertainty",
+        "A biased evaluation dataset",
+        "The need for repeated resampling"
+      ],
+      "answer": 1,
+      "explanation": "Resampling preserves the original sample\u2019s bias."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.choice.html"
+    ]
+  }
+]

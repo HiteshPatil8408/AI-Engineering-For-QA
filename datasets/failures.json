@@ -1,0 +1,65 @@
+[
+  {
+    "name": "login",
+    "status": "failed",
+    "duration": 4.5,
+    "build_id": 1,
+    "module": "auth"
+  },
+  {
+    "name": "search",
+    "status": "passed",
+    "duration": 1.2,
+    "build_id": 1,
+    "module": "catalog"
+  },
+  {
+    "name": "checkout",
+    "status": "failed",
+    "duration": 8.1,
+    "build_id": 1,
+    "module": "payment"
+  },
+  {
+    "name": "login",
+    "status": "failed",
+    "duration": 4.2,
+    "build_id": 2,
+    "module": "auth"
+  },
+  {
+    "name": "search",
+    "status": "failed",
+    "duration": 3.1,
+    "build_id": 2,
+    "module": "catalog"
+  },
+  {
+    "name": "checkout",
+    "status": "failed",
+    "duration": 9.2,
+    "build_id": 2,
+    "module": "payment"
+  },
+  {
+    "name": "login",
+    "status": "passed",
+    "duration": 2.0,
+    "build_id": 3,
+    "module": "auth"
+  },
+  {
+    "name": "search",
+    "status": "passed",
+    "duration": 1.1,
+    "build_id": 3,
+    "module": "catalog"
+  },
+  {
+    "name": "checkout",
+    "status": "failed",
+    "duration": 10.1,
+    "build_id": 3,
+    "module": "payment"
+  }
+]

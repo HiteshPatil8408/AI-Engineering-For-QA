@@ -1,0 +1,674 @@
+[
+  {
+    "id": "p10-deadlines",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Provider adapters: deadlines and bounded retries",
+    "minutes": 35,
+    "objectives": [
+      "Provider adapters",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects provider adapters: deadlines and bounded retries with test contracts, failure triage, and evidence for release. The local provider lab exposes identical typed results from live and deterministic fixture adapters, with mode recorded in every report.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "An adapter isolates provider-specific request and response formats from domain logic. The domain asks for a typed classification; the adapter authenticates, sends the request, normalizes usage and translates errors. Keep credentials on the server, obtained from environment variables or a secret manager. Browser storage and exported progress must never contain a provider key.",
+          "A timeout limits one attempt; a deadline limits the whole operation, including waiting and retries. Without a deadline, three nominal ten-second attempts plus backoff can violate a fifteen-second service objective."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Classify errors before retrying: transport failures, 429 and selected 5xx responses may be transient; malformed input, authorization failure and unsupported schemas usually require correction. Use capped exponential backoff with jitter, respect Retry-After, and stop before the remaining deadline cannot cover another attempt.",
+          "Retry only operations whose effects are safe to repeat. For tool side effects, use a persisted idempotency key. Record attempt count, provider request ID, elapsed time and final error without logging credentials or full sensitive prompts."
+        ],
+        "code": "def retryable(status):\n    return status == 429 or 500 <= status < 600\nassert not retryable(401)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Catching every Exception and retrying an invalid API key multiplies latency without any chance of success. Retrying a tool after a network timeout can execute the same write twice even when the client never received the first result.",
+          "Inject failures at the HTTP boundary with a mock transport. Assert that 401 has one attempt, 429 honors the retry policy, the deadline terminates work, and cancellation is propagated rather than swallowed."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The local provider lab exposes identical typed results from live and deterministic fixture adapters, with mode recorded in every report. Fixture mode tests application behavior; live mode measures model behavior and requires explicit environment credentials.",
+          "Gate releases on malformed-response handling, authentication isolation and timeout behavior before evaluating classification quality. A valid model answer that arrives after the application deadline is not a successful user task."
+        ]
+      }
+    ],
+    "mistake": "Catching every Exception and retrying an invalid API key multiplies latency without any chance of success. Retrying a tool after a network timeout can execute the same write twice even when the client never received the first result.",
+    "takeaway": "The local provider lab exposes identical typed results from live and deterministic fixture adapters, with mode recorded in every report.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def backoff(attempt,cap=8):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def backoff(attempt,cap=8):\n    if attempt<0: raise ValueError('attempt')\n    return min(cap,2**attempt)",
+      "starter": "def backoff(attempt,cap=8):\n    return 0",
+      "tests": "assert backoff(0)==1\nassert backoff(4)==8\ntry: backoff(-1); assert False\nexcept ValueError: pass",
+      "id": "p10-deadlines-exercise",
+      "hints": [
+        "An adapter isolates provider-specific request and response formats from domain logic.",
+        "Catching every Exception and retrying an invalid API key multiplies latency without any chance of success.",
+        "Classify errors before retrying: transport failures, 429 and selected 5xx responses may be transient; malformed input, authorization failure and unsupported schemas usually require correction.",
+        "The local provider lab exposes identical typed results from live and deterministic fixture adapters, with mode recorded in every report."
+      ],
+      "explanation": "def backoff(attempt,cap=8):\n    if attempt<0: raise ValueError('attempt')\n    return min(cap,2**attempt)"
+    },
+    "quiz": {
+      "question": "Which failure should ordinarily stop retries?",
+      "options": [
+        "Invalid authentication",
+        "Temporary rate limit",
+        "Transient gateway error"
+      ],
+      "answer": 0,
+      "explanation": "Authentication requires fixing credentials; retries cannot repair them."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which failure should ordinarily stop retries?",
+      "options": [
+        "Invalid authentication",
+        "Temporary rate limit",
+        "Transient gateway error"
+      ],
+      "answer": 0,
+      "explanation": "Authentication requires fixing credentials; retries cannot repair them."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/error-codes",
+      "https://www.python-httpx.org/advanced/timeouts/",
+      "https://developers.openai.com/api/docs/guides/structured-outputs"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p09-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Deadline",
+      "Exponential backoff",
+      "Idempotency"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-011",
+      "bridge-transformers--llm-012",
+      "bridge-transformers--llm-013",
+      "bridge-phase-10-3",
+      "bridge-phase-10-4",
+      "bridge-phase-10-5",
+      "bridge-phase-10-6",
+      "bridge-phase-10-7"
+    ]
+  },
+  {
+    "id": "p10-streaming",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Streaming and bounded concurrent inference",
+    "minutes": 35,
+    "objectives": [
+      "Streaming and bounded concurrent inference",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects streaming and bounded concurrent inference with test contracts, failure triage, and evidence for release. Replay a recorded event sequence through the adapter and measure TTFT, final latency and validation status.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Streaming emits a sequence of events before the final response exists. First-token latency describes responsiveness, while end-to-end latency includes the full completion. A partial JSON fragment is not a typed domain result. Treat transport events, assembled output and final validated response as separate objects.",
+          "Concurrency overlaps waiting; it does not remove rate limits. A semaphore bounds in-flight work while a queue bounds pending work. Backpressure prevents a traffic spike from consuming unbounded memory."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use asynchronous clients, connection pooling, an overall deadline and cancellation on client disconnect. Assemble deltas in order, retain a finish reason, and validate only the final payload. A streaming error must end the UI in a visible failed or partial state.",
+          "Track queue time separately from provider time. Set limits for per-tenant concurrency, output tokens and queue length. Retries enter the same capacity budget as first attempts so outages do not create a retry storm."
+        ],
+        "code": "events=['{\"category\":', '\"UNKNOWN\"}']\nassembled=''.join(events)\nimport json\nassert json.loads(assembled)['category']=='UNKNOWN'",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "An API returns success when the first stream event arrives, then ignores a truncated stream. Another implementation opens hundreds of connections with gather over an unbounded list. Both can pass a single happy-path test.",
+          "Test duplicate events, missing completion events, cancellation, abrupt disconnects and queue saturation. Ensure cancellation releases permits and that a partial response is not cached as a complete answer."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Replay a recorded event sequence through the adapter and measure TTFT, final latency and validation status. Load tests must include long outputs and slow clients, not only short classifications.",
+          "For SDET evidence, report in-flight maximum, rejected queue entries and whether every completed result passed schema validation. Separate capacity failures from model-quality failures in the release report."
+        ]
+      }
+    ],
+    "mistake": "An API returns success when the first stream event arrives, then ignores a truncated stream. Another implementation opens hundreds of connections with gather over an unbounded list. Both can pass a single happy-path test.",
+    "takeaway": "Replay a recorded event sequence through the adapter and measure TTFT, final latency and validation status.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def assemble(events):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def assemble(events):\n    import json\n    if not events or events[-1].get('type')!='done': raise ValueError('incomplete')\n    return json.loads(''.join(e.get('text','') for e in events if e.get('type')=='delta'))",
+      "starter": "def assemble(events):\n    return {}",
+      "tests": "assert assemble([{'type':'delta','text':'{\"x\":1}'},{'type':'done'}])=={'x':1}\ntry: assemble([{'type':'delta','text':'{}'}]); assert False\nexcept ValueError: pass",
+      "id": "p10-streaming-exercise",
+      "hints": [
+        "Streaming emits a sequence of events before the final response exists.",
+        "An API returns success when the first stream event arrives, then ignores a truncated stream.",
+        "Use asynchronous clients, connection pooling, an overall deadline and cancellation on client disconnect.",
+        "Replay a recorded event sequence through the adapter and measure TTFT, final latency and validation status."
+      ],
+      "explanation": "def assemble(events):\n    import json\n    if not events or events[-1].get('type')!='done': raise ValueError('incomplete')\n    return json.loads(''.join(e.get('text','') for e in events if e.get('type')=='delta'))"
+    },
+    "quiz": {
+      "question": "When is streamed structured output a validated result?",
+      "options": [
+        "After completion and schema validation",
+        "After the first text fragment",
+        "When TTFT is low"
+      ],
+      "answer": 0,
+      "explanation": "A fragment can be incomplete or followed by an error."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: When is streamed structured output a validated result?",
+      "options": [
+        "After completion and schema validation",
+        "After the first text fragment",
+        "When TTFT is low"
+      ],
+      "answer": 0,
+      "explanation": "A fragment can be incomplete or followed by an error."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/error-codes",
+      "https://www.python-httpx.org/advanced/timeouts/",
+      "https://developers.openai.com/api/docs/guides/structured-outputs"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p10-deadlines"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Streaming",
+      "Backpressure",
+      "TTFT"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-011",
+      "bridge-transformers--llm-012",
+      "bridge-transformers--llm-013",
+      "bridge-phase-10-3",
+      "bridge-phase-10-4",
+      "bridge-phase-10-5",
+      "bridge-phase-10-6",
+      "bridge-phase-10-7"
+    ]
+  },
+  {
+    "id": "p10-normalization",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Normalize provider outcomes without hiding failures",
+    "minutes": 35,
+    "objectives": [
+      "Normalize provider outcomes without hiding failures",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects normalize provider outcomes without hiding failures with test contracts, failure triage, and evidence for release. Acceptance demonstrates typed normalization, visible failure mapping and client cleanup for every outcome.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A provider's response envelope includes more than generated text: completion status, refusals, request IDs, token usage and sometimes partial results. Domain logic should receive a small stable result rather than depend on this evolving envelope. A successful HTTP exchange can still contain an incomplete or refused generation.",
+          "Define normal completion, refusal, unavailable and invalid-output outcomes before implementation. Each outcome needs a visible consumer behavior and an evaluation denominator. Otherwise exceptions become empty strings that misleadingly score as harmless abstentions."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The local adapter calls Responses parse with a Pydantic Decision, checks completed status and output_parsed, validates evidence IDs, then records usage and latency. It closes the async client in finally. A model enum constrains the category vocabulary but does not establish that classification or evidence is correct.",
+          "Map transport and timeout failures to unavailable; retain refusal as a distinct adapter result in a richer deployment. Keep safe provider correlation IDs for diagnosis. Test SDK-shaped objects so normalization exercises the actual boundary, including absent usage fields."
+        ],
+        "code": "# local-labs/quality/provider.py\n# response.status == 'completed' and response.output_parsed is not None",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A code path extracts output[0].content[0].text and breaks when a refusal appears first. Another reports category UNKNOWN after a timeout, inflating apparently safe model behavior. Provider upgrade changes token metadata and billing reports silently become zero.",
+          "Inject completed, incomplete, refused and malformed envelopes. Assert that incomplete output never reaches domain persistence. Test missing optional usage separately from missing required parsed content."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance demonstrates typed normalization, visible failure mapping and client cleanup for every outcome. A fixture SDK test verifies configuration without spending provider tokens; a credentialed integration run separately checks provider behavior.",
+          "For SDETs, this is contract testing across an external boundary. Pin the installed SDK in a lock or environment record, retain its version with integration evidence, and rerun boundary tests after upgrades."
+        ]
+      }
+    ],
+    "mistake": "A code path extracts output[0].content[0].text and breaks when a refusal appears first. Another reports category UNKNOWN after a timeout, inflating apparently safe model behavior. Provider upgrade changes token metadata and billing reports silently become zero.",
+    "takeaway": "Acceptance demonstrates typed normalization, visible failure mapping and client cleanup for every outcome.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def normalize(status,parsed):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def normalize(status,parsed):\n    if status!='completed':return {'status':'incomplete','value':None}\n    if parsed is None:return {'status':'invalid','value':None}\n    return {'status':'ready','value':parsed}",
+      "starter": "def normalize(status,parsed):\n    return {}",
+      "tests": "assert normalize('incomplete',{'x':1})['value'] is None\nassert normalize('completed',None)['status']=='invalid'\nassert normalize('completed',{'x':1})['status']=='ready'",
+      "id": "p10-normalization-exercise",
+      "hints": [
+        "A provider's response envelope includes more than generated text: completion status, refusals, request IDs, token usage and sometimes partial results.",
+        "A code path extracts output[0].content[0].text and breaks when a refusal appears first.",
+        "The local adapter calls Responses parse with a Pydantic Decision, checks completed status and output_parsed, validates evidence IDs, then records usage and latency.",
+        "Acceptance demonstrates typed normalization, visible failure mapping and client cleanup for every outcome."
+      ],
+      "explanation": "def normalize(status,parsed):\n    if status!='completed':return {'status':'incomplete','value':None}\n    if parsed is None:return {'status':'invalid','value':None}\n    return {'status':'ready','value':parsed}"
+    },
+    "quiz": {
+      "question": "Does HTTP success prove a completed domain answer?",
+      "options": [
+        "No: inspect completion and parsed-domain invariants",
+        "Yes: status 200 is sufficient",
+        "Only if token usage is present"
+      ],
+      "answer": 0,
+      "explanation": "Envelope and domain validity are separate contracts."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Does HTTP success prove a completed domain answer?",
+      "options": [
+        "No: inspect completion and parsed-domain invariants",
+        "Yes: status 200 is sufficient",
+        "Only if token usage is present"
+      ],
+      "answer": 0,
+      "explanation": "Envelope and domain validity are separate contracts."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/error-codes",
+      "https://www.python-httpx.org/advanced/timeouts/",
+      "https://developers.openai.com/api/docs/guides/structured-outputs"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p10-streaming"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Provider adapter",
+      "Refusal"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-011",
+      "bridge-transformers--llm-012",
+      "bridge-transformers--llm-013",
+      "bridge-phase-10-3",
+      "bridge-phase-10-4",
+      "bridge-phase-10-5",
+      "bridge-phase-10-6",
+      "bridge-phase-10-7"
+    ]
+  },
+  {
+    "id": "p10-secrets",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Credentials, model routing and reproducible request configuration",
+    "minutes": 35,
+    "objectives": [
+      "Credentials, model routing and reproducible request configuration",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects credentials, model routing and reproducible request configuration with test contracts, failure triage, and evidence for release. Acceptance includes server-only key handling, explicit execution mode and a safe configuration manifest.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Credentials authorize provider access and belong in the server's secret boundary. Model names, request parameters and endpoint choice are configuration, but a user-supplied endpoint can redirect secrets to an attacker. Treat provider routing as an allowlisted deployment decision rather than a free-form request field.",
+          "A reproducible experiment records configuration without recording the secret: model identifier, SDK version, prompt revision, output cap, timeout and mode. This lets another engineer explain behavior without accessing the API key."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The live classifier obtains OPENAI_API_KEY and OPENAI_MODEL from the environment and uses a fixed application adapter. Its API request model rejects api_key as an extra field. Keep the fixture mode visibly separate so a passing offline test cannot imply a successful live model call.",
+          "For multiple providers, create adapters implementing the same domain contract. Route only among approved configurations and compare models on identical case IDs. Reject unknown names and validate credential availability at startup or readiness for the required live mode."
+        ],
+        "code": "# Server environment only; never put provider keys in VITE_* variables\n# .env.example documents names without credentials",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A browser component includes a key in its bundled environment variables. An error logs authorization headers. A request chooses an arbitrary base URL and causes the server to send its credential elsewhere. A benchmark forgets which model produced the result.",
+          "Inspect generated assets and public error bodies for secret canaries. Test unknown routing values and missing credentials. Redact secrets at log creation, not just when presenting the final report."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes server-only key handling, explicit execution mode and a safe configuration manifest. The course's public fixture requires no paid credentials; a live run must record real provider outcomes rather than relabel fixture text.",
+          "SDETs can compare adapters through the same conformance suite, then add provider-specific integration cases for errors, schemas and usage. Configuration compatibility is a release concern, not merely a setup detail."
+        ]
+      }
+    ],
+    "mistake": "A browser component includes a key in its bundled environment variables. An error logs authorization headers. A request chooses an arbitrary base URL and causes the server to send its credential elsewhere. A benchmark forgets which model produced the result.",
+    "takeaway": "Acceptance includes server-only key handling, explicit execution mode and a safe configuration manifest.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def public_config(config):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def public_config(config):\n    allowed={'model','sdk_version','prompt_revision','output_cap','mode'}\n    return {k:v for k,v in config.items() if k in allowed}",
+      "starter": "def public_config(config):\n    return {}",
+      "tests": "assert public_config({'model':'m','api_key':'secret'})=={'model':'m'}\nassert 'authorization' not in public_config({'authorization':'token'})",
+      "id": "p10-secrets-exercise",
+      "hints": [
+        "Credentials authorize provider access and belong in the server's secret boundary.",
+        "A browser component includes a key in its bundled environment variables.",
+        "The live classifier obtains OPENAI_API_KEY and OPENAI_MODEL from the environment and uses a fixed application adapter.",
+        "Acceptance includes server-only key handling, explicit execution mode and a safe configuration manifest."
+      ],
+      "explanation": "def public_config(config):\n    allowed={'model','sdk_version','prompt_revision','output_cap','mode'}\n    return {k:v for k,v in config.items() if k in allowed}"
+    },
+    "quiz": {
+      "question": "Where should provider credentials live?",
+      "options": [
+        "Server secret boundary",
+        "Public frontend environment bundle",
+        "Exported learner progress"
+      ],
+      "answer": 0,
+      "explanation": "Client-delivered assets and progress exports are observable."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Where should provider credentials live?",
+      "options": [
+        "Server secret boundary",
+        "Public frontend environment bundle",
+        "Exported learner progress"
+      ],
+      "answer": 0,
+      "explanation": "Client-delivered assets and progress exports are observable."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/error-codes",
+      "https://www.python-httpx.org/advanced/timeouts/",
+      "https://developers.openai.com/api/docs/guides/structured-outputs"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p10-normalization"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Secret management",
+      "Model routing"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-011",
+      "bridge-transformers--llm-012",
+      "bridge-transformers--llm-013",
+      "bridge-phase-10-3",
+      "bridge-phase-10-4",
+      "bridge-phase-10-5",
+      "bridge-phase-10-6",
+      "bridge-phase-10-7"
+    ]
+  },
+  {
+    "id": "p10-accounting",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Token accounting and bounded generation requests",
+    "minutes": 35,
+    "objectives": [
+      "Token accounting and bounded generation requests",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects token accounting and bounded generation requests with test contracts, failure triage, and evidence for release. Acceptance demonstrates budget arithmetic and separate complete/incomplete outcomes.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Input and output tokens drive cost and occupy context. They are not equivalent to characters or words; serialization, roles and tool schemas also consume input space. Count with the selected model's tokenizer when available, then use provider-reported usage for actual accounting.",
+          "Output limits bound generation but do not guarantee a complete structured object. A low cap may increase incomplete results and retries, making a superficially cheaper configuration more expensive per successful task."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Reserve context for completion and essential instructions before adding authorized evidence. The adapter applies max_output_tokens=512 for its compact classification contract and treats incomplete generation as failure. The tokenization lab loads the configured real Hugging Face tokenizer so learners can compare punctuation and multilingual strings.",
+          "Record input/output usage, retries and success status per case. Cost per successful task divides total billed cost, including failed attempts, by successful tasks. Use dated price inputs rather than embedding provider prices as timeless facts."
+        ],
+        "code": ".venv/bin/python local-labs/deep-learning/tokenize.py --help",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A report counts only the last successful retry. A character-based budget undercounts multilingual input. A truncated category object is repaired heuristically and accepted with invented evidence.",
+          "Test zero successful tasks, missing usage metadata, long prompts and deliberately small output caps. Distinguish measured usage from estimates and avoid interpreting absent usage as known zero cost."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance demonstrates budget arithmetic and separate complete/incomplete outcomes. Compare paired request configurations on quality, latency and total cost per successful task. A cap is acceptable only when required task completion remains above its target.",
+          "SDETs should retain failures in the cost denominator and report tokenizer/configuration versions. Performance and finance evidence becomes useful when the measured workload and successful task definition are explicit."
+        ]
+      }
+    ],
+    "mistake": "A report counts only the last successful retry. A character-based budget undercounts multilingual input. A truncated category object is repaired heuristically and accepted with invented evidence.",
+    "takeaway": "Acceptance demonstrates budget arithmetic and separate complete/incomplete outcomes.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def cost_per_success(costs,successes):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def cost_per_success(costs,successes):\n    if successes<=0:return None\n    return sum(costs)/successes",
+      "starter": "def cost_per_success(costs,successes):\n    return 0",
+      "tests": "assert cost_per_success([1,2,3],2)==3\nassert cost_per_success([2],0) is None",
+      "id": "p10-accounting-exercise",
+      "hints": [
+        "Input and output tokens drive cost and occupy context.",
+        "A report counts only the last successful retry.",
+        "Reserve context for completion and essential instructions before adding authorized evidence.",
+        "Acceptance demonstrates budget arithmetic and separate complete/incomplete outcomes."
+      ],
+      "explanation": "def cost_per_success(costs,successes):\n    if successes<=0:return None\n    return sum(costs)/successes"
+    },
+    "quiz": {
+      "question": "Which attempts belong in cost per successful task?",
+      "options": [
+        "All billed attempts, including failures",
+        "Only the final success",
+        "Only requests with low latency"
+      ],
+      "answer": 0,
+      "explanation": "Failed attempts consume resources even when they produce no usable result."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which attempts belong in cost per successful task?",
+      "options": [
+        "All billed attempts, including failures",
+        "Only the final success",
+        "Only requests with low latency"
+      ],
+      "answer": 0,
+      "explanation": "Failed attempts consume resources even when they produce no usable result."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/error-codes",
+      "https://www.python-httpx.org/advanced/timeouts/",
+      "https://developers.openai.com/api/docs/guides/structured-outputs"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p10-secrets"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Token budget",
+      "Cost per task"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-011",
+      "bridge-transformers--llm-012",
+      "bridge-transformers--llm-013",
+      "bridge-phase-10-3",
+      "bridge-phase-10-4",
+      "bridge-phase-10-5",
+      "bridge-phase-10-6",
+      "bridge-phase-10-7"
+    ]
+  },
+  {
+    "id": "p10-checkpoint",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Phase 10 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 10 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 10 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance demonstrates budget arithmetic and separate complete/incomplete outcomes.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects token accounting and bounded generation requests to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Reserve context for completion and essential instructions before adding authorized evidence. The adapter applies max_output_tokens=512 for its compact classification contract and treats incomplete generation as failure. The tokenization lab loads the configured real Hugging Face tokenizer so learners can compare punctuation and multilingual strings.",
+          "Record input/output usage, retries and success status per case. Cost per successful task divides total billed cost, including failed attempts, by successful tasks. Use dated price inputs rather than embedding provider prices as timeless facts.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": ".venv/bin/python local-labs/deep-learning/tokenize.py --help",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A report counts only the last successful retry. A character-based budget undercounts multilingual input. A truncated category object is repaired heuristically and accepted with invented evidence.",
+          "Test zero successful tasks, missing usage metadata, long prompts and deliberately small output caps. Distinguish measured usage from estimates and avoid interpreting absent usage as known zero cost.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance demonstrates budget arithmetic and separate complete/incomplete outcomes. Compare paired request configurations on quality, latency and total cost per successful task. A cap is acceptable only when required task completion remains above its target.",
+          "SDETs should retain failures in the cost denominator and report tokenizer/configuration versions. Performance and finance evidence becomes useful when the measured workload and successful task definition are explicit.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A report counts only the last successful retry. A character-based budget undercounts multilingual input. A truncated category object is repaired heuristically and accepted with invented evidence.",
+    "takeaway": "Acceptance demonstrates budget arithmetic and separate complete/incomplete outcomes.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Token accounting and bounded generation requests to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance demonstrates budget arithmetic and separate complete/incomplete outcomes.",
+      "id": "p10-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects token accounting and bounded generation requests to the shared CI quality platform.",
+        "A report counts only the last successful retry.",
+        "Reserve context for completion and essential instructions before adding authorized evidence.",
+        "Acceptance demonstrates budget arithmetic and separate complete/incomplete outcomes."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance demonstrates budget arithmetic and separate complete/incomplete outcomes."
+    },
+    "quiz": {
+      "question": "A candidate for token accounting and bounded generation requests meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for token accounting and bounded generation requests meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/error-codes",
+      "https://www.python-httpx.org/advanced/timeouts/",
+      "https://developers.openai.com/api/docs/guides/structured-outputs"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p10-accounting"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-transformers--llm-011",
+      "bridge-transformers--llm-012",
+      "bridge-transformers--llm-013",
+      "bridge-phase-10-3",
+      "bridge-phase-10-4",
+      "bridge-phase-10-5",
+      "bridge-phase-10-6",
+      "bridge-phase-10-7"
+    ]
+  }
+]

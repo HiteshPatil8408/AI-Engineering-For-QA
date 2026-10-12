@@ -1,0 +1,14 @@
+[
+  {
+    "request_id": "synthetic-1",
+    "route": "/ask",
+    "status": 200,
+    "latency_ms": 340
+  },
+  {
+    "request_id": "synthetic-2",
+    "route": "/ask",
+    "status": 504,
+    "latency_ms": 1000
+  }
+]

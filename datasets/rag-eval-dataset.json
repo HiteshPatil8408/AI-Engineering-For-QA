@@ -1,0 +1,23 @@
+[
+  {
+    "id": "r1",
+    "query": "When do sessions expire?",
+    "expected_document": "auth.md",
+    "expected": "30 minutes of inactivity",
+    "answerable": true
+  },
+  {
+    "id": "r2",
+    "query": "Can a declined card be retried automatically?",
+    "expected_document": "payments.md",
+    "expected": "Never",
+    "answerable": true
+  },
+  {
+    "id": "r3",
+    "query": "What is the office address?",
+    "expected_document": null,
+    "expected": "Insufficient evidence",
+    "answerable": false
+  }
+]

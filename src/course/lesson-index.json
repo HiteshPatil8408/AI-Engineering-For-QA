@@ -1,0 +1,4246 @@
+[
+  {
+    "id": "orientation",
+    "phase": 0,
+    "module": "Your new engineering role",
+    "title": "From SDET to AI quality engineer",
+    "minutes": 30,
+    "objectives": [
+      "Distinguish testing with AI from testing AI",
+      "Map existing SDET skills to probabilistic systems",
+      "Identify the evidence needed to release an AI feature"
+    ],
+    "prerequisites": [],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "orientation-exercise",
+      "kind": "classification",
+      "prompt": "Classify these 15 engineering tasks. Consider the primary purpose of each task."
+    },
+    "sections": []
+  },
+  {
+    "id": "environment",
+    "phase": 0,
+    "module": "Your new engineering role",
+    "title": "A reproducible engineering workspace",
+    "minutes": 26,
+    "objectives": [
+      "Isolate dependencies in a virtual environment",
+      "Separate experiments from production modules",
+      "Keep secrets out of browser applications"
+    ],
+    "prerequisites": [
+      "orientation"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "environment-exercise",
+      "kind": "order",
+      "prompt": "Put workspace setup in a reproducible order."
+    },
+    "sections": []
+  },
+  {
+    "id": "p00-risk-contract",
+    "phase": 0,
+    "module": "Orientation: From SDET To AI Quality Engineer",
+    "title": "Define an AI release contract",
+    "minutes": 35,
+    "objectives": [
+      "Define an AI release contract",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "environment"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p00-risk-contract-exercise",
+      "kind": "rubric",
+      "prompt": "Design the release contract for a CI-log summarizer that can access two synthetic tenants. Include hard gates, quality evidence, and an outage fallback."
+    },
+    "sections": []
+  },
+  {
+    "id": "p00-checkpoint",
+    "phase": 0,
+    "module": "Orientation: From SDET To AI Quality Engineer",
+    "title": "Phase 00 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 00 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p00-risk-contract"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p00-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Define an AI release contract to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "python-values",
+    "phase": 1,
+    "module": "Python fundamentals",
+    "title": "Values, collections, and API contracts",
+    "minutes": 26,
+    "objectives": [
+      "Choose the right collection for a test result",
+      "Understand mutable objects and missing fields",
+      "Normalize external values at a contract boundary"
+    ],
+    "prerequisites": [
+      "p00-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "python-values-exercise",
+      "kind": "choice",
+      "prompt": "What does original[0][\"status\"] print after the shallow-copy example?"
+    },
+    "sections": []
+  },
+  {
+    "id": "python-control",
+    "phase": 1,
+    "module": "Python fundamentals",
+    "title": "Filter, transform, and summarize test runs",
+    "minutes": 26,
+    "objectives": [
+      "Use loops and comprehensions for explicit transformations",
+      "Implement a pure function with clear return values",
+      "Handle empty inputs deliberately"
+    ],
+    "prerequisites": [
+      "python-values"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "python-control-exercise",
+      "kind": "python",
+      "prompt": "Implement failed_names(runs). Return failed test names in input order; do not mutate the input."
+    },
+    "sections": []
+  },
+  {
+    "id": "python-functions",
+    "phase": 1,
+    "module": "Python fundamentals",
+    "title": "Functions, arguments, and maintainable modules",
+    "minutes": 26,
+    "objectives": [
+      "Use keyword-only arguments for important options",
+      "Understand module import behavior and scope",
+      "Separate I/O from transformation logic"
+    ],
+    "prerequisites": [
+      "python-control"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "python-functions-exercise",
+      "kind": "choice",
+      "prompt": "A generator yielded three failures. You iterate over it again. What happens?"
+    },
+    "sections": []
+  },
+  {
+    "id": "python-production",
+    "phase": 1,
+    "module": "Production Python",
+    "title": "Types, validation, and error boundaries",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish type hints from runtime validation",
+      "Represent domain records with dataclasses",
+      "Catch errors at the layer that can handle them"
+    ],
+    "prerequisites": [
+      "python-functions"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "python-production-exercise",
+      "kind": "python",
+      "prompt": "Implement validate_duration(value): accept non-negative int/float values, reject booleans, negatives, and other types with ValueError."
+    },
+    "sections": []
+  },
+  {
+    "id": "python-tests",
+    "phase": 1,
+    "module": "Python testing",
+    "title": "Test the analyzer, including what can break",
+    "minutes": 26,
+    "objectives": [
+      "Design boundary tests with pytest",
+      "Use parametrization and fixtures deliberately",
+      "Mock external dependencies at their boundary"
+    ],
+    "prerequisites": [
+      "python-production"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "python-tests-exercise",
+      "kind": "choice",
+      "prompt": "Which test catches hidden state between calls?"
+    },
+    "sections": []
+  },
+  {
+    "id": "p01-async",
+    "phase": 1,
+    "module": "Python For AI And Test Automation Engineers",
+    "title": "Bounded async, cancellation, and retry",
+    "minutes": 35,
+    "objectives": [
+      "Bounded async, cancellation, and retry",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "python-tests"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p01-async-exercise",
+      "kind": "python",
+      "prompt": "Implement retryable(status): retry only 429 and 500\u2013599. A 400 validation failure must not retry."
+    },
+    "sections": []
+  },
+  {
+    "id": "p01-models",
+    "phase": 1,
+    "module": "Python For AI And Test Automation Engineers",
+    "title": "Classes, enums, Pydantic, and contract testing",
+    "minutes": 35,
+    "objectives": [
+      "Classes, enums, Pydantic, and contract testing",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p01-async"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p01-models-exercise",
+      "kind": "rubric",
+      "prompt": "Propose tests for a Pydantic result API that currently accepts unknown status strings and leaked internal fields."
+    },
+    "sections": []
+  },
+  {
+    "id": "p01-files",
+    "phase": 1,
+    "module": "Python For AI And Test Automation Engineers",
+    "title": "Files, structured logs, and streaming reports",
+    "minutes": 35,
+    "objectives": [
+      "Files, structured logs, and streaming reports",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p01-models"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p01-files-exercise",
+      "kind": "python",
+      "prompt": "Implement count_status(rows): return status counts in a single pass over any iterable. Do not iterate twice."
+    },
+    "sections": []
+  },
+  {
+    "id": "p01-checkpoint",
+    "phase": 1,
+    "module": "Python For AI And Test Automation Engineers",
+    "title": "Phase 01 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 01 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p01-files"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p01-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Files, structured logs, and streaming reports to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "numpy-arrays",
+    "phase": 2,
+    "module": "Numerical computing",
+    "title": "Arrays, shapes, and vectorized metrics",
+    "minutes": 26,
+    "objectives": [
+      "Interpret array shape and axes",
+      "Use boolean masks and aggregation",
+      "Understand broadcasting instead of guessing"
+    ],
+    "prerequisites": [
+      "p01-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "numpy-arrays-exercise",
+      "kind": "choice",
+      "prompt": "A passed matrix has shape (10 runs, 4 tests). Which expression returns four pass rates?"
+    },
+    "sections": []
+  },
+  {
+    "id": "numpy-cosine",
+    "phase": 2,
+    "module": "Numerical computing",
+    "title": "Cosine similarity from first principles",
+    "minutes": 26,
+    "objectives": [
+      "Compute dot product and vector norms",
+      "Distinguish direction from magnitude",
+      "Handle zero vectors explicitly"
+    ],
+    "prerequisites": [
+      "numpy-arrays"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "numpy-cosine-exercise",
+      "kind": "python",
+      "prompt": "Implement cosine(a, b) with NumPy. Raise ValueError for zero vectors or shape mismatch."
+    },
+    "sections": []
+  },
+  {
+    "id": "numpy-sampling",
+    "phase": 2,
+    "module": "Numerical computing",
+    "title": "Sampling, masks, and reproducible experiments",
+    "minutes": 26,
+    "objectives": [
+      "Use a seeded random generator",
+      "Separate deterministic fixtures from statistical samples",
+      "Choose representative slices for evaluation"
+    ],
+    "prerequisites": [
+      "numpy-cosine"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "numpy-sampling-exercise",
+      "kind": "choice",
+      "prompt": "Your evaluation set contains only successful chatbot interactions. What is the main issue?"
+    },
+    "sections": []
+  },
+  {
+    "id": "p02-matrix",
+    "phase": 2,
+    "module": "Numerical Computing With Numpy",
+    "title": "Matrix shapes and normalized batch similarity",
+    "minutes": 35,
+    "objectives": [
+      "Matrix shapes and normalized batch similarity",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "numpy-sampling"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p02-matrix-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def batch_cosine(queries,docs):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p02-checkpoint",
+    "phase": 2,
+    "module": "Numerical Computing With Numpy",
+    "title": "Phase 02 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 02 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p02-matrix"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p02-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Matrix shapes and normalized batch similarity to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "pandas-clean",
+    "phase": 3,
+    "module": "CI data analysis",
+    "title": "Clean test history without hiding defects",
+    "minutes": 26,
+    "objectives": [
+      "Inspect DataFrame schema and missing values",
+      "Distinguish duplicates from legitimate retries",
+      "Define missing-value policies before aggregation"
+    ],
+    "prerequisites": [
+      "p02-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "pandas-clean-exercise",
+      "kind": "choice",
+      "prompt": "A run has a known failed status but an unknown duration. What should you do?"
+    },
+    "sections": []
+  },
+  {
+    "id": "pandas-group",
+    "phase": 3,
+    "module": "CI data analysis",
+    "title": "Pass rates and flaky-test analysis",
+    "minutes": 26,
+    "objectives": [
+      "Aggregate by meaningful groups",
+      "Keep run rate separate from test rate",
+      "Use mixed outcomes as evidence, not a verdict"
+    ],
+    "prerequisites": [
+      "pandas-clean"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "pandas-group-exercise",
+      "kind": "python",
+      "prompt": "Implement pass_rates(df) returning a dictionary of per-test pass rates. The DataFrame has test and status columns."
+    },
+    "sections": []
+  },
+  {
+    "id": "pandas-joins",
+    "phase": 3,
+    "module": "CI data analysis",
+    "title": "Joins, time windows, and regression signals",
+    "minutes": 26,
+    "objectives": [
+      "Validate merge cardinality",
+      "Compare duration trends within a test",
+      "Avoid leakage from future observations"
+    ],
+    "prerequisites": [
+      "pandas-group"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "pandas-joins-exercise",
+      "kind": "choice",
+      "prompt": "Every test_run should match one test_cases row. Which merge validation fits?"
+    },
+    "sections": []
+  },
+  {
+    "id": "p03-pivot",
+    "phase": 3,
+    "module": "Data Analysis With Pandas",
+    "title": "Pivot tables, UTC time, and leakage-safe features",
+    "minutes": 35,
+    "objectives": [
+      "Pivot tables, UTC time, and leakage-safe features",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "pandas-joins"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p03-pivot-exercise",
+      "kind": "python",
+      "prompt": "Implement previous_duration(df): sort by test then build; return the prior duration for each sorted row, replacing missing prior values with None."
+    },
+    "sections": []
+  },
+  {
+    "id": "p03-health",
+    "phase": 3,
+    "module": "Data Analysis With Pandas",
+    "title": "CI-health report: reruns, denominators and slow tests",
+    "minutes": 35,
+    "objectives": [
+      "CI-health report",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p03-pivot"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p03-health-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def latest_health(rows):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p03-checkpoint",
+    "phase": 3,
+    "module": "Data Analysis With Pandas",
+    "title": "Phase 03 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 03 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p03-health"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p03-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply CI-health report: reruns, denominators and slow tests to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "sql-basics",
+    "phase": 4,
+    "module": "Relational analysis",
+    "title": "Query test runs with explicit semantics",
+    "minutes": 26,
+    "objectives": [
+      "Filter before grouping when appropriate",
+      "Distinguish WHERE from HAVING",
+      "Use NULL-aware aggregates"
+    ],
+    "prerequisites": [
+      "p03-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "sql-basics-exercise",
+      "kind": "sql",
+      "prompt": "Return test_id and failures for every test with at least one failed run. Sort by test_id."
+    },
+    "sections": []
+  },
+  {
+    "id": "sql-joins",
+    "phase": 4,
+    "module": "Relational analysis",
+    "title": "Join failures to builds and defects",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish inner and outer joins",
+      "Preserve unmatched rows for investigation",
+      "Avoid accidental join multiplication"
+    ],
+    "prerequisites": [
+      "sql-basics"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "sql-joins-exercise",
+      "kind": "choice",
+      "prompt": "How do you count actual executions while retaining cases with zero executions?"
+    },
+    "sections": []
+  },
+  {
+    "id": "sql-windows",
+    "phase": 4,
+    "module": "Relational analysis",
+    "title": "Latest results, ranks, and failure streaks",
+    "minutes": 26,
+    "objectives": [
+      "Use window functions without collapsing rows",
+      "Make ordering deterministic",
+      "Find latest execution per test with a CTE"
+    ],
+    "prerequisites": [
+      "sql-joins"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "sql-windows-exercise",
+      "kind": "sql",
+      "prompt": "Return test_id and status for each test\u2019s latest result. Latest means highest build_id, then run_id. Sort by test_id."
+    },
+    "sections": []
+  },
+  {
+    "id": "p04-query-plans",
+    "phase": 4,
+    "module": "SQL For Test And AI Engineering",
+    "title": "Subqueries, CASE, UNION, and query plans",
+    "minutes": 35,
+    "objectives": [
+      "Subqueries, CASE, UNION, and query plans",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "sql-windows"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p04-query-plans-exercise",
+      "kind": "sql",
+      "prompt": "Return name for test cases with any failed execution. Sort by name. Use EXISTS to avoid multiplication."
+    },
+    "sections": []
+  },
+  {
+    "id": "p04-streaks",
+    "phase": 4,
+    "module": "SQL For Test And AI Engineering",
+    "title": "Consecutive failures: preserve passes in the window",
+    "minutes": 35,
+    "objectives": [
+      "Consecutive failures",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p04-query-plans"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p04-streaks-exercise",
+      "kind": "sql",
+      "prompt": "Return one name column for tests with three consecutive failed builds in the bundled fixture. Preserve passes before calculating windows."
+    },
+    "sections": []
+  },
+  {
+    "id": "p04-checkpoint",
+    "phase": 4,
+    "module": "SQL For Test And AI Engineering",
+    "title": "Phase 04 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 04 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p04-streaks"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p04-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Consecutive failures: preserve passes in the window to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "stats-descriptive",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Distributions, percentiles, and misleading averages",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish population from sample",
+      "Use median and p95 for skewed latency",
+      "Understand variance and standard deviation"
+    ],
+    "prerequisites": [
+      "p04-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "stats-descriptive-exercise",
+      "kind": "choice",
+      "prompt": "Latencies are 100, 110, 120, 125, and 900 ms. What is the median?"
+    },
+    "sections": []
+  },
+  {
+    "id": "stats-probability",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Conditional probability and base rates",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish P(alert|defect) from P(defect|alert)",
+      "Use base rates when interpreting classifiers",
+      "Recognize dependence between repeated outcomes"
+    ],
+    "prerequisites": [
+      "stats-descriptive"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "stats-probability-exercise",
+      "kind": "choice",
+      "prompt": "A detector finds 90 true defects and produces 495 false alarms. Approximate precision?"
+    },
+    "sections": []
+  },
+  {
+    "id": "stats-comparison",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Is 85% really better than 82%?",
+    "minutes": 30,
+    "objectives": [
+      "Separate effect size from uncertainty",
+      "Design paired model comparisons",
+      "Avoid interpreting p-values as truth probabilities"
+    ],
+    "prerequisites": [
+      "stats-probability"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "stats-comparison-exercise",
+      "kind": "choice",
+      "prompt": "A scores 82%, B 85%. What is the best next step?"
+    },
+    "sections": []
+  },
+  {
+    "id": "stats-bootstrap",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Bootstrap evaluation differences",
+    "minutes": 26,
+    "objectives": [
+      "Resample paired cases with replacement",
+      "Compute an interval for score difference",
+      "State limitations of your evaluation sample"
+    ],
+    "prerequisites": [
+      "stats-comparison"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "stats-bootstrap-exercise",
+      "kind": "python",
+      "prompt": "Implement paired_differences(a, b): return a NumPy array of b-a. Reject unequal shapes."
+    },
+    "sections": []
+  },
+  {
+    "id": "p05-experiments",
+    "phase": 5,
+    "module": "Statistics For Quality And AI Evaluation",
+    "title": "Confidence intervals, power, and A/B experiments",
+    "minutes": 35,
+    "objectives": [
+      "Confidence intervals, power, and A/B experiments",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "stats-bootstrap"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p05-experiments-exercise",
+      "kind": "python",
+      "prompt": "Implement effect_pp(a, b): success proportions must be between 0 and 1; return B-A in percentage points."
+    },
+    "sections": []
+  },
+  {
+    "id": "p05-checkpoint",
+    "phase": 5,
+    "module": "Statistics For Quality And AI Evaluation",
+    "title": "Phase 05 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 05 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p05-experiments"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p05-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Confidence intervals, power, and A/B experiments to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p06-formulation",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Formulate a failure-classification problem",
+    "minutes": 35,
+    "objectives": [
+      "Formulate a failure-classification problem",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p05-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p06-formulation-exercise",
+      "kind": "python",
+      "prompt": "Implement disjoint_groups(train, test): return True only if incident-group identifiers do not overlap."
+    },
+    "sections": []
+  },
+  {
+    "id": "p06-splits",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Preprocessing, cross-validation, and generalization",
+    "minutes": 35,
+    "objectives": [
+      "Preprocessing, cross-validation, and generalization",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p06-formulation"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p06-splits-exercise",
+      "kind": "rubric",
+      "prompt": "A classifier scores 99% after TF-IDF was fit on all data and retries were split randomly. Repair the evaluation plan."
+    },
+    "sections": []
+  },
+  {
+    "id": "p06-algorithms",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Linear models, neighbors, trees, and ensembles",
+    "minutes": 35,
+    "objectives": [
+      "Linear models, neighbors, trees, and ensembles",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p06-splits"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p06-algorithms-exercise",
+      "kind": "python",
+      "prompt": "Implement mae(actual,predicted): equal non-empty lengths are required. Return mean absolute error."
+    },
+    "sections": []
+  },
+  {
+    "id": "p06-metrics",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Confusion matrices, imbalance, and thresholds",
+    "minutes": 35,
+    "objectives": [
+      "Confusion matrices, imbalance, and thresholds",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p06-algorithms"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p06-metrics-exercise",
+      "kind": "python",
+      "prompt": "Implement prf(tp,fp,fn): return (precision, recall, f1). Use 0.0 for zero denominators."
+    },
+    "sections": []
+  },
+  {
+    "id": "p06-unsupervised",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Clustering and anomaly detection for CI triage",
+    "minutes": 35,
+    "objectives": [
+      "Clustering and anomaly detection for CI triage",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p06-metrics"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p06-unsupervised-exercise",
+      "kind": "python",
+      "prompt": "Implement unusual(value,mean,sd,limit=3): flag an absolute z-score above limit. Reject sd <= 0."
+    },
+    "sections": []
+  },
+  {
+    "id": "p06-checkpoint",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Phase 06 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 06 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p06-unsupervised"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p06-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Clustering and anomaly detection for CI triage to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p07-neuron",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "Neurons, activations, tensors, and initialization",
+    "minutes": 35,
+    "objectives": [
+      "Neurons, activations, tensors, and initialization",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p06-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p07-neuron-exercise",
+      "kind": "python",
+      "prompt": "Implement relu_neuron(x,w,b): return max(0,w*x+b)."
+    },
+    "sections": []
+  },
+  {
+    "id": "p07-gradient",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "Gradient descent and the learning-rate contract",
+    "minutes": 35,
+    "objectives": [
+      "Gradient descent and the learning-rate contract",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p07-neuron"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p07-gradient-exercise",
+      "kind": "python",
+      "prompt": "Implement step(w,lr): take one gradient descent update for loss (w-3)^2."
+    },
+    "sections": []
+  },
+  {
+    "id": "p07-backprop",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "Backpropagation is the chain rule in a graph",
+    "minutes": 35,
+    "objectives": [
+      "Backpropagation is the chain rule in a graph",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p07-gradient"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p07-backprop-exercise",
+      "kind": "python",
+      "prompt": "Implement gradients(x,w1,w2,target): return (dL/dw1,dL/dw2) for the described network."
+    },
+    "sections": []
+  },
+  {
+    "id": "p07-training",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "Train and debug a small PyTorch classifier",
+    "minutes": 35,
+    "objectives": [
+      "Train and debug a small PyTorch classifier",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p07-backprop"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p07-training-exercise",
+      "kind": "rubric",
+      "prompt": "A five-class network outputs softmax twice, sees validation loss rise, and cannot be reproduced after saving. Diagnose and repair all three boundaries."
+    },
+    "sections": []
+  },
+  {
+    "id": "p07-architectures",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "From CNNs and recurrent networks to attention",
+    "minutes": 35,
+    "objectives": [
+      "From CNNs and recurrent networks to attention",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p07-training"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p07-architectures-exercise",
+      "kind": "choice",
+      "prompt": "Which architecture uses a hidden state updated sequentially across tokens?"
+    },
+    "sections": []
+  },
+  {
+    "id": "p07-checkpoint",
+    "phase": 7,
+    "module": "Deep Learning Foundations",
+    "title": "Phase 07 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 07 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p07-architectures"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p07-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply From CNNs and recurrent networks to attention to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p08-tokens",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Tokenization: text becomes an indexed sequence",
+    "minutes": 35,
+    "objectives": [
+      "Tokenization",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p07-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p08-tokens-exercise",
+      "kind": "python",
+      "prompt": "Implement encode(text, vocab): split on whitespace and map unknown tokens to vocab[\"<unk>\"]."
+    },
+    "sections": []
+  },
+  {
+    "id": "p08-attention",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Attention: query, key and value with a causal mask",
+    "minutes": 35,
+    "objectives": [
+      "Attention",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p08-tokens"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p08-attention-exercise",
+      "kind": "python",
+      "prompt": "Implement softmax(scores), stable for very large scores. Return [] for no scores."
+    },
+    "sections": []
+  },
+  {
+    "id": "p08-blocks",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Transformer blocks: position, residuals and encoder\u2013decoder roles",
+    "minutes": 35,
+    "objectives": [
+      "Transformer blocks",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p08-attention"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p08-blocks-exercise",
+      "kind": "rubric",
+      "prompt": "Describe tests for a padded log classifier and a causal generator. Include both shape and information-flow checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p08-objective",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Next-token training: shifted targets and cross-entropy",
+    "minutes": 35,
+    "objectives": [
+      "Next-token training",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p08-blocks"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p08-objective-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def nll(probabilities):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p08-positions",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Position information and causal invariance tests",
+    "minutes": 35,
+    "objectives": [
+      "Position information and causal invariance tests",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p08-objective"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p08-positions-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def causal_allowed(query_position,key_position):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p08-checkpoint",
+    "phase": 8,
+    "module": "NLP And Transformer Foundations",
+    "title": "Phase 08 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 08 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p08-positions"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p08-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Position information and causal invariance tests to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p09-lifecycle",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Pretraining, instruction tuning and grounded generation",
+    "minutes": 35,
+    "objectives": [
+      "Pretraining, instruction tuning and grounded generation",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p08-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p09-lifecycle-exercise",
+      "kind": "python",
+      "prompt": "Implement valid_decision(result): UNKNOWN requires needs_review=True; any other category requires at least one evidence_id."
+    },
+    "sections": []
+  },
+  {
+    "id": "p09-decoding",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Temperature, top-p and repeatability",
+    "minutes": 35,
+    "objectives": [
+      "Temperature, top-p and repeatability",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p09-lifecycle"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p09-decoding-exercise",
+      "kind": "python",
+      "prompt": "Implement nucleus(probs,p), returning ranked token indices through cumulative p. Reject p outside (0,1]."
+    },
+    "sections": []
+  },
+  {
+    "id": "p09-selection",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Model selection: quality, context, latency and cost",
+    "minutes": 35,
+    "objectives": [
+      "Model selection",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p09-decoding"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p09-selection-exercise",
+      "kind": "python",
+      "prompt": "Implement cost_usd(input_tokens,output_tokens,input_rate,output_rate) for rates per million. Reject negative quantities."
+    },
+    "sections": []
+  },
+  {
+    "id": "p09-variability",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Non-determinism: contract stability versus wording changes",
+    "minutes": 35,
+    "objectives": [
+      "Non-determinism",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p09-selection"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p09-variability-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def agreement(outputs):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p09-context-failures",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Context degradation, stale knowledge and explicit abstention",
+    "minutes": 35,
+    "objectives": [
+      "Context degradation, stale knowledge and explicit abstention",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p09-variability"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p09-context-failures-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def select_current(docs,tenant,version):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p09-checkpoint",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Phase 09 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 09 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p09-context-failures"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p09-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Context degradation, stale knowledge and explicit abstention to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p10-deadlines",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Provider adapters: deadlines and bounded retries",
+    "minutes": 35,
+    "objectives": [
+      "Provider adapters",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p09-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p10-deadlines-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def backoff(attempt,cap=8):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p10-streaming",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Streaming and bounded concurrent inference",
+    "minutes": 35,
+    "objectives": [
+      "Streaming and bounded concurrent inference",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p10-deadlines"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p10-streaming-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def assemble(events):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p10-normalization",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Normalize provider outcomes without hiding failures",
+    "minutes": 35,
+    "objectives": [
+      "Normalize provider outcomes without hiding failures",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p10-streaming"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p10-normalization-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def normalize(status,parsed):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p10-secrets",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Credentials, model routing and reproducible request configuration",
+    "minutes": 35,
+    "objectives": [
+      "Credentials, model routing and reproducible request configuration",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p10-normalization"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p10-secrets-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def public_config(config):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p10-accounting",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Token accounting and bounded generation requests",
+    "minutes": 35,
+    "objectives": [
+      "Token accounting and bounded generation requests",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p10-secrets"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p10-accounting-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def cost_per_success(costs,successes):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p10-checkpoint",
+    "phase": 10,
+    "module": "LLM Api Engineering",
+    "title": "Phase 10 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 10 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p10-accounting"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p10-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Token accounting and bounded generation requests to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p11-templates",
+    "phase": 11,
+    "module": "Prompt Engineering As Software Engineering",
+    "title": "Prompt contracts: instructions, examples and untrusted evidence",
+    "minutes": 35,
+    "objectives": [
+      "Prompt contracts",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p10-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p11-templates-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def render(template,fields):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p11-regression",
+    "phase": 11,
+    "module": "Prompt Engineering As Software Engineering",
+    "title": "Prompt experiments: paired comparisons and failure slices",
+    "minutes": 35,
+    "objectives": [
+      "Prompt experiments",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p11-templates"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p11-regression-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def compare(base,candidate):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p11-separation",
+    "phase": 11,
+    "module": "Prompt Engineering As Software Engineering",
+    "title": "Prompt instructions and untrusted evidence occupy different roles",
+    "minutes": 35,
+    "objectives": [
+      "Prompt instructions and untrusted evidence occupy different roles",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p11-regression"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p11-separation-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def evidence_ids_valid(ids,sources):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p11-examples",
+    "phase": 11,
+    "module": "Prompt Engineering As Software Engineering",
+    "title": "Few-shot examples: representative cases and contamination controls",
+    "minutes": 35,
+    "objectives": [
+      "Few-shot examples",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p11-separation"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p11-examples-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def overlap(examples,holdout):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p11-uncertainty",
+    "phase": 11,
+    "module": "Prompt Engineering As Software Engineering",
+    "title": "Uncertainty, clarification and evidence-first prompting",
+    "minutes": 35,
+    "objectives": [
+      "Uncertainty, clarification and evidence-first prompting",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p11-examples"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p11-uncertainty-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def uncertainty_valid(category,review,evidence):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p11-checkpoint",
+    "phase": 11,
+    "module": "Prompt Engineering As Software Engineering",
+    "title": "Phase 11 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 11 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p11-uncertainty"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p11-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Uncertainty, clarification and evidence-first prompting to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p12-schema",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Structured outputs: syntax, schema and business invariants",
+    "minutes": 35,
+    "objectives": [
+      "Structured outputs",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p11-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p12-schema-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def valid_result(r):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p12-tools",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Tool calling: proposal, authorization and execution",
+    "minutes": 35,
+    "objectives": [
+      "Tool calling",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p12-schema"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p12-tools-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def permitted(tool,approved,calls,limit):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p12-domain",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Schema validity versus business correctness",
+    "minutes": 35,
+    "objectives": [
+      "Schema validity versus business correctness",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p12-tools"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p12-domain-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def domain_valid(d,allowed):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p12-dispatch",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Tool dispatch: validate arguments before effects",
+    "minutes": 35,
+    "objectives": [
+      "Tool dispatch",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p12-domain"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p12-dispatch-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def dispatch_allowed(name,args,registry):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p12-repair",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Bounded repair, refusals and incomplete structured output",
+    "minutes": 35,
+    "objectives": [
+      "Bounded repair, refusals and incomplete structured output",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p12-dispatch"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p12-repair-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def may_repair(reason,attempt,limit,remaining):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p12-checkpoint",
+    "phase": 12,
+    "module": "Structured Outputs And Tool/Function Calling",
+    "title": "Phase 12 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 12 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p12-repair"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p12-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Bounded repair, refusals and incomplete structured output to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p13-geometry",
+    "phase": 13,
+    "module": "Embeddings",
+    "title": "Embedding geometry: cosine, norms and semantic search",
+    "minutes": 35,
+    "objectives": [
+      "Embedding geometry",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p12-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p13-geometry-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def cosine(a,b):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p13-index-version",
+    "phase": 13,
+    "module": "Embeddings",
+    "title": "Embedding compatibility, batching and multilingual evaluation",
+    "minutes": 35,
+    "objectives": [
+      "Embedding compatibility, batching and multilingual evaluation",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p13-geometry"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p13-index-version-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def compatible_embeddings(left,right):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p13-checkpoint",
+    "phase": 13,
+    "module": "Embeddings",
+    "title": "Phase 13 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 13 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p13-index-version"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p13-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Embedding compatibility, batching and multilingual evaluation to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p14-ann",
+    "phase": 14,
+    "module": "Vector Databases",
+    "title": "Vector indexes: exact search, ANN and filtered recall",
+    "minutes": 35,
+    "objectives": [
+      "Vector indexes",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p13-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p14-ann-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def authorized_topk(docs,tenant,k):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p14-persistence",
+    "phase": 14,
+    "module": "Vector Databases",
+    "title": "Qdrant persistence and payload-filter integration tests",
+    "minutes": 35,
+    "objectives": [
+      "Qdrant persistence and payload-filter integration tests",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p14-ann"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p14-persistence-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def upsert(points,new):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p14-checkpoint",
+    "phase": 14,
+    "module": "Vector Databases",
+    "title": "Phase 14 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 14 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p14-persistence"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p14-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Qdrant persistence and payload-filter integration tests to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p15-ingestion",
+    "phase": 15,
+    "module": "Retrieval-Augmented Generation",
+    "title": "RAG ingestion: chunk boundaries, metadata and citations",
+    "minutes": 35,
+    "objectives": [
+      "RAG ingestion",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p14-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p15-ingestion-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def chunks(words,size,overlap):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p15-citations",
+    "phase": 15,
+    "module": "Retrieval-Augmented Generation",
+    "title": "Context construction: resolved citations and missing evidence",
+    "minutes": 35,
+    "objectives": [
+      "Context construction",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p15-ingestion"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p15-citations-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def citations_valid(cited,supplied,tenant,documents):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p15-checkpoint",
+    "phase": 15,
+    "module": "Retrieval-Augmented Generation",
+    "title": "Phase 15 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 15 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p15-citations"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p15-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Context construction: resolved citations and missing evidence to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p16-fusion",
+    "phase": 16,
+    "module": "Advanced RAG",
+    "title": "Advanced retrieval: hybrid ranking and reciprocal rank fusion",
+    "minutes": 35,
+    "objectives": [
+      "Advanced retrieval",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p15-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p16-fusion-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def rrf(lists,c=60):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p16-freshness",
+    "phase": 16,
+    "module": "Advanced RAG",
+    "title": "Freshness, deletion and incremental indexing",
+    "minutes": 35,
+    "objectives": [
+      "Freshness, deletion and incremental indexing",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p16-fusion"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p16-freshness-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def apply_event(state,event):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p16-checkpoint",
+    "phase": 16,
+    "module": "Advanced RAG",
+    "title": "Phase 16 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 16 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p16-freshness"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p16-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Freshness, deletion and incremental indexing to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p17-ranking",
+    "phase": 17,
+    "module": "RAG Evaluation",
+    "title": "RAG evaluation: retrieval metrics and grounded answers",
+    "minutes": 35,
+    "objectives": [
+      "RAG evaluation",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p16-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p17-ranking-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def retrieval_metrics(ranked,relevant,k):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p17-ndcg",
+    "phase": 17,
+    "module": "RAG Evaluation",
+    "title": "Graded ranking: calculate NDCG and inspect its limits",
+    "minutes": 35,
+    "objectives": [
+      "Graded ranking",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p17-ranking"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p17-ndcg-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def ndcg(grades,ideal,k):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p17-judges",
+    "phase": 17,
+    "module": "RAG Evaluation",
+    "title": "Judge calibration: agreement, false accepts and bias",
+    "minutes": 35,
+    "objectives": [
+      "Judge calibration",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p17-ndcg"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p17-judges-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def judge_errors(human,judge):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p17-checkpoint",
+    "phase": 17,
+    "module": "RAG Evaluation",
+    "title": "Phase 17 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 17 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p17-judges"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p17-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Judge calibration: agreement, false accepts and bias to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p18-state",
+    "phase": 18,
+    "module": "AI Agents",
+    "title": "Agents as bounded state machines",
+    "minutes": 35,
+    "objectives": [
+      "Agents as bounded state machines",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p17-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p18-state-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def stop_reason(actions,steps,limit,done):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p18-checkpoint",
+    "phase": 18,
+    "module": "AI Agents",
+    "title": "Phase 18 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 18 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p18-state"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p18-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Agents as bounded state machines to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p19-graphs",
+    "phase": 19,
+    "module": "Agent Frameworks",
+    "title": "Frameworks: LangGraph state, LangChain tools and LlamaIndex retrieval",
+    "minutes": 35,
+    "objectives": [
+      "Frameworks",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p18-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p19-graphs-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def route(state):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p19-checkpoint",
+    "phase": 19,
+    "module": "Agent Frameworks",
+    "title": "Phase 19 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 19 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p19-graphs"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p19-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Frameworks: LangGraph state, LangChain tools and LlamaIndex retrieval to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p20-protocol",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "MCP: discovery, typed tools and safe transports",
+    "minutes": 35,
+    "objectives": [
+      "MCP",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p19-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p20-protocol-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def fixture_path(identifier):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p20-session",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "MCP lifecycle: initialize, discover, call and close",
+    "minutes": 35,
+    "objectives": [
+      "MCP lifecycle",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p20-protocol"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p20-session-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def lifecycle_valid(events):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p20-resources",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "MCP resources and prompts versus executable tools",
+    "minutes": 35,
+    "objectives": [
+      "MCP resources and prompts versus executable tools",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p20-session"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p20-resources-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def supported_resource(uri):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p20-transports",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "Stdio and Streamable HTTP: different deployment boundaries",
+    "minutes": 35,
+    "objectives": [
+      "Stdio and Streamable HTTP",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p20-resources"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p20-transports-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def safe_server_config(url,allowed_hosts):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p20-permissions",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "MCP host policy: discovery does not authorize effects",
+    "minutes": 35,
+    "objectives": [
+      "MCP host policy",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p20-transports"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p20-permissions-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def validate_call(name,args,allowed):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p20-checkpoint",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "Phase 20 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 20 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p20-permissions"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p20-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply MCP host policy: discovery does not authorize effects to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p21-handoffs",
+    "phase": 21,
+    "module": "Multi-Agent Systems",
+    "title": "Multi-agent coordination: scoped specialists and shared evidence",
+    "minutes": 35,
+    "objectives": [
+      "Multi-agent coordination",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p20-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p21-handoffs-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def merge_evidence(results):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p21-allocation",
+    "phase": 21,
+    "module": "Multi-Agent Systems",
+    "title": "Coordinate specialist budgets and merge conflicts",
+    "minutes": 35,
+    "objectives": [
+      "Coordinate specialist budgets and merge conflicts",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p21-handoffs"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p21-allocation-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def allocate(total,requests):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p21-checkpoint",
+    "phase": 21,
+    "module": "Multi-Agent Systems",
+    "title": "Phase 21 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 21 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p21-allocation"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p21-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Coordinate specialist budgets and merge conflicts to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p22-sessions",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Chatbots: tenant-scoped sessions and multi-turn evidence",
+    "minutes": 35,
+    "objectives": [
+      "Chatbots",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p21-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p22-sessions-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def context(messages,budget):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p22-identity",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Conversation ownership, expiry and bounded storage",
+    "minutes": 35,
+    "objectives": [
+      "Conversation ownership, expiry and bounded storage",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p22-sessions"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p22-identity-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def session_access(record,tenant,user,now):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p22-followups",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Multi-turn intent: resolve references or ask a clarification",
+    "minutes": 35,
+    "objectives": [
+      "Multi-turn intent",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p22-identity"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p22-followups-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def resolve(subject,followup,is_reference):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p22-packing",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Bound message history without losing the evidence contract",
+    "minutes": 35,
+    "objectives": [
+      "Bound message history without losing the evidence contract",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p22-followups"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p22-packing-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def retain_messages(messages,limit):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p22-response-state",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Response states: answer, clarification, abstention and failure",
+    "minutes": 35,
+    "objectives": [
+      "Response states",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p22-packing"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p22-response-state-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def response_valid(r):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p22-checkpoint",
+    "phase": 22,
+    "module": "AI Chatbot Engineering",
+    "title": "Phase 22 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 22 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p22-response-state"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p22-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Response states: answer, clarification, abstention and failure to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p23-scorers",
+    "phase": 23,
+    "module": "LLM / Chatbot Evaluation",
+    "title": "Chatbot evaluation: deterministic gates and calibrated judges",
+    "minutes": 35,
+    "objectives": [
+      "Chatbot evaluation",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p22-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p23-scorers-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def gate(checks,quality,threshold):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p23-checkpoint",
+    "phase": 23,
+    "module": "LLM / Chatbot Evaluation",
+    "title": "Phase 23 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 23 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p23-scorers"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p23-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Chatbot evaluation: deterministic gates and calibrated judges to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p24-trajectories",
+    "phase": 24,
+    "module": "Agent Evaluation",
+    "title": "Agent evaluation: action accuracy and counterfactual replay",
+    "minutes": 35,
+    "objectives": [
+      "Agent evaluation",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p23-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p24-trajectories-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def trace_metrics(trace):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p24-checkpoint",
+    "phase": 24,
+    "module": "Agent Evaluation",
+    "title": "Phase 24 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 24 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p24-trajectories"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p24-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Agent evaluation: action accuracy and counterfactual replay to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p25-runner",
+    "phase": 25,
+    "module": "Build An AI Evaluation Framework",
+    "title": "Build an evaluation runner with reproducible release artifacts",
+    "minutes": 35,
+    "objectives": [
+      "Build an evaluation runner with reproducible release artifacts",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p24-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p25-runner-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def verdict(results,expected_ids):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p25-checkpoint",
+    "phase": 25,
+    "module": "Build An AI Evaluation Framework",
+    "title": "Phase 25 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 25 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p25-runner"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p25-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Build an evaluation runner with reproducible release artifacts to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p26-injection",
+    "phase": 26,
+    "module": "AI Safety And Security Testing",
+    "title": "Security testing: injection, poisoning and tenant isolation",
+    "minutes": 35,
+    "objectives": [
+      "Security testing",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p25-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p26-injection-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def leaks(text,canaries):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p26-checkpoint",
+    "phase": 26,
+    "module": "AI Safety And Security Testing",
+    "title": "Phase 26 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 26 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p26-injection"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p26-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Security testing: injection, poisoning and tenant isolation to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p27-policies",
+    "phase": 27,
+    "module": "AI Guardrails",
+    "title": "Guardrails: layered validation and least privilege",
+    "minutes": 35,
+    "objectives": [
+      "Guardrails",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p26-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p27-policies-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def approval_valid(record,action_hash,now):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p27-output",
+    "phase": 27,
+    "module": "AI Guardrails",
+    "title": "Output handling: redaction, rendering and policy layers",
+    "minutes": 35,
+    "objectives": [
+      "Output handling",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p27-policies"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p27-output-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def redact_nested(value):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p27-checkpoint",
+    "phase": 27,
+    "module": "AI Guardrails",
+    "title": "Phase 27 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 27 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p27-output"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p27-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Output handling: redaction, rendering and policy layers to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p28-generation",
+    "phase": 28,
+    "module": "AI-Assisted Test Automation",
+    "title": "AI-assisted tests: GraphQL contracts and requirement traceability",
+    "minutes": 35,
+    "objectives": [
+      "AI-assisted tests",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p27-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p28-generation-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def graphql_ok(response):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p28-checkpoint",
+    "phase": 28,
+    "module": "AI-Assisted Test Automation",
+    "title": "Phase 28 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 28 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p28-generation"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p28-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply AI-assisted tests: GraphQL contracts and requirement traceability to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p29-verification",
+    "phase": 29,
+    "module": "Testing AI-Generated Code",
+    "title": "Verify generated code: independent oracles and mutation checks",
+    "minutes": 35,
+    "objectives": [
+      "Verify generated code",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p28-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p29-verification-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def catches_mutant(test_inputs,expected,mutant):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p29-dependencies",
+    "phase": 29,
+    "module": "Testing AI-Generated Code",
+    "title": "Generated dependencies: import checks and sandbox boundaries",
+    "minutes": 35,
+    "objectives": [
+      "Generated dependencies",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p29-verification"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p29-dependencies-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def imports_in(code):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p29-checkpoint",
+    "phase": 29,
+    "module": "Testing AI-Generated Code",
+    "title": "Phase 29 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 29 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p29-dependencies"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p29-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Generated dependencies: import checks and sandbox boundaries to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p30-service",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "FastAPI: typed boundaries, dependencies and service tests",
+    "minutes": 35,
+    "objectives": [
+      "FastAPI",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p29-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p30-service-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def http_status(kind):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p30-models",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "Request and response models: strict types at the boundary",
+    "minutes": 35,
+    "objectives": [
+      "Request and response models",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p30-service"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p30-models-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def request_fields(body):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p30-dependencies",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "Dependency injection and realistic API test overrides",
+    "minutes": 35,
+    "objectives": [
+      "Dependency injection and realistic API test overrides",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p30-models"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p30-dependencies-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def normalize_adapter(result):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p30-async-work",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "Async service capacity: provider I/O versus CPU work",
+    "minutes": 35,
+    "objectives": [
+      "Async service capacity",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p30-dependencies"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p30-async-work-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def can_admit(in_flight,max_in_flight,queue,max_queue):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p30-operations",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "Health, readiness, OpenAPI and safe error contracts",
+    "minutes": 35,
+    "objectives": [
+      "Health, readiness, OpenAPI and safe error contracts",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p30-async-work"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p30-operations-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def readiness(required):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p30-checkpoint",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "Phase 30 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 30 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p30-operations"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p30-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Health, readiness, OpenAPI and safe error contracts to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p31-resilience",
+    "phase": 31,
+    "module": "Production AI Architecture",
+    "title": "Production architecture: queues, cache and idempotent effects",
+    "minutes": 35,
+    "objectives": [
+      "Production architecture",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p30-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p31-resilience-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def cache_key(tenant,scope,prompt,model,index,query):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p31-checkpoint",
+    "phase": 31,
+    "module": "Production AI Architecture",
+    "title": "Phase 31 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 31 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p31-resilience"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p31-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Production architecture: queues, cache and idempotent effects to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p32-containers",
+    "phase": 32,
+    "module": "Docker",
+    "title": "Docker: reproducible images, non-root runtime and Compose",
+    "minutes": 35,
+    "objectives": [
+      "Docker",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p31-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p32-containers-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def safe_context(paths):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p32-deployment",
+    "phase": 32,
+    "module": "Docker",
+    "title": "Container smoke tests: data paths, ports and persistence",
+    "minutes": 35,
+    "objectives": [
+      "Container smoke tests",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p32-containers"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p32-deployment-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def required_build_files(files):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p32-checkpoint",
+    "phase": 32,
+    "module": "Docker",
+    "title": "Phase 32 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 32 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p32-deployment"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p32-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Container smoke tests: data paths, ports and persistence to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p33-ci",
+    "phase": 33,
+    "module": "CI/CD And GitHub Actions",
+    "title": "CI/CD: ordered checks, artifacts and release gates",
+    "minutes": 35,
+    "objectives": [
+      "CI/CD",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p32-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p33-ci-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def deployable(checks):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p33-artifacts",
+    "phase": 33,
+    "module": "CI/CD And GitHub Actions",
+    "title": "GitHub Actions: failure artifacts and protected evaluation modes",
+    "minutes": 35,
+    "objectives": [
+      "GitHub Actions",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p33-ci"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p33-artifacts-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def artifact_policy(status):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p33-checkpoint",
+    "phase": 33,
+    "module": "CI/CD And GitHub Actions",
+    "title": "Phase 33 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 33 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p33-artifacts"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p33-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply GitHub Actions: failure artifacts and protected evaluation modes to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p34-tracing",
+    "phase": 34,
+    "module": "AI Observability",
+    "title": "Observability: spans, redaction and experiment identity",
+    "minutes": 35,
+    "objectives": [
+      "Observability",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p33-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p34-tracing-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def redact(record):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p34-correlation",
+    "phase": 34,
+    "module": "AI Observability",
+    "title": "Trace correlation and safe telemetry assertions",
+    "minutes": 35,
+    "objectives": [
+      "Trace correlation and safe telemetry assertions",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p34-tracing"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p34-correlation-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def safe_attributes(attrs):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p34-checkpoint",
+    "phase": 34,
+    "module": "AI Observability",
+    "title": "Phase 34 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 34 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p34-correlation"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p34-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Trace correlation and safe telemetry assertions to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p35-economics",
+    "phase": 35,
+    "module": "Cost Engineering",
+    "title": "Cost engineering: useful-task budgets and routing",
+    "minutes": 35,
+    "objectives": [
+      "Cost engineering",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p34-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p35-economics-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def cost_per_success(costs,successes):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p35-budget",
+    "phase": 35,
+    "module": "Cost Engineering",
+    "title": "Enforce task budgets before hidden work grows",
+    "minutes": 35,
+    "objectives": [
+      "Enforce task budgets before hidden work grows",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p35-economics"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p35-budget-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def remaining_budget(total,usage):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p35-checkpoint",
+    "phase": 35,
+    "module": "Cost Engineering",
+    "title": "Phase 35 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 35 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p35-budget"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p35-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Enforce task budgets before hidden work grows to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p36-load",
+    "phase": 36,
+    "module": "AI Performance Testing",
+    "title": "Performance tests: TTFT, tails and realistic workloads",
+    "minutes": 35,
+    "objectives": [
+      "Performance tests",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p35-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p36-load-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def percentile(values,p):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p36-workload",
+    "phase": 36,
+    "module": "AI Performance Testing",
+    "title": "Load-test interpretation and coordinated omission",
+    "minutes": 35,
+    "objectives": [
+      "Load-test interpretation and coordinated omission",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p36-load"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p36-workload-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def throughput(completed,seconds):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p36-checkpoint",
+    "phase": 36,
+    "module": "AI Performance Testing",
+    "title": "Phase 36 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 36 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p36-workload"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p36-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Load-test interpretation and coordinated omission to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p37-faults",
+    "phase": 37,
+    "module": "Reliability Engineering For AI",
+    "title": "Reliability: controlled faults and graceful degradation",
+    "minutes": 35,
+    "objectives": [
+      "Reliability",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p36-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p37-faults-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def recovery(fault):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p37-matrix",
+    "phase": 37,
+    "module": "Reliability Engineering For AI",
+    "title": "Turn the failure matrix into executable recovery contracts",
+    "minutes": 35,
+    "objectives": [
+      "Turn the failure matrix into executable recovery contracts",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p37-faults"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p37-matrix-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def failure_contract(fault,observed):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p37-checkpoint",
+    "phase": 37,
+    "module": "Reliability Engineering For AI",
+    "title": "Phase 37 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 37 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p37-matrix"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p37-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Turn the failure matrix into executable recovery contracts to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p38-versions",
+    "phase": 38,
+    "module": "Mlops / LLMops Foundations",
+    "title": "MLOps and LLMOps: versioned inputs and rollback",
+    "minutes": 35,
+    "objectives": [
+      "MLOps and LLMOps",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p37-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p38-versions-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def compatible(a,b):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p38-manifest",
+    "phase": 38,
+    "module": "Mlops / LLMops Foundations",
+    "title": "Artifact manifests and compatibility-aware rollback",
+    "minutes": 35,
+    "objectives": [
+      "Artifact manifests and compatibility-aware rollback",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p38-versions"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p38-manifest-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def manifest_complete(manifest):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p38-checkpoint",
+    "phase": 38,
+    "module": "Mlops / LLMops Foundations",
+    "title": "Phase 38 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 38 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p38-manifest"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p38-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Artifact manifests and compatibility-aware rollback to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p39-adaptation",
+    "phase": 39,
+    "module": "Fine-Tuning Foundations",
+    "title": "Fine-tuning: data splits, LoRA and independent evaluation",
+    "minutes": 35,
+    "objectives": [
+      "Fine-tuning",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p38-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p39-adaptation-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def lora_params(input_dim,output_dim,rank):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p39-lora",
+    "phase": 39,
+    "module": "Fine-Tuning Foundations",
+    "title": "LoRA initialization, training and acceptance are separate stages",
+    "minutes": 35,
+    "objectives": [
+      "LoRA initialization, training and acceptance are separate stages",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p39-adaptation"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p39-lora-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def adapter_status(initialized,trained,evaluated):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p39-checkpoint",
+    "phase": 39,
+    "module": "Fine-Tuning Foundations",
+    "title": "Phase 39 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 39 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p39-lora"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p39-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply LoRA initialization, training and acceptance are separate stages to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p40-tradeoffs",
+    "phase": 40,
+    "module": "AI System Design",
+    "title": "System design: trust boundaries, SLOs and release evidence",
+    "minutes": 35,
+    "objectives": [
+      "System design",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p39-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p40-tradeoffs-exercise",
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def design_gate(evidence):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks."
+    },
+    "sections": []
+  },
+  {
+    "id": "p40-checkpoint",
+    "phase": 40,
+    "module": "AI System Design",
+    "title": "Phase 40 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 40 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p40-tradeoffs"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p40-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply System design: trust boundaries, SLOs and release evidence to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p41-triage",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "AI failure triage: classification, retrieval and evidence",
+    "minutes": 35,
+    "objectives": [
+      "AI failure triage",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p40-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p41-triage-exercise",
+      "kind": "rubric",
+      "prompt": "Write your acceptance memo: link a reproducible run, explain a measured failure, the boundary that fixes it, and the release/rollback decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p41-data",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "Validate incident identity and source provenance",
+    "minutes": 35,
+    "objectives": [
+      "Validate incident identity and source provenance",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p41-triage"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p41-data-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the validate incident identity and source provenance stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p41-training",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "Train, reload and evaluate a real classifier",
+    "minutes": 35,
+    "objectives": [
+      "Train, reload and evaluate a real classifier",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p41-data"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p41-training-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the train, reload and evaluate a real classifier stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p41-evidence",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "Retrieve similar incidents and constrain explanations",
+    "minutes": 35,
+    "objectives": [
+      "Retrieve similar incidents and constrain explanations",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p41-training"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p41-evidence-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the retrieve similar incidents and constrain explanations stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p41-release",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "Package the triage report and prove the gate fails",
+    "minutes": 35,
+    "objectives": [
+      "Package the triage report and prove the gate fails",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p41-evidence"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p41-release-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the package the triage report and prove the gate fails stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p41-checkpoint",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "Phase 41 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 41 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p41-release"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p41-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Package the triage report and prove the gate fails to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p42-graphql",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "GraphQL test generation: schema-to-executable coverage",
+    "minutes": 35,
+    "objectives": [
+      "GraphQL test generation",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p41-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p42-graphql-exercise",
+      "kind": "rubric",
+      "prompt": "Write your acceptance memo: link a reproducible run, explain a measured failure, the boundary that fixes it, and the release/rollback decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p42-ast",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "Inspect an operation with a real GraphQL parser",
+    "minutes": 35,
+    "objectives": [
+      "Inspect an operation with a real GraphQL parser",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p42-graphql"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p42-ast-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the inspect an operation with a real graphql parser stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p42-cases",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "Generate traceable schema and business counterexamples",
+    "minutes": 35,
+    "objectives": [
+      "Generate traceable schema and business counterexamples",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p42-ast"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p42-cases-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the generate traceable schema and business counterexamples stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p42-oracles",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "Execute candidate assertions and challenge the oracle",
+    "minutes": 35,
+    "objectives": [
+      "Execute candidate assertions and challenge the oracle",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p42-cases"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p42-oracles-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the execute candidate assertions and challenge the oracle stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p42-export",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "Export a runnable test artifact and CI coverage report",
+    "minutes": 35,
+    "objectives": [
+      "Export a runnable test artifact and CI coverage report",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p42-oracles"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p42-export-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the export a runnable test artifact and ci coverage report stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p42-checkpoint",
+    "phase": 42,
+    "module": "Capstone Project 2",
+    "title": "Phase 42 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 42 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p42-export"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p42-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Export a runnable test artifact and CI coverage report to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p43-rag-quality",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "RAG quality project: ingestion, evaluation and CI",
+    "minutes": 35,
+    "objectives": [
+      "RAG quality project",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p42-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p43-rag-quality-exercise",
+      "kind": "rubric",
+      "prompt": "Write your acceptance memo: link a reproducible run, explain a measured failure, the boundary that fixes it, and the release/rollback decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p43-ingest",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "Build a versioned authorized documentation corpus",
+    "minutes": 35,
+    "objectives": [
+      "Build a versioned authorized documentation corpus",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p43-rag-quality"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p43-ingest-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the build a versioned authorized documentation corpus stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p43-retrieval",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "Compare sparse, dense and hybrid retrieval by query slice",
+    "minutes": 35,
+    "objectives": [
+      "Compare sparse, dense and hybrid retrieval by query slice",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p43-ingest"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p43-retrieval-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the compare sparse, dense and hybrid retrieval by query slice stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p43-evaluation",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "Calibrate answer support and adversarial cases",
+    "minutes": 35,
+    "objectives": [
+      "Calibrate answer support and adversarial cases",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p43-retrieval"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p43-evaluation-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the calibrate answer support and adversarial cases stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p43-deployment",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "Trace, package and gate the RAG service",
+    "minutes": 35,
+    "objectives": [
+      "Trace, package and gate the RAG service",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p43-evaluation"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p43-deployment-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the trace, package and gate the rag service stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p43-checkpoint",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "Phase 43 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 43 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p43-deployment"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p43-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Trace, package and gate the RAG service to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p44-automation-agent",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Safe automation assistant: read, investigate and propose",
+    "minutes": 35,
+    "objectives": [
+      "Safe automation assistant",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p43-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p44-automation-agent-exercise",
+      "kind": "rubric",
+      "prompt": "Write your acceptance memo: link a reproducible run, explain a measured failure, the boundary that fixes it, and the release/rollback decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p44-tools",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Implement scoped read tools and explicit proposal artifacts",
+    "minutes": 35,
+    "objectives": [
+      "Implement scoped read tools and explicit proposal artifacts",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p44-automation-agent"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p44-tools-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the implement scoped read tools and explicit proposal artifacts stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p44-approval",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Bind human approval to the exact proposed action",
+    "minutes": 35,
+    "objectives": [
+      "Bind human approval to the exact proposed action",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p44-tools"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p44-approval-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the bind human approval to the exact proposed action stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p44-state",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Add loop detection, budget and fault recovery",
+    "minutes": 35,
+    "objectives": [
+      "Add loop detection, budget and fault recovery",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p44-approval"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p44-state-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the add loop detection, budget and fault recovery stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p44-quality",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Evaluate trajectories and prepare the technical deep dive",
+    "minutes": 35,
+    "objectives": [
+      "Evaluate trajectories and prepare the technical deep dive",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p44-state"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p44-quality-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the evaluate trajectories and prepare the technical deep dive stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p44-checkpoint",
+    "phase": 44,
+    "module": "Capstone Project 4",
+    "title": "Phase 44 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 44 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p44-quality"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p44-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Evaluate trajectories and prepare the technical deep dive to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p45-platform",
+    "phase": 45,
+    "module": "Final Master Project",
+    "title": "Final platform: typed AI services and an enforceable release gate",
+    "minutes": 35,
+    "objectives": [
+      "Final platform",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p44-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p45-platform-exercise",
+      "kind": "rubric",
+      "prompt": "Write your acceptance memo: link a reproducible run, explain a measured failure, the boundary that fixes it, and the release/rollback decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p45-boundaries",
+    "phase": 45,
+    "module": "Final Master Project",
+    "title": "Integrate the typed API and shared domain modules",
+    "minutes": 35,
+    "objectives": [
+      "Integrate the typed API and shared domain modules",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p45-platform"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p45-boundaries-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the integrate the typed api and shared domain modules stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p45-quality-system",
+    "phase": 45,
+    "module": "Final Master Project",
+    "title": "Connect complete evaluation artifacts to release decisions",
+    "minutes": 35,
+    "objectives": [
+      "Connect complete evaluation artifacts to release decisions",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p45-boundaries"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p45-quality-system-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the connect complete evaluation artifacts to release decisions stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p45-operations",
+    "phase": 45,
+    "module": "Final Master Project",
+    "title": "Exercise latency, tracing and degraded failure paths",
+    "minutes": 35,
+    "objectives": [
+      "Exercise latency, tracing and degraded failure paths",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p45-quality-system"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p45-operations-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the exercise latency, tracing and degraded failure paths stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p45-handover",
+    "phase": 45,
+    "module": "Final Master Project",
+    "title": "Package a reproducible portfolio and compatible rollback",
+    "minutes": 35,
+    "objectives": [
+      "Package a reproducible portfolio and compatible rollback",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p45-operations"
+    ],
+    "isPhaseCheckpoint": false,
+    "exercise": {
+      "id": "p45-handover-exercise",
+      "kind": "rubric",
+      "prompt": "Deliver the package a reproducible portfolio and compatible rollback stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision."
+    },
+    "sections": []
+  },
+  {
+    "id": "p45-checkpoint",
+    "phase": 45,
+    "module": "Final Master Project",
+    "title": "Phase 45 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 45 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "prerequisites": [
+      "p45-handover"
+    ],
+    "isPhaseCheckpoint": true,
+    "exercise": {
+      "id": "p45-checkpoint-exercise",
+      "kind": "rubric",
+      "prompt": "Apply Package a reproducible portfolio and compatible rollback to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision."
+    },
+    "sections": []
+  }
+]

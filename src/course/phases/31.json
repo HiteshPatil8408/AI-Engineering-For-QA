@@ -1,0 +1,243 @@
+[
+  {
+    "id": "p31-resilience",
+    "phase": 31,
+    "module": "Production AI Architecture",
+    "title": "Production architecture: queues, cache and idempotent effects",
+    "minutes": 35,
+    "objectives": [
+      "Production architecture",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects production architecture: queues, cache and idempotent effects with test contracts, failure triage, and evidence for release. Architecture acceptance measures successful tasks under failure, not only normal throughput.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A production AI path includes authentication, admission control, retrieval, provider work, validation and response delivery. Caches reduce repeated work, queues decouple long tasks, circuit breakers limit calls to failing dependencies and fallbacks preserve a smaller safe capability. Each mechanism changes failure behavior and needs a contract.",
+          "Idempotency means repeating a request has the same intended effect as executing it once. A timeout is ambiguous: the remote system may have completed work even if the client received no response."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Key caches by tenant, permission scope, normalized request, prompt/model versions and index generation. Bound TTL and invalidate after permission or document changes. For side effects, persist an idempotency record before execution and return its existing result on duplicate requests.",
+          "A circuit breaker moves closed to open after configured failures, then half-open for limited probes after cooldown. Queued work has an expiry and cancellation path. Fallback answers must indicate reduced capability and retain the same authorization rules."
+        ],
+        "code": "cache_key=('tenant-a','permissions-v2','prompt-v3','index-v4','question')\nassert len(cache_key)==5",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "An open breaker routes to a backup provider with a different schema and the application treats arbitrary text as valid. A global cache returns another tenant's answer. A retry storm fills the queue faster than workers can drain it.",
+          "Inject provider outage, slow storage, duplicate requests and permission revocation. Check bounded queue growth, consistent duplicate results, visible degraded mode and eventual recovery."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Architecture acceptance measures successful tasks under failure, not only normal throughput. Document which dependency failures cause abstention, fallback or rejection.",
+          "SDETs should verify each transition with controlled faults and preserve traces for diagnosis. A retry mechanism is reliable only when it respects effect safety, capacity and deadlines."
+        ]
+      }
+    ],
+    "mistake": "An open breaker routes to a backup provider with a different schema and the application treats arbitrary text as valid. A global cache returns another tenant's answer. A retry storm fills the queue faster than workers can drain it.",
+    "takeaway": "Architecture acceptance measures successful tasks under failure, not only normal throughput.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def cache_key(tenant,scope,prompt,model,index,query):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def cache_key(tenant,scope,prompt,model,index,query):\n    return (tenant,scope,prompt,model,index,query.strip())",
+      "starter": "def cache_key(tenant,scope,prompt,model,index,query):\n    return ()",
+      "tests": "assert cache_key('a','s','p','m','i',' x ')!=cache_key('b','s','p','m','i','x')\nassert cache_key('a','s','p','m','i',' x ')[-1]=='x'",
+      "id": "p31-resilience-exercise",
+      "hints": [
+        "A production AI path includes authentication, admission control, retrieval, provider work, validation and response delivery.",
+        "An open breaker routes to a backup provider with a different schema and the application treats arbitrary text as valid.",
+        "Key caches by tenant, permission scope, normalized request, prompt/model versions and index generation.",
+        "Architecture acceptance measures successful tasks under failure, not only normal throughput."
+      ],
+      "explanation": "def cache_key(tenant,scope,prompt,model,index,query):\n    return (tenant,scope,prompt,model,index,query.strip())"
+    },
+    "quiz": {
+      "question": "Why include permission scope in a cache key?",
+      "options": [
+        "To prevent reuse across different access rights",
+        "To increase answer creativity",
+        "To avoid response validation"
+      ],
+      "answer": 0,
+      "explanation": "The cached evidence and answer are authorized only within their original scope."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Why include permission scope in a cache key?",
+      "options": [
+        "To prevent reuse across different access rights",
+        "To increase answer creativity",
+        "To avoid response validation"
+      ],
+      "answer": 0,
+      "explanation": "The cached evidence and answer are authorized only within their original scope."
+    },
+    "sources": [
+      "https://opentelemetry.io/docs/languages/python/instrumentation/",
+      "https://www.python-httpx.org/advanced/timeouts/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p30-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Circuit breaker",
+      "Cache invalidation",
+      "Queue"
+    ],
+    "interviewIds": [
+      "bridge-production-001",
+      "bridge-production-018",
+      "bridge-phase-31-2",
+      "bridge-phase-31-3",
+      "bridge-phase-31-4",
+      "bridge-phase-31-5",
+      "bridge-phase-31-6",
+      "bridge-phase-31-7"
+    ]
+  },
+  {
+    "id": "p31-checkpoint",
+    "phase": 31,
+    "module": "Production AI Architecture",
+    "title": "Phase 31 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 31 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 31 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Architecture acceptance measures successful tasks under failure, not only normal throughput.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects production architecture: queues, cache and idempotent effects to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Key caches by tenant, permission scope, normalized request, prompt/model versions and index generation. Bound TTL and invalidate after permission or document changes. For side effects, persist an idempotency record before execution and return its existing result on duplicate requests.",
+          "A circuit breaker moves closed to open after configured failures, then half-open for limited probes after cooldown. Queued work has an expiry and cancellation path. Fallback answers must indicate reduced capability and retain the same authorization rules.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "cache_key=('tenant-a','permissions-v2','prompt-v3','index-v4','question')\nassert len(cache_key)==5",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "An open breaker routes to a backup provider with a different schema and the application treats arbitrary text as valid. A global cache returns another tenant's answer. A retry storm fills the queue faster than workers can drain it.",
+          "Inject provider outage, slow storage, duplicate requests and permission revocation. Check bounded queue growth, consistent duplicate results, visible degraded mode and eventual recovery.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Architecture acceptance measures successful tasks under failure, not only normal throughput. Document which dependency failures cause abstention, fallback or rejection.",
+          "SDETs should verify each transition with controlled faults and preserve traces for diagnosis. A retry mechanism is reliable only when it respects effect safety, capacity and deadlines.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "An open breaker routes to a backup provider with a different schema and the application treats arbitrary text as valid. A global cache returns another tenant's answer. A retry storm fills the queue faster than workers can drain it.",
+    "takeaway": "Architecture acceptance measures successful tasks under failure, not only normal throughput.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Production architecture: queues, cache and idempotent effects to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nArchitecture acceptance measures successful tasks under failure, not only normal throughput.",
+      "id": "p31-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects production architecture: queues, cache and idempotent effects to the shared CI quality platform.",
+        "An open breaker routes to a backup provider with a different schema and the application treats arbitrary text as valid.",
+        "Key caches by tenant, permission scope, normalized request, prompt/model versions and index generation.",
+        "Architecture acceptance measures successful tasks under failure, not only normal throughput."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nArchitecture acceptance measures successful tasks under failure, not only normal throughput."
+    },
+    "quiz": {
+      "question": "A candidate for production architecture: queues, cache and idempotent effects meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for production architecture: queues, cache and idempotent effects meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://opentelemetry.io/docs/languages/python/instrumentation/",
+      "https://www.python-httpx.org/advanced/timeouts/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p31-resilience"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-production-001",
+      "bridge-production-018",
+      "bridge-phase-31-2",
+      "bridge-phase-31-3",
+      "bridge-phase-31-4",
+      "bridge-phase-31-5",
+      "bridge-phase-31-6",
+      "bridge-phase-31-7"
+    ]
+  }
+]

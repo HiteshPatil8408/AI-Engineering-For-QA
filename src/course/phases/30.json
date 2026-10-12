@@ -1,0 +1,668 @@
+[
+  {
+    "id": "p30-service",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "FastAPI: typed boundaries, dependencies and service tests",
+    "minutes": 35,
+    "objectives": [
+      "FastAPI",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects fastapi: typed boundaries, dependencies and service tests with test contracts, failure triage, and evidence for release. Run integration cases against all domain endpoints using synthetic data.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "An AI service should expose typed domain contracts rather than raw provider messages. FastAPI routes accept request models, call application services and return response models. Dependency injection supplies authenticated principals and adapters. Health reports process liveness; readiness reports whether required dependencies can serve requests.",
+          "Asynchronous routes help with I/O, but blocking CPU work still occupies execution resources. Offload training and long evaluations to bounded workers or jobs rather than running them on the request event loop."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The shared service exposes /health, /chat, /classify-failure, /search-failures, /generate-tests and /evaluate. Requests forbid unexpected fields, cap input sizes and carry request IDs. Responses include mode, evidence, status and trace references.",
+          "Use dependency overrides for fixture adapters in tests, and exercise real HTTP serialization through TestClient or ASGI transport. Map invalid input to 422, denied access to 403 and unavailable dependencies to a controlled 503. Never return raw exception strings containing secrets."
+        ],
+        "code": "from fastapi import FastAPI\nfrom pydantic import BaseModel,ConfigDict\nclass Request(BaseModel):\n    model_config=ConfigDict(extra='forbid')\n    failure_id:str\napp=FastAPI()\n@app.get('/health')\ndef health():return {'status':'ok'}",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A route returns any dict and accidentally includes provider credentials in an error response. Another declares async while calling a blocking network client. A health check makes a paid model request and becomes both slow and unreliable.",
+          "Test response schemas, extra fields, auth, dependency failure, timeout and cancellation. Verify OpenAPI matches actual responses and that a readiness failure does not imply process death."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Run integration cases against all domain endpoints using synthetic data. Measure contract behavior separately from model accuracy and record adapter mode. Deployment evidence includes typed OpenAPI, bounded work, redacted errors and startup checks.",
+          "For SDETs, the AI boundary is familiar API testing with additional uncertainty inside the adapter. Stable service contracts should remain deterministic even when model wording varies."
+        ]
+      }
+    ],
+    "mistake": "A route returns any dict and accidentally includes provider credentials in an error response. Another declares async while calling a blocking network client. A health check makes a paid model request and becomes both slow and unreliable.",
+    "takeaway": "Run integration cases against all domain endpoints using synthetic data.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def http_status(kind):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def http_status(kind):\n    return {'invalid':422,'denied':403,'unavailable':503,'ok':200}[kind]",
+      "starter": "def http_status(kind):\n    return 200",
+      "tests": "assert http_status('invalid')==422\nassert http_status('denied')==403\nassert http_status('unavailable')==503",
+      "id": "p30-service-exercise",
+      "hints": [
+        "An AI service should expose typed domain contracts rather than raw provider messages.",
+        "A route returns any dict and accidentally includes provider credentials in an error response.",
+        "The shared service exposes /health, /chat, /classify-failure, /search-failures, /generate-tests and /evaluate.",
+        "Run integration cases against all domain endpoints using synthetic data."
+      ],
+      "explanation": "def http_status(kind):\n    return {'invalid':422,'denied':403,'unavailable':503,'ok':200}[kind]"
+    },
+    "quiz": {
+      "question": "What belongs in readiness rather than liveness?",
+      "options": [
+        "Required dependency availability",
+        "A paid generation on every probe",
+        "User quality scores"
+      ],
+      "answer": 0,
+      "explanation": "Liveness detects process health; readiness indicates ability to serve its required workload."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What belongs in readiness rather than liveness?",
+      "options": [
+        "Required dependency availability",
+        "A paid generation on every probe",
+        "User quality scores"
+      ],
+      "answer": 0,
+      "explanation": "Liveness detects process health; readiness indicates ability to serve its required workload."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p29-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "FastAPI",
+      "Dependency injection",
+      "Readiness"
+    ],
+    "interviewIds": [
+      "bridge-fastapi-001",
+      "bridge-fastapi-002",
+      "bridge-fastapi-003",
+      "bridge-fastapi-016",
+      "bridge-fastapi-017",
+      "bridge-fastapi-018",
+      "bridge-phase-30-6",
+      "bridge-phase-30-7"
+    ]
+  },
+  {
+    "id": "p30-models",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "Request and response models: strict types at the boundary",
+    "minutes": 35,
+    "objectives": [
+      "Request and response models",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects request and response models: strict types at the boundary with test contracts, failure triage, and evidence for release. Acceptance includes request rejection, response schema conformance and domain evidence checks.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A request model defines which fields a client may supply, their types and bounds. A response model defines which domain fields may leave the service. Forbid extras when unknown fields could smuggle credentials, tenant identity or operational controls. Type validation and business invariants remain separate layers.",
+          "Strictness must be deliberate. Coercing a numeric string for ingestion can be useful, but coercing an approval flag from a nonempty string can authorize the wrong action."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use Pydantic ConfigDict(extra='forbid'), bounded strings and closed mode/category enums. Validate live provider outputs again at the domain boundary, resolve evidence IDs and apply UNKNOWN/review rules. Response filtering prevents accidental internal fields from leaking.",
+          "The fixture API rejects an api_key field in classification requests and derives tenant identity through a dependency. Source IDs select the immutable authorized log rather than trusting a caller's unrelated text."
+        ],
+        "code": "from pydantic import BaseModel,ConfigDict,Field\nclass Input(BaseModel):\n    model_config=ConfigDict(extra='forbid')\n    log:str=Field(min_length=1,max_length=10000)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A service accepts any dictionary and serializes the provider request with credentials. A permissive model ignores unsupported fields, leaving clients unaware that their intended control was not applied. A valid category lacks evidence.",
+          "Test extra fields, wrong types, oversized strings, invalid modes and inconsistent source IDs. Keep error messages stable and free of secret values."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes request rejection, response schema conformance and domain evidence checks. OpenAPI documents the same contract that integration tests observe.",
+          "SDETs should distinguish 422 input failures from 403 authorization and 503 dependency failures. A typed AI service keeps its outer contract predictable even when an inner model is uncertain."
+        ]
+      }
+    ],
+    "mistake": "A service accepts any dictionary and serializes the provider request with credentials. A permissive model ignores unsupported fields, leaving clients unaware that their intended control was not applied. A valid category lacks evidence.",
+    "takeaway": "Acceptance includes request rejection, response schema conformance and domain evidence checks.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def request_fields(body):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def request_fields(body):\n    return set(body)<={'log','failure_id','mode'} and isinstance(body.get('log'),str) and 1<=len(body['log'])<=10000",
+      "starter": "def request_fields(body):\n    return False",
+      "tests": "assert request_fields({'log':'x'})\nassert not request_fields({'log':'x','api_key':'secret'})\nassert not request_fields({'log':''})",
+      "id": "p30-models-exercise",
+      "hints": [
+        "A request model defines which fields a client may supply, their types and bounds.",
+        "A service accepts any dictionary and serializes the provider request with credentials.",
+        "Use Pydantic ConfigDict(extra='forbid'), bounded strings and closed mode/category enums.",
+        "Acceptance includes request rejection, response schema conformance and domain evidence checks."
+      ],
+      "explanation": "def request_fields(body):\n    return set(body)<={'log','failure_id','mode'} and isinstance(body.get('log'),str) and 1<=len(body['log'])<=10000"
+    },
+    "quiz": {
+      "question": "What should supply the request\u2019s tenant identity?",
+      "options": [
+        "Authenticated dependency context",
+        "A model-generated field",
+        "Any caller-provided dictionary key"
+      ],
+      "answer": 0,
+      "explanation": "The service owns authenticated scope; inputs cannot grant access."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What should supply the request\u2019s tenant identity?",
+      "options": [
+        "Authenticated dependency context",
+        "A model-generated field",
+        "Any caller-provided dictionary key"
+      ],
+      "answer": 0,
+      "explanation": "The service owns authenticated scope; inputs cannot grant access."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p30-service"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Response model",
+      "Strict validation"
+    ],
+    "interviewIds": [
+      "bridge-fastapi-001",
+      "bridge-fastapi-002",
+      "bridge-fastapi-003",
+      "bridge-fastapi-016",
+      "bridge-fastapi-017",
+      "bridge-fastapi-018",
+      "bridge-phase-30-6",
+      "bridge-phase-30-7"
+    ]
+  },
+  {
+    "id": "p30-dependencies",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "Dependency injection and realistic API test overrides",
+    "minutes": 35,
+    "objectives": [
+      "Dependency injection and realistic API test overrides",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects dependency injection and realistic api test overrides with test contracts, failure triage, and evidence for release. Acceptance proves that the fixture and live adapters share the same domain interface, while their execution modes remain visible.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Dependency injection separates routes from concrete provider, retrieval and identity implementations. A test can substitute a controlled adapter while retaining real request parsing, routing and response serialization. This is stronger than testing the route function in isolation with hand-built objects.",
+          "Overrides should replace external boundaries, not bypass the application invariant being tested. Mocking authorization to always true cannot establish tenant isolation."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use FastAPI Depends for principal and adapter construction. In tests, supply a fixture provider returning known valid, malformed or refused results, then issue HTTP requests through TestClient/ASGI transport. Assert status, body schema, headers and actual domain effects.",
+          "Reset overrides after each test and create fresh state when histories or caches are involved. Keep a separate integration test for actual SDK/protocol wiring where credentials are not required."
+        ],
+        "code": "from fastapi.testclient import TestClient\nclient=TestClient(app)\nresponse=client.post('/chat',json={'query':'retry HTTP 429'})\nassert response.status_code==200 and response.json()['citations']",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A global dependency override leaks into later tests and disables auth. Tests call classify directly and miss request model validation. A mock returns a convenient dictionary incompatible with the real provider\u2019s typed result.",
+          "Test the normalized adapter contract and at least one real serialization path. Include invalid inputs and dependency exceptions so public error behavior is checked."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance proves that the fixture and live adapters share the same domain interface, while their execution modes remain visible. The live adapter test validates the request configuration and closes the async client without making a paid call.",
+          "SDETs should retain realistic boundaries: mocking a provider is appropriate for deterministic service behavior; evaluating model correctness requires controlled live evidence."
+        ]
+      }
+    ],
+    "mistake": "A global dependency override leaks into later tests and disables auth. Tests call classify directly and miss request model validation. A mock returns a convenient dictionary incompatible with the real provider\u2019s typed result.",
+    "takeaway": "Acceptance proves that the fixture and live adapters share the same domain interface, while their execution modes remain visible.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def normalize_adapter(result):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def normalize_adapter(result):\n    required={'category','evidence_ids','needs_review'}\n    if not required<=set(result):raise ValueError('adapter contract')\n    return {k:result[k] for k in sorted(required)}",
+      "starter": "def normalize_adapter(result):\n    return {}",
+      "tests": "assert normalize_adapter({'category':'UNKNOWN','evidence_ids':[],'needs_review':True})['needs_review']\ntry:normalize_adapter({'category':'UNKNOWN'});assert False\nexcept ValueError:pass",
+      "id": "p30-dependencies-exercise",
+      "hints": [
+        "Dependency injection separates routes from concrete provider, retrieval and identity implementations.",
+        "A global dependency override leaks into later tests and disables auth.",
+        "Use FastAPI Depends for principal and adapter construction.",
+        "Acceptance proves that the fixture and live adapters share the same domain interface, while their execution modes remain visible."
+      ],
+      "explanation": "def normalize_adapter(result):\n    required={'category','evidence_ids','needs_review'}\n    if not required<=set(result):raise ValueError('adapter contract')\n    return {k:result[k] for k in sorted(required)}"
+    },
+    "quiz": {
+      "question": "Which boundary should a deterministic service test replace?",
+      "options": [
+        "The external provider while retaining validation/policy",
+        "Every application function",
+        "Authorization with an unconditional pass"
+      ],
+      "answer": 0,
+      "explanation": "Controlled external results let real application contracts be exercised."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which boundary should a deterministic service test replace?",
+      "options": [
+        "The external provider while retaining validation/policy",
+        "Every application function",
+        "Authorization with an unconditional pass"
+      ],
+      "answer": 0,
+      "explanation": "Controlled external results let real application contracts be exercised."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p30-models"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Dependency override",
+      "ASGI test"
+    ],
+    "interviewIds": [
+      "bridge-fastapi-001",
+      "bridge-fastapi-002",
+      "bridge-fastapi-003",
+      "bridge-fastapi-016",
+      "bridge-fastapi-017",
+      "bridge-fastapi-018",
+      "bridge-phase-30-6",
+      "bridge-phase-30-7"
+    ]
+  },
+  {
+    "id": "p30-async-work",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "Async service capacity: provider I/O versus CPU work",
+    "minutes": 35,
+    "objectives": [
+      "Async service capacity",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects async service capacity: provider i/o versus cpu work with test contracts, failure triage, and evidence for release. Acceptance demonstrates bounded external waits, clean cancellation and stable typed unavailable responses.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Async awaits allow other requests to progress while I/O is pending. They do not make blocking CPU or synchronous network operations nonblocking. Model training and long evaluation should use bounded jobs/workers, while request-time provider calls use asynchronous clients, deadlines and admission controls.",
+          "Per-attempt timeouts are not a whole-task deadline. Queue waiting and retries must fit the user's total latency budget."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The live adapter uses AsyncOpenAI, bounded SDK retries, a maximum output budget and asyncio.wait_for over the entire call. It closes the client in finally. A production service also bounds queued/in-flight work and cancels provider work on client disconnect.",
+          "Keep lightweight fixture classification in the route and move expensive fitting into the explicit training commands. Record queue, provider and validation durations separately rather than one unexplained timer."
+        ],
+        "code": "import asyncio\nresult=await asyncio.wait_for(provider_call(),timeout=15)\n# Close clients and release capacity in finally blocks",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "An async handler invokes a blocking trainer and starves unrelated health requests. A timeout is caught as success with an empty result. Cancellation does not release a semaphore permit.",
+          "Inject a slow adapter and verify deadline outcome, cleanup and subsequent healthy requests. Load tests should include concurrent long/short requests and errors, not only the fastest endpoint."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance demonstrates bounded external waits, clean cancellation and stable typed unavailable responses. CPU-heavy work has a separate controlled execution path.",
+          "SDETs should assess both latency and correctness under concurrency. A service returning invalid results quickly does not meet performance objectives, and a correct result after the deadline does not complete the intended user task."
+        ]
+      }
+    ],
+    "mistake": "An async handler invokes a blocking trainer and starves unrelated health requests. A timeout is caught as success with an empty result. Cancellation does not release a semaphore permit.",
+    "takeaway": "Acceptance demonstrates bounded external waits, clean cancellation and stable typed unavailable responses.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def can_admit(in_flight,max_in_flight,queue,max_queue):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def can_admit(in_flight,max_in_flight,queue,max_queue):\n    return in_flight<max_in_flight or queue<max_queue",
+      "starter": "def can_admit(in_flight,max_in_flight,queue,max_queue):\n    return False",
+      "tests": "assert can_admit(1,2,0,0)\nassert not can_admit(2,2,3,3)\nassert can_admit(2,2,2,3)",
+      "id": "p30-async-work-exercise",
+      "hints": [
+        "Async awaits allow other requests to progress while I/O is pending.",
+        "An async handler invokes a blocking trainer and starves unrelated health requests.",
+        "The live adapter uses AsyncOpenAI, bounded SDK retries, a maximum output budget and asyncio.wait_for over the entire call.",
+        "Acceptance demonstrates bounded external waits, clean cancellation and stable typed unavailable responses."
+      ],
+      "explanation": "def can_admit(in_flight,max_in_flight,queue,max_queue):\n    return in_flight<max_in_flight or queue<max_queue"
+    },
+    "quiz": {
+      "question": "Does declaring async make CPU training nonblocking?",
+      "options": [
+        "No: it needs a separate bounded execution path",
+        "Yes: all work becomes concurrent",
+        "Only if training loss decreases"
+      ],
+      "answer": 0,
+      "explanation": "Async schedules waiting; CPU work still consumes execution resources."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Does declaring async make CPU training nonblocking?",
+      "options": [
+        "No: it needs a separate bounded execution path",
+        "Yes: all work becomes concurrent",
+        "Only if training loss decreases"
+      ],
+      "answer": 0,
+      "explanation": "Async schedules waiting; CPU work still consumes execution resources."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p30-dependencies"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Admission control",
+      "Async I/O"
+    ],
+    "interviewIds": [
+      "bridge-fastapi-001",
+      "bridge-fastapi-002",
+      "bridge-fastapi-003",
+      "bridge-fastapi-016",
+      "bridge-fastapi-017",
+      "bridge-fastapi-018",
+      "bridge-phase-30-6",
+      "bridge-phase-30-7"
+    ]
+  },
+  {
+    "id": "p30-operations",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "Health, readiness, OpenAPI and safe error contracts",
+    "minutes": 35,
+    "objectives": [
+      "Health, readiness, OpenAPI and safe error contracts",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects health, readiness, openapi and safe error contracts with test contracts, failure triage, and evidence for release. Acceptance includes cheap probes, accurate readiness for the declared mode, typed OpenAPI and safe correlated errors.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Liveness asks whether the process is functioning; readiness asks whether it can serve its required workload. A live process can be unready because a dependency or index is unavailable. OpenAPI describes route contracts for clients, while actual integration checks prove that implementation matches them.",
+          "Health probes should be inexpensive and avoid paid model calls. Quality evaluation is a different workflow from operational probing."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Expose a cheap health result and a readiness result naming required mode/dependency state. Test all domain endpoints and request/response models against OpenAPI. Add correlation and timing headers without exposing credentials or raw sensitive errors.",
+          "Map malformed input to 422, denied identity/access to 401/403 and controlled dependency failure to 503. Retain internal safe trace references for diagnosis, but do not serialize raw provider exceptions to clients."
+        ],
+        "code": "# GET /health -> process status\n# GET /ready -> readiness for declared fixture/live dependencies\n# Inspect /openapi.json and correlate X-Request-ID with safe traces",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A readiness probe always returns ready despite an unavailable required index. A health probe calls the model, causing costs and false restarts during rate limits. Error bodies leak request headers or tokens.",
+          "Test health under simulated dependency failure, readiness transitions, public error schemas and secret redaction. Check that every advertised route can be exercised with a known fixture."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes cheap probes, accurate readiness for the declared mode, typed OpenAPI and safe correlated errors. Fixture readiness states must not be mistaken for live-provider readiness.",
+          "For SDETs, probe and API checks are deterministic operational contracts. They support deployment and recovery while quality metrics separately assess the model's task behavior."
+        ]
+      }
+    ],
+    "mistake": "A readiness probe always returns ready despite an unavailable required index. A health probe calls the model, causing costs and false restarts during rate limits. Error bodies leak request headers or tokens.",
+    "takeaway": "Acceptance includes cheap probes, accurate readiness for the declared mode, typed OpenAPI and safe correlated errors.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def readiness(required):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def readiness(required):\n    return bool(required) and all(value is True for value in required.values())",
+      "starter": "def readiness(required):\n    return False",
+      "tests": "assert readiness({'data':True,'adapter':True})\nassert not readiness({'data':True,'adapter':False})\nassert not readiness({})",
+      "id": "p30-operations-exercise",
+      "hints": [
+        "Liveness asks whether the process is functioning; readiness asks whether it can serve its required workload.",
+        "A readiness probe always returns ready despite an unavailable required index.",
+        "Expose a cheap health result and a readiness result naming required mode/dependency state.",
+        "Acceptance includes cheap probes, accurate readiness for the declared mode, typed OpenAPI and safe correlated errors."
+      ],
+      "explanation": "def readiness(required):\n    return bool(required) and all(value is True for value in required.values())"
+    },
+    "quiz": {
+      "question": "Should liveness issue a paid model generation?",
+      "options": [
+        "No: keep it cheap and operational",
+        "Yes: every probe measures quality",
+        "Only with high temperature"
+      ],
+      "answer": 0,
+      "explanation": "Operational probes and model-quality evaluations have different purposes."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Should liveness issue a paid model generation?",
+      "options": [
+        "No: keep it cheap and operational",
+        "Yes: every probe measures quality",
+        "Only with high temperature"
+      ],
+      "answer": 0,
+      "explanation": "Operational probes and model-quality evaluations have different purposes."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p30-async-work"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Liveness",
+      "OpenAPI",
+      "Safe error"
+    ],
+    "interviewIds": [
+      "bridge-fastapi-001",
+      "bridge-fastapi-002",
+      "bridge-fastapi-003",
+      "bridge-fastapi-016",
+      "bridge-fastapi-017",
+      "bridge-fastapi-018",
+      "bridge-phase-30-6",
+      "bridge-phase-30-7"
+    ]
+  },
+  {
+    "id": "p30-checkpoint",
+    "phase": 30,
+    "module": "FastAPI For AI Services",
+    "title": "Phase 30 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 30 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 30 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance includes cheap probes, accurate readiness for the declared mode, typed OpenAPI and safe correlated errors.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects health, readiness, openapi and safe error contracts to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Expose a cheap health result and a readiness result naming required mode/dependency state. Test all domain endpoints and request/response models against OpenAPI. Add correlation and timing headers without exposing credentials or raw sensitive errors.",
+          "Map malformed input to 422, denied identity/access to 401/403 and controlled dependency failure to 503. Retain internal safe trace references for diagnosis, but do not serialize raw provider exceptions to clients.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "# GET /health -> process status\n# GET /ready -> readiness for declared fixture/live dependencies\n# Inspect /openapi.json and correlate X-Request-ID with safe traces",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A readiness probe always returns ready despite an unavailable required index. A health probe calls the model, causing costs and false restarts during rate limits. Error bodies leak request headers or tokens.",
+          "Test health under simulated dependency failure, readiness transitions, public error schemas and secret redaction. Check that every advertised route can be exercised with a known fixture.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes cheap probes, accurate readiness for the declared mode, typed OpenAPI and safe correlated errors. Fixture readiness states must not be mistaken for live-provider readiness.",
+          "For SDETs, probe and API checks are deterministic operational contracts. They support deployment and recovery while quality metrics separately assess the model's task behavior.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A readiness probe always returns ready despite an unavailable required index. A health probe calls the model, causing costs and false restarts during rate limits. Error bodies leak request headers or tokens.",
+    "takeaway": "Acceptance includes cheap probes, accurate readiness for the declared mode, typed OpenAPI and safe correlated errors.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Health, readiness, OpenAPI and safe error contracts to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance includes cheap probes, accurate readiness for the declared mode, typed OpenAPI and safe correlated errors.",
+      "id": "p30-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects health, readiness, openapi and safe error contracts to the shared CI quality platform.",
+        "A readiness probe always returns ready despite an unavailable required index.",
+        "Expose a cheap health result and a readiness result naming required mode/dependency state.",
+        "Acceptance includes cheap probes, accurate readiness for the declared mode, typed OpenAPI and safe correlated errors."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance includes cheap probes, accurate readiness for the declared mode, typed OpenAPI and safe correlated errors."
+    },
+    "quiz": {
+      "question": "A candidate for health, readiness, openapi and safe error contracts meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for health, readiness, openapi and safe error contracts meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p30-operations"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-fastapi-001",
+      "bridge-fastapi-002",
+      "bridge-fastapi-003",
+      "bridge-fastapi-016",
+      "bridge-fastapi-017",
+      "bridge-fastapi-018",
+      "bridge-phase-30-6",
+      "bridge-phase-30-7"
+    ]
+  }
+]

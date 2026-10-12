@@ -1,0 +1,245 @@
+[
+  {
+    "id": "p19-graphs",
+    "phase": 19,
+    "module": "Agent Frameworks",
+    "title": "Frameworks: LangGraph state, LangChain tools and LlamaIndex retrieval",
+    "minutes": 35,
+    "objectives": [
+      "Frameworks",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects frameworks: langgraph state, langchain tools and llamaindex retrieval with test contracts, failure triage, and evidence for release. Run equivalent task fixtures through the plain state machine and the framework graph.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Frameworks package orchestration mechanisms; they do not define your quality contract. LangGraph exposes nodes, edges, shared state, conditional routing and persisted checkpoints. LangChain's current create_agent interface combines models and tools with standardized messages. LlamaIndex provides ingestion/retrieval abstractions for data-grounded applications.",
+          "Choose based on required control. A fixed classify-and-report pipeline needs little autonomous behavior. A resumable investigation with approval may benefit from a state graph. Keep domain validation outside framework-specific callbacks."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The local graph lab declares typed state, adds read and draft nodes, connects START to read to draft to END, and invokes the graph on a synthetic failure ID. Conditional edges route insufficient evidence to review. A checkpointer persists state using a thread identity scoped to the user and tenant.",
+          "Interrupt before side effects, display the exact proposed action, then resume only with recorded approval. Parallel independent reads may merge results; define reducer semantics to avoid lost updates. Pin framework versions and run contract tests against upgrades."
+        ],
+        "code": "from typing import TypedDict\nfrom langgraph.graph import StateGraph,START,END\nclass State(TypedDict):\n    failure_id:str\n    draft:str\ndef draft(s):return {'draft':'Review '+s['failure_id']}\ng=StateGraph(State);g.add_node('draft',draft)\ng.add_edge(START,'draft');g.add_edge('draft',END)\napp=g.compile()\nprint(app.invoke({'failure_id':'F1','draft':''}))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A checkpoint is mistaken for an authorization grant, so a resumed task applies an old patch after permissions changed. Parallel nodes overwrite the same evidence list because no merge policy exists.",
+          "Test restart/resume, state serialization, tenant-scoped thread IDs, duplicate execution and stale approvals. Mock the model boundary while testing graph routing; reserve live calls for the model's decisions."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Run equivalent task fixtures through the plain state machine and the framework graph. Compare outputs, tool traces and error behavior. Framework convenience is valuable when it reduces your orchestration burden without obscuring policy enforcement.",
+          "Record API versions and provide a migration test rather than copying old AgentExecutor tutorials. The course's framework examples link current official documentation and isolate imports in optional local labs."
+        ]
+      }
+    ],
+    "mistake": "A checkpoint is mistaken for an authorization grant, so a resumed task applies an old patch after permissions changed. Parallel nodes overwrite the same evidence list because no merge policy exists.",
+    "takeaway": "Run equivalent task fixtures through the plain state machine and the framework graph.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def route(state):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def route(state):\n    if not state.get('evidence'):return 'review'\n    if state.get('write_requested') and not state.get('approved'):return 'approval'\n    return 'draft'",
+      "starter": "def route(state):\n    return 'draft'",
+      "tests": "assert route({'evidence':[]})=='review'\nassert route({'evidence':['F1'],'write_requested':True,'approved':False})=='approval'\nassert route({'evidence':['F1']})=='draft'",
+      "id": "p19-graphs-exercise",
+      "hints": [
+        "Frameworks package orchestration mechanisms; they do not define your quality contract.",
+        "A checkpoint is mistaken for an authorization grant, so a resumed task applies an old patch after permissions changed.",
+        "The local graph lab declares typed state, adds read and draft nodes, connects START to read to draft to END, and invokes the graph on a synthetic failure ID.",
+        "Run equivalent task fixtures through the plain state machine and the framework graph."
+      ],
+      "explanation": "def route(state):\n    if not state.get('evidence'):return 'review'\n    if state.get('write_requested') and not state.get('approved'):return 'approval'\n    return 'draft'"
+    },
+    "quiz": {
+      "question": "Does a saved checkpoint authorize a write on resume?",
+      "options": [
+        "No: revalidate permission and approval",
+        "Yes: state persistence is approval",
+        "Only after a retry"
+      ],
+      "answer": 0,
+      "explanation": "Persisted execution state and current authorization are separate contracts."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Does a saved checkpoint authorize a write on resume?",
+      "options": [
+        "No: revalidate permission and approval",
+        "Yes: state persistence is approval",
+        "Only after a retry"
+      ],
+      "answer": 0,
+      "explanation": "Persisted execution state and current authorization are separate contracts."
+    },
+    "sources": [
+      "https://docs.langchain.com/oss/python/langchain/overview",
+      "https://docs.langchain.com/oss/python/langgraph/overview",
+      "https://developers.llamaindex.ai/python/framework/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p18-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "LangGraph",
+      "Checkpoint",
+      "Reducer"
+    ],
+    "interviewIds": [
+      "bridge-agents-002",
+      "bridge-agents-016",
+      "bridge-agents-030",
+      "bridge-agents-044",
+      "bridge-phase-19-4",
+      "bridge-phase-19-5",
+      "bridge-phase-19-6",
+      "bridge-phase-19-7"
+    ]
+  },
+  {
+    "id": "p19-checkpoint",
+    "phase": 19,
+    "module": "Agent Frameworks",
+    "title": "Phase 19 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 19 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 19 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Run equivalent task fixtures through the plain state machine and the framework graph.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects frameworks: langgraph state, langchain tools and llamaindex retrieval to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The local graph lab declares typed state, adds read and draft nodes, connects START to read to draft to END, and invokes the graph on a synthetic failure ID. Conditional edges route insufficient evidence to review. A checkpointer persists state using a thread identity scoped to the user and tenant.",
+          "Interrupt before side effects, display the exact proposed action, then resume only with recorded approval. Parallel independent reads may merge results; define reducer semantics to avoid lost updates. Pin framework versions and run contract tests against upgrades.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "from typing import TypedDict\nfrom langgraph.graph import StateGraph,START,END\nclass State(TypedDict):\n    failure_id:str\n    draft:str\ndef draft(s):return {'draft':'Review '+s['failure_id']}\ng=StateGraph(State);g.add_node('draft',draft)\ng.add_edge(START,'draft');g.add_edge('draft',END)\napp=g.compile()\nprint(app.invoke({'failure_id':'F1','draft':''}))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A checkpoint is mistaken for an authorization grant, so a resumed task applies an old patch after permissions changed. Parallel nodes overwrite the same evidence list because no merge policy exists.",
+          "Test restart/resume, state serialization, tenant-scoped thread IDs, duplicate execution and stale approvals. Mock the model boundary while testing graph routing; reserve live calls for the model's decisions.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Run equivalent task fixtures through the plain state machine and the framework graph. Compare outputs, tool traces and error behavior. Framework convenience is valuable when it reduces your orchestration burden without obscuring policy enforcement.",
+          "Record API versions and provide a migration test rather than copying old AgentExecutor tutorials. The course's framework examples link current official documentation and isolate imports in optional local labs.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A checkpoint is mistaken for an authorization grant, so a resumed task applies an old patch after permissions changed. Parallel nodes overwrite the same evidence list because no merge policy exists.",
+    "takeaway": "Run equivalent task fixtures through the plain state machine and the framework graph.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Frameworks: LangGraph state, LangChain tools and LlamaIndex retrieval to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nRun equivalent task fixtures through the plain state machine and the framework graph.",
+      "id": "p19-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects frameworks: langgraph state, langchain tools and llamaindex retrieval to the shared CI quality platform.",
+        "A checkpoint is mistaken for an authorization grant, so a resumed task applies an old patch after permissions changed.",
+        "The local graph lab declares typed state, adds read and draft nodes, connects START to read to draft to END, and invokes the graph on a synthetic failure ID.",
+        "Run equivalent task fixtures through the plain state machine and the framework graph."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nRun equivalent task fixtures through the plain state machine and the framework graph."
+    },
+    "quiz": {
+      "question": "A candidate for frameworks: langgraph state, langchain tools and llamaindex retrieval meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for frameworks: langgraph state, langchain tools and llamaindex retrieval meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://docs.langchain.com/oss/python/langchain/overview",
+      "https://docs.langchain.com/oss/python/langgraph/overview",
+      "https://developers.llamaindex.ai/python/framework/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p19-graphs"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-agents-002",
+      "bridge-agents-016",
+      "bridge-agents-030",
+      "bridge-agents-044",
+      "bridge-phase-19-4",
+      "bridge-phase-19-5",
+      "bridge-phase-19-6",
+      "bridge-phase-19-7"
+    ]
+  }
+]

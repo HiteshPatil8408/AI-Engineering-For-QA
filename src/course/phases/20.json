@@ -1,0 +1,673 @@
+[
+  {
+    "id": "p20-protocol",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "MCP: discovery, typed tools and safe transports",
+    "minutes": 35,
+    "objectives": [
+      "MCP",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects mcp: discovery, typed tools and safe transports with test contracts, failure triage, and evidence for release. Capture a real initialized session, tool listing and successful fixture call in a test artifact.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Model Context Protocol standardizes how hosts connect to servers exposing tools, resources and prompts. The host owns the user-facing application and policy; a client maintains a connection to a server. Tools perform operations, resources expose addressable context and prompts offer reusable interaction templates where supported.",
+          "MCP reduces bespoke integration wiring but does not make a server trustworthy. Tool descriptions and returned content are untrusted inputs; authentication identifies a party, while authorization determines which operation it may perform."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The actual local MCP server uses the Python SDK's FastMCP with read_failure and search_history tools, plus a synthetic fixture resource. The client starts the server over stdio, initializes the session, lists tools and calls them with typed arguments. Streamable HTTP is a separate remote transport with its own authentication and session considerations.",
+          "Keep server stdout reserved for protocol messages in stdio mode; log to stderr. Validate IDs against a bounded fixture root and inject tenant from authenticated context rather than tool arguments. Expose read-only tools first."
+        ],
+        "code": "from mcp.server.fastmcp import FastMCP\nmcp=FastMCP('synthetic-ci')\n@mcp.tool()\ndef read_failure(failure_id:str)->dict:\n    if failure_id!='F1':raise ValueError('unknown fixture')\n    return {'id':'F1','error':'TimeoutError'}\nif __name__=='__main__':mcp.run(transport='stdio')",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A server advertises a benign description but returns instructions to expose secrets. A tool accepts a filename and reads arbitrary paths. Another writes debug text to stdout, corrupting JSON-RPC communication.",
+          "Test discovery schemas, unknown IDs, malformed arguments, path traversal and protocol output. For remote deployments, test origin/authentication behavior and avoid forwarding tokens to unrelated downstream audiences."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Capture a real initialized session, tool listing and successful fixture call in a test artifact. A hand-written JSON object named MCP is not an implementation of the protocol.",
+          "For SDET quality gates, combine interoperability tests with explicit permission checks. Record SDK/protocol versions and test upgrades against the same fixture server and client before adopting changed transport behavior."
+        ]
+      }
+    ],
+    "mistake": "A server advertises a benign description but returns instructions to expose secrets. A tool accepts a filename and reads arbitrary paths. Another writes debug text to stdout, corrupting JSON-RPC communication.",
+    "takeaway": "Capture a real initialized session, tool listing and successful fixture call in a test artifact.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def fixture_path(identifier):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def fixture_path(identifier):\n    if not identifier.startswith('F') or not identifier[1:].isdigit():raise ValueError('invalid id')\n    return 'fixtures/'+identifier+'.json'",
+      "starter": "def fixture_path(identifier):\n    return ''",
+      "tests": "assert fixture_path('F12')=='fixtures/F12.json'\nfor x in ['../secret','F1/../../x','F']:\n    try: fixture_path(x); assert False\n    except ValueError: pass",
+      "id": "p20-protocol-exercise",
+      "hints": [
+        "Model Context Protocol standardizes how hosts connect to servers exposing tools, resources and prompts.",
+        "A server advertises a benign description but returns instructions to expose secrets.",
+        "The actual local MCP server uses the Python SDK's FastMCP with read_failure and search_history tools, plus a synthetic fixture resource.",
+        "Capture a real initialized session, tool listing and successful fixture call in a test artifact."
+      ],
+      "explanation": "def fixture_path(identifier):\n    if not identifier.startswith('F') or not identifier[1:].isdigit():raise ValueError('invalid id')\n    return 'fixtures/'+identifier+'.json'"
+    },
+    "quiz": {
+      "question": "Where should stdio server diagnostic logs go?",
+      "options": [
+        "stderr",
+        "stdout beside protocol frames",
+        "Into tool argument schemas"
+      ],
+      "answer": 0,
+      "explanation": "stdout must remain a valid protocol stream."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Where should stdio server diagnostic logs go?",
+      "options": [
+        "stderr",
+        "stdout beside protocol frames",
+        "Into tool argument schemas"
+      ],
+      "answer": 0,
+      "explanation": "stdout must remain a valid protocol stream."
+    },
+    "sources": [
+      "https://modelcontextprotocol.io/docs/learn/architecture",
+      "https://github.com/modelcontextprotocol/python-sdk",
+      "https://modelcontextprotocol.io/specification/2026-07-28"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p19-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "MCP",
+      "JSON-RPC",
+      "Transport"
+    ],
+    "interviewIds": [
+      "bridge-mcp-001",
+      "bridge-mcp-002",
+      "bridge-mcp-003",
+      "bridge-mcp-016",
+      "bridge-mcp-017",
+      "bridge-mcp-018",
+      "bridge-phase-20-6",
+      "bridge-phase-20-7"
+    ]
+  },
+  {
+    "id": "p20-session",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "MCP lifecycle: initialize, discover, call and close",
+    "minutes": 35,
+    "objectives": [
+      "MCP lifecycle",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects mcp lifecycle: initialize, discover, call and close with test contracts, failure triage, and evidence for release. The real smoke test establishes an initialized SDK session and receives fixture evidence.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "An MCP client cannot treat a server as an arbitrary HTTP endpoint returning a convenient dictionary. It establishes a protocol session, negotiates capabilities, discovers supported tools/resources and sends typed requests. The SDK owns message framing and request-response correlation; application code owns permission and task policy.",
+          "A successful initialization says the parties can communicate, not that every advertised tool is authorized for the user. Discovery provides schemas and descriptions that must still be reviewed as untrusted integration metadata."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The companion client creates StdioServerParameters with the current Python executable and the fixture server path, opens stdio_client, constructs ClientSession and calls initialize before list_tools or call_tool. Async context managers close the child process and streams after the test.",
+          "Call read_failure with F001 and inspect the typed content and isError result. Then call a traversal-like unknown ID and assert a protocol-level tool error rather than reading a path. Record the discovered tool names and negotiated protocol version."
+        ],
+        "code": "from mcp import ClientSession,StdioServerParameters\nfrom mcp.client.stdio import stdio_client\n# See local-labs/mcp/client.py for the complete async context and handshake",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A client calls tools before initialization or assumes every server exposes the same names. A server logs diagnostic text to stdout and corrupts protocol framing. A child process is left running after cancellation because lifecycle cleanup is absent.",
+          "Test initialization order, expected capabilities, tool listing, successful calls, invalid arguments and clean shutdown. Preserve protocol errors separately from domain not-found results for diagnosis."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The real smoke test establishes an initialized SDK session and receives fixture evidence. A mocked object named MCP cannot establish interoperability. Keep a portable artifact with SDK/protocol identity and observed tool results.",
+          "For SDETs, this is integration testing across a protocol boundary: known requests, schemas, correlation and cleanup remain deterministic even when the host later uses an LLM to select a tool."
+        ]
+      }
+    ],
+    "mistake": "A client calls tools before initialization or assumes every server exposes the same names. A server logs diagnostic text to stdout and corrupts protocol framing. A child process is left running after cancellation because lifecycle cleanup is absent.",
+    "takeaway": "The real smoke test establishes an initialized SDK session and receives fixture evidence.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def lifecycle_valid(events):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def lifecycle_valid(events):\n    required=['connect','initialize','discover','call','close']\n    return events==required",
+      "starter": "def lifecycle_valid(events):\n    return False",
+      "tests": "assert lifecycle_valid(['connect','initialize','discover','call','close'])\nassert not lifecycle_valid(['connect','call','close'])",
+      "id": "p20-session-exercise",
+      "hints": [
+        "An MCP client cannot treat a server as an arbitrary HTTP endpoint returning a convenient dictionary.",
+        "A client calls tools before initialization or assumes every server exposes the same names.",
+        "The companion client creates StdioServerParameters with the current Python executable and the fixture server path, opens stdio_client, constructs ClientSession and calls initialize before list_tools or call_tool.",
+        "The real smoke test establishes an initialized SDK session and receives fixture evidence."
+      ],
+      "explanation": "def lifecycle_valid(events):\n    required=['connect','initialize','discover','call','close']\n    return events==required"
+    },
+    "quiz": {
+      "question": "What should precede tool discovery/calls in a new session?",
+      "options": [
+        "Protocol initialization",
+        "A guessed tool name",
+        "A raw shell command"
+      ],
+      "answer": 0,
+      "explanation": "Initialization negotiates the session contract before capability use."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What should precede tool discovery/calls in a new session?",
+      "options": [
+        "Protocol initialization",
+        "A guessed tool name",
+        "A raw shell command"
+      ],
+      "answer": 0,
+      "explanation": "Initialization negotiates the session contract before capability use."
+    },
+    "sources": [
+      "https://modelcontextprotocol.io/docs/learn/architecture",
+      "https://github.com/modelcontextprotocol/python-sdk",
+      "https://modelcontextprotocol.io/specification/2026-07-28"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p20-protocol"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "MCP initialization",
+      "ClientSession"
+    ],
+    "interviewIds": [
+      "bridge-mcp-001",
+      "bridge-mcp-002",
+      "bridge-mcp-003",
+      "bridge-mcp-016",
+      "bridge-mcp-017",
+      "bridge-mcp-018",
+      "bridge-phase-20-6",
+      "bridge-phase-20-7"
+    ]
+  },
+  {
+    "id": "p20-resources",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "MCP resources and prompts versus executable tools",
+    "minutes": 35,
+    "objectives": [
+      "MCP resources and prompts versus executable tools",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects mcp resources and prompts versus executable tools with test contracts, failure triage, and evidence for release. Acceptance demonstrates real resource discovery/read behavior and tool calls separately.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Tools perform application operations with declared input schemas. Resources expose context at a URI and may support listing/templates; prompts provide reusable interaction templates where the server supports them. These interfaces serve different roles, and a resource's text must not become a new authority for tool permissions.",
+          "The fixture server exposes a schema resource describing synthetic incident fields. Reading that resource informs the host about data, while read_failure retrieves one authorized incident through a tool. Neither interface grants repository writes."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use FastMCP decorators to declare a resource at fixture://ci/schema and tools with typed function arguments. Discover the relevant capability, read the resource and associate its contents with the server identity. Restrict resource identifiers and templates to supported namespaces.",
+          "A host may use a prompt template as part of its request construction, but it still applies its own instruction hierarchy and safety policy. Keep tool result IDs and resource URIs in traces so evidence provenance is inspectable."
+        ],
+        "code": "from mcp.server.fastmcp import FastMCP\nserver=FastMCP('fixture')\n@server.resource('fixture://ci/schema')\ndef schema():return 'id, tenant, group, log, category'",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A host sees a resource containing 'run this command' and executes it as an instruction. A resource template accepts an arbitrary filesystem path. A tool description is changed remotely and the host silently expands its allowlist.",
+          "Test supported URI namespaces, template arguments, malicious resource text and changed discovery schemas. Treat descriptions and contents as data crossing a trust boundary, even when the transport is authenticated."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance demonstrates real resource discovery/read behavior and tool calls separately. Record which interfaces the server actually advertises rather than assuming every MCP server supports every optional capability.",
+          "SDETs should verify schema compatibility and scope across upgrades. The protocol reduces wiring differences, but the host still owns trust, evidence handling and effect authorization."
+        ]
+      }
+    ],
+    "mistake": "A host sees a resource containing 'run this command' and executes it as an instruction. A resource template accepts an arbitrary filesystem path. A tool description is changed remotely and the host silently expands its allowlist.",
+    "takeaway": "Acceptance demonstrates real resource discovery/read behavior and tool calls separately.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def supported_resource(uri):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def supported_resource(uri):\n    return uri=='fixture://ci/schema'",
+      "starter": "def supported_resource(uri):\n    return False",
+      "tests": "assert supported_resource('fixture://ci/schema')\nassert not supported_resource('file:///etc/passwd')\nassert not supported_resource('fixture://ci/../../secret')",
+      "id": "p20-resources-exercise",
+      "hints": [
+        "Tools perform application operations with declared input schemas.",
+        "A host sees a resource containing 'run this command' and executes it as an instruction.",
+        "Use FastMCP decorators to declare a resource at fixture://ci/schema and tools with typed function arguments.",
+        "Acceptance demonstrates real resource discovery/read behavior and tool calls separately."
+      ],
+      "explanation": "def supported_resource(uri):\n    return uri=='fixture://ci/schema'"
+    },
+    "quiz": {
+      "question": "Does authenticated resource text become trusted instructions?",
+      "options": [
+        "No: its content is still data",
+        "Yes: authentication proves every statement",
+        "Only if it contains JSON"
+      ],
+      "answer": 0,
+      "explanation": "Identity does not grant content authority or operational permissions."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Does authenticated resource text become trusted instructions?",
+      "options": [
+        "No: its content is still data",
+        "Yes: authentication proves every statement",
+        "Only if it contains JSON"
+      ],
+      "answer": 0,
+      "explanation": "Identity does not grant content authority or operational permissions."
+    },
+    "sources": [
+      "https://modelcontextprotocol.io/docs/learn/architecture",
+      "https://github.com/modelcontextprotocol/python-sdk",
+      "https://modelcontextprotocol.io/specification/2026-07-28"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p20-session"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "MCP resource",
+      "MCP prompt"
+    ],
+    "interviewIds": [
+      "bridge-mcp-001",
+      "bridge-mcp-002",
+      "bridge-mcp-003",
+      "bridge-mcp-016",
+      "bridge-mcp-017",
+      "bridge-mcp-018",
+      "bridge-phase-20-6",
+      "bridge-phase-20-7"
+    ]
+  },
+  {
+    "id": "p20-transports",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "Stdio and Streamable HTTP: different deployment boundaries",
+    "minutes": 35,
+    "objectives": [
+      "Stdio and Streamable HTTP",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects stdio and streamable http: different deployment boundaries with test contracts, failure triage, and evidence for release. The provided smoke test executes real stdio mode.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Stdio connects a host to a locally launched server process through input/output streams. Streamable HTTP supports remote connections and introduces network identity, session and authentication considerations. Choosing a transport changes operational and security assumptions; it does not change the host's obligation to authorize tools.",
+          "A local fixture server can rely on a narrowly launched process with synthetic data. A remote deployment must protect its origin, audience, credentials, session lifecycle and downstream requests."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Keep stdout reserved for protocol messages in stdio mode and put logs on stderr. Launch a known executable with explicit arguments and a minimal environment. For a remote server, use the SDK's supported HTTP transport, enforce authenticated scopes and bind session handling to the intended client context.",
+          "Do not pass upstream bearer tokens to unrelated downstream services. Validate resource audiences and avoid treating arbitrary endpoint URLs from model text as trusted server configuration. TLS and authentication protect transport identity; authorization still restricts effects."
+        ],
+        "code": "# Local server\nserver.run(transport='stdio')\n# A separately configured remote server can use streamable-http\n# Authentication and origin policy must be supplied for that deployment",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A remote host accepts any origin or follows a model-provided MCP URL carrying credentials. A stdio launcher passes its entire secret environment to an unreviewed server. An HTTP session is reused across users without scope checks.",
+          "Test malformed connections, denied authentication, wrong audience, session ownership and shutdown. Separate local interoperability tests from the remote deployment's actual auth and network tests."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The provided smoke test executes real stdio mode. Remote HTTP configuration is a separate deployment exercise whose authentication cannot be proved by that local test. Record transport and tested boundaries in the artifact.",
+          "SDETs should avoid overstating protocol compliance or security from a single happy path. Each deployment mode needs evidence for the assumptions it introduces."
+        ]
+      }
+    ],
+    "mistake": "A remote host accepts any origin or follows a model-provided MCP URL carrying credentials. A stdio launcher passes its entire secret environment to an unreviewed server. An HTTP session is reused across users without scope checks.",
+    "takeaway": "The provided smoke test executes real stdio mode.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def safe_server_config(url,allowed_hosts):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def safe_server_config(url,allowed_hosts):\n    from urllib.parse import urlparse\n    p=urlparse(url)\n    return p.scheme=='https' and p.hostname in allowed_hosts and p.username is None and p.password is None",
+      "starter": "def safe_server_config(url,allowed_hosts):\n    return False",
+      "tests": "assert safe_server_config('https://ci.example.invalid/mcp',{'ci.example.invalid'})\nassert not safe_server_config('https://evil.example.invalid/mcp',{'ci.example.invalid'})\nassert not safe_server_config('https://user:secret@ci.example.invalid/mcp',{'ci.example.invalid'})",
+      "id": "p20-transports-exercise",
+      "hints": [
+        "Stdio connects a host to a locally launched server process through input/output streams.",
+        "A remote host accepts any origin or follows a model-provided MCP URL carrying credentials.",
+        "Keep stdout reserved for protocol messages in stdio mode and put logs on stderr.",
+        "The provided smoke test executes real stdio mode."
+      ],
+      "explanation": "def safe_server_config(url,allowed_hosts):\n    from urllib.parse import urlparse\n    p=urlparse(url)\n    return p.scheme=='https' and p.hostname in allowed_hosts and p.username is None and p.password is None"
+    },
+    "quiz": {
+      "question": "What additional evidence does a remote transport need?",
+      "options": [
+        "Authentication, origin/session and audience tests",
+        "Only the local stdio smoke result",
+        "A more descriptive server name"
+      ],
+      "answer": 0,
+      "explanation": "Remote deployment introduces trust and lifecycle boundaries absent from local process communication."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What additional evidence does a remote transport need?",
+      "options": [
+        "Authentication, origin/session and audience tests",
+        "Only the local stdio smoke result",
+        "A more descriptive server name"
+      ],
+      "answer": 0,
+      "explanation": "Remote deployment introduces trust and lifecycle boundaries absent from local process communication."
+    },
+    "sources": [
+      "https://modelcontextprotocol.io/docs/learn/architecture",
+      "https://github.com/modelcontextprotocol/python-sdk",
+      "https://modelcontextprotocol.io/specification/2026-07-28"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p20-resources"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Streamable HTTP",
+      "Audience"
+    ],
+    "interviewIds": [
+      "bridge-mcp-001",
+      "bridge-mcp-002",
+      "bridge-mcp-003",
+      "bridge-mcp-016",
+      "bridge-mcp-017",
+      "bridge-mcp-018",
+      "bridge-phase-20-6",
+      "bridge-phase-20-7"
+    ]
+  },
+  {
+    "id": "p20-permissions",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "MCP host policy: discovery does not authorize effects",
+    "minutes": 35,
+    "objectives": [
+      "MCP host policy",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects mcp host policy: discovery does not authorize effects with test contracts, failure triage, and evidence for release. Acceptance combines the real protocol smoke test with domain/policy regressions.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "MCP makes tools discoverable, but discovery is not permission. The host decides which tool proposals are allowed for a task and principal. The server separately enforces its domain access rules. Defense at both ends protects against malicious proposals and overly broad server implementations.",
+          "An allowlisted read tool can still expose too much if its arguments select unauthorized IDs. Tool-name validation and data-scope validation are separate checks."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Limit the fixture server to read_failure and search_history, with alpha-tenant records and bounded query lengths. The host's agent policy also limits calls, tracks repeated action signatures and rejects unsupported tool names. A write-capable integration must bind approval to an exact action and current permission scope.",
+          "Retain discovery, proposal, validation, authorization, result and termination events. On schema changes, compare the new tool contract with the tested one before enabling it automatically."
+        ],
+        "code": "allowed_tools={'read_failure','search_history'}\nassert 'run_shell' not in allowed_tools",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A server advertises a safe read description but accepts a path traversal ID. A host trusts a returned instruction to invoke an unrelated tool. A denied tool call is retried through a broader generic endpoint.",
+          "Test unknown names, extra arguments, cross-tenant IDs, overlong queries and denial recovery. Ensure denied actions have zero effects and do not alter the task's budget or allowlist."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance combines the real protocol smoke test with domain/policy regressions. A successful call shows interoperability, while denied cases show the intended permission boundary. Neither alone proves the entire agent safe.",
+          "For SDETs, retain the denied-call trace as first-class evidence. It establishes that an attempted unsafe action was blocked at the application/server boundary, not merely discouraged in prose."
+        ]
+      }
+    ],
+    "mistake": "A server advertises a safe read description but accepts a path traversal ID. A host trusts a returned instruction to invoke an unrelated tool. A denied tool call is retried through a broader generic endpoint.",
+    "takeaway": "Acceptance combines the real protocol smoke test with domain/policy regressions.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def validate_call(name,args,allowed):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def validate_call(name,args,allowed):\n    if name not in allowed:return False\n    if name=='read_failure':return set(args)=={'failure_id'} and args['failure_id'].startswith('F') and args['failure_id'][1:].isdigit()\n    if name=='search_history':return set(args)=={'query'} and isinstance(args['query'],str) and len(args['query'])<=1000\n    return False",
+      "starter": "def validate_call(name,args,allowed):\n    return False",
+      "tests": "assert validate_call('read_failure',{'failure_id':'F1'},{'read_failure'})\nassert not validate_call('read_failure',{'failure_id':'../x'},{'read_failure'})\nassert not validate_call('run_shell',{}, {'read_failure'})",
+      "id": "p20-permissions-exercise",
+      "hints": [
+        "MCP makes tools discoverable, but discovery is not permission.",
+        "A server advertises a safe read description but accepts a path traversal ID.",
+        "Limit the fixture server to read_failure and search_history, with alpha-tenant records and bounded query lengths.",
+        "Acceptance combines the real protocol smoke test with domain/policy regressions."
+      ],
+      "explanation": "def validate_call(name,args,allowed):\n    if name not in allowed:return False\n    if name=='read_failure':return set(args)=={'failure_id'} and args['failure_id'].startswith('F') and args['failure_id'][1:].isdigit()\n    if name=='search_history':return set(args)=={'query'} and isinstance(args['query'],str) and len(args['query'])<=1000\n    return False"
+    },
+    "quiz": {
+      "question": "Which checks are separate for a discovered read tool?",
+      "options": [
+        "Tool permission and authorized data scope",
+        "Only tool description and tone",
+        "Server name and icon"
+      ],
+      "answer": 0,
+      "explanation": "A permitted tool can still receive arguments outside the principal\u2019s allowed resources."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which checks are separate for a discovered read tool?",
+      "options": [
+        "Tool permission and authorized data scope",
+        "Only tool description and tone",
+        "Server name and icon"
+      ],
+      "answer": 0,
+      "explanation": "A permitted tool can still receive arguments outside the principal\u2019s allowed resources."
+    },
+    "sources": [
+      "https://modelcontextprotocol.io/docs/learn/architecture",
+      "https://github.com/modelcontextprotocol/python-sdk",
+      "https://modelcontextprotocol.io/specification/2026-07-28"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p20-transports"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "MCP host policy",
+      "Tool schema"
+    ],
+    "interviewIds": [
+      "bridge-mcp-001",
+      "bridge-mcp-002",
+      "bridge-mcp-003",
+      "bridge-mcp-016",
+      "bridge-mcp-017",
+      "bridge-mcp-018",
+      "bridge-phase-20-6",
+      "bridge-phase-20-7"
+    ]
+  },
+  {
+    "id": "p20-checkpoint",
+    "phase": 20,
+    "module": "MCP: Model Context Protocol",
+    "title": "Phase 20 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 20 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 20 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance combines the real protocol smoke test with domain/policy regressions.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects mcp host policy: discovery does not authorize effects to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Limit the fixture server to read_failure and search_history, with alpha-tenant records and bounded query lengths. The host's agent policy also limits calls, tracks repeated action signatures and rejects unsupported tool names. A write-capable integration must bind approval to an exact action and current permission scope.",
+          "Retain discovery, proposal, validation, authorization, result and termination events. On schema changes, compare the new tool contract with the tested one before enabling it automatically.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "allowed_tools={'read_failure','search_history'}\nassert 'run_shell' not in allowed_tools",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A server advertises a safe read description but accepts a path traversal ID. A host trusts a returned instruction to invoke an unrelated tool. A denied tool call is retried through a broader generic endpoint.",
+          "Test unknown names, extra arguments, cross-tenant IDs, overlong queries and denial recovery. Ensure denied actions have zero effects and do not alter the task's budget or allowlist.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance combines the real protocol smoke test with domain/policy regressions. A successful call shows interoperability, while denied cases show the intended permission boundary. Neither alone proves the entire agent safe.",
+          "For SDETs, retain the denied-call trace as first-class evidence. It establishes that an attempted unsafe action was blocked at the application/server boundary, not merely discouraged in prose.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A server advertises a safe read description but accepts a path traversal ID. A host trusts a returned instruction to invoke an unrelated tool. A denied tool call is retried through a broader generic endpoint.",
+    "takeaway": "Acceptance combines the real protocol smoke test with domain/policy regressions.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply MCP host policy: discovery does not authorize effects to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance combines the real protocol smoke test with domain/policy regressions.",
+      "id": "p20-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects mcp host policy: discovery does not authorize effects to the shared CI quality platform.",
+        "A server advertises a safe read description but accepts a path traversal ID.",
+        "Limit the fixture server to read_failure and search_history, with alpha-tenant records and bounded query lengths.",
+        "Acceptance combines the real protocol smoke test with domain/policy regressions."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance combines the real protocol smoke test with domain/policy regressions."
+    },
+    "quiz": {
+      "question": "A candidate for mcp host policy: discovery does not authorize effects meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for mcp host policy: discovery does not authorize effects meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://modelcontextprotocol.io/docs/learn/architecture",
+      "https://github.com/modelcontextprotocol/python-sdk",
+      "https://modelcontextprotocol.io/specification/2026-07-28"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p20-permissions"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-mcp-001",
+      "bridge-mcp-002",
+      "bridge-mcp-003",
+      "bridge-mcp-016",
+      "bridge-mcp-017",
+      "bridge-mcp-018",
+      "bridge-phase-20-6",
+      "bridge-phase-20-7"
+    ]
+  }
+]

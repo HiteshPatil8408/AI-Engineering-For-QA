@@ -1,0 +1,798 @@
+[
+  {
+    "id": "p41-triage",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "AI failure triage: classification, retrieval and evidence",
+    "minutes": 35,
+    "objectives": [
+      "AI failure triage",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects ai failure triage: classification, retrieval and evidence with test contracts, failure triage, and evidence for release. Acceptance evidence includes held-out confusion metrics, retrieval Recall@K, valid citations, unknown-case escalation, p95 latency and cost per accepted task.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A CI failure contains an exception, test identity, build context and history. The triage system must classify product, automation, environment, test-data or unknown causes without turning a plausible narrative into a confirmed defect. Similar failures provide evidence, not proof that two incidents share a root cause.",
+          "The portfolio result must be reproducible from the supplied synthetic fixtures and declared configuration. Keep a deterministic baseline visible alongside any live-provider results."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Build a grouped-split TF-IDF baseline, retrieve approved historical failures, then optionally ask a live model for a typed explanation with evidence IDs. Map probable owners from an explicit module registry rather than asking the model to invent a person. Export a report containing category, uncertainty, similar failures and review status.",
+          "The repository labs provide the domain entry points and fixture cases. Run the acceptance checks before recording project completion and keep the generated run ID in your field notes."
+        ],
+        "code": "# Local acceptance workflow\npython -m pytest local-labs\npython local-labs/evals/runner.py --output artifacts/evaluation\n# Inspect JSON verdict and escaped HTML case report",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Inject an unknown failure, contradictory history and a deleted evidence ID. An accepted non-UNKNOWN decision with no supporting evidence is a release failure; a fluent explanation cannot repair that invariant. Distinguish classifier errors from retrieval misses and unsupported explanations.",
+          "Trace the actual effect and retain the counterexample as a regression fixture. Fixing presentation alone does not establish that the application boundary is safe."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance evidence includes held-out confusion metrics, retrieval Recall@K, valid citations, unknown-case escalation, p95 latency and cost per accepted task. Replay a failed case from the JSON report and show the fix without editing its expected label.",
+          "Prepare a technical deep dive explaining one rejected design, one detected regression and the tradeoff behind the final implementation. Separate fixture contract evidence from live model quality claims."
+        ]
+      }
+    ],
+    "mistake": "Inject an unknown failure, contradictory history and a deleted evidence ID. An accepted non-UNKNOWN decision with no supporting evidence is a release failure; a fluent explanation cannot repair that invariant. Distinguish classifier errors from retrieval misses and unsupported explanations.",
+    "takeaway": "Acceptance evidence includes held-out confusion metrics, retrieval Recall@K, valid citations, unknown-case escalation, p95 latency and cost per accepted task.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Write your acceptance memo: link a reproducible run, explain a measured failure, the boundary that fixes it, and the release/rollback decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Reproducible evidence",
+          "terms": [
+            "dataset",
+            "run"
+          ]
+        },
+        {
+          "label": "Failure and enforcement",
+          "terms": [
+            "failure",
+            "boundary"
+          ]
+        },
+        {
+          "label": "Release plan",
+          "terms": [
+            "release",
+            "rollback"
+          ]
+        }
+      ],
+      "solution": "Acceptance evidence includes held-out confusion metrics, retrieval Recall@K, valid citations, unknown-case escalation, p95 latency and cost per accepted task. Replay a failed case from the JSON report and show the fix without editing its expected label.",
+      "id": "p41-triage-exercise",
+      "hints": [
+        "A CI failure contains an exception, test identity, build context and history.",
+        "Inject an unknown failure, contradictory history and a deleted evidence ID.",
+        "Build a grouped-split TF-IDF baseline, retrieve approved historical failures, then optionally ask a live model for a typed explanation with evidence IDs.",
+        "Acceptance evidence includes held-out confusion metrics, retrieval Recall@K, valid citations, unknown-case escalation, p95 latency and cost per accepted task."
+      ],
+      "explanation": "Acceptance evidence includes held-out confusion metrics, retrieval Recall@K, valid citations, unknown-case escalation, p95 latency and cost per accepted task. Replay a failed case from the JSON report and show the fix without editing its expected label."
+    },
+    "quiz": {
+      "question": "What demonstrates this project is ready for review?",
+      "options": [
+        "Reproducible acceptance evidence with failure cases",
+        "A polished diagram alone",
+        "A model saying the project works"
+      ],
+      "answer": 0,
+      "explanation": "Reviewable artifacts and independent checks establish the claimed behavior."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What demonstrates this project is ready for review?",
+      "options": [
+        "Reproducible acceptance evidence with failure cases",
+        "A polished diagram alone",
+        "A model saying the project works"
+      ],
+      "answer": 0,
+      "explanation": "Reviewable artifacts and independent checks establish the claimed behavior."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p40-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Acceptance evidence"
+    ],
+    "interviewIds": [
+      "bridge-ai-testing-009",
+      "bridge-ai-testing-010",
+      "bridge-ai-testing-011",
+      "bridge-phase-41-3",
+      "bridge-phase-41-4",
+      "bridge-phase-41-5",
+      "bridge-phase-41-6",
+      "bridge-phase-41-7"
+    ]
+  },
+  {
+    "id": "p41-data",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "Validate incident identity and source provenance",
+    "minutes": 35,
+    "objectives": [
+      "Validate incident identity and source provenance",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects validate incident identity and source provenance with test contracts, failure triage, and evidence for release. Acceptance requires unique IDs, closed categories, valid durations and disjoint held-out groups.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "The triage dataset contains 180 explicitly synthetic failures. Each record has a stable ID, incident group, tenant, module, category, log and duration. Group identity prevents related observations from leaking across training and held-out evaluation; tenant identity constrains search and API access.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run the data exporter, inspect the five categories and count records by group and tenant. Keep the original nine-row analyzer dataset separate: it demonstrates run aggregation, while ci-incidents.json demonstrates failure classification. Do not overwrite historical learner fixtures.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python local-labs/quality/data.py\npython -m pytest local-labs/tests/test_quality.py -k dataset",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Duplicate IDs can attach a citation to the wrong failure. A free-form log paired with an unrelated failure ID can falsely claim source support. Validate identity and use the immutable authorized source log when an ID is supplied.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires unique IDs, closed categories, valid durations and disjoint held-out groups. Retain rejected-record reasons and the dataset version. The data contract must pass before any model metric is interpreted.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "Duplicate IDs can attach a citation to the wrong failure. A free-form log paired with an unrelated failure ID can falsely claim source support. Validate identity and use the immutable authorized source log when an ID is supplied.",
+    "takeaway": "Acceptance requires unique IDs, closed categories, valid durations and disjoint held-out groups.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the validate incident identity and source provenance stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires unique IDs, closed categories, valid durations and disjoint held-out groups. Retain rejected-record reasons and the dataset version. The data contract must pass before any model metric is interpreted.",
+      "id": "p41-data-exercise",
+      "hints": [
+        "The triage dataset contains 180 explicitly synthetic failures.",
+        "Duplicate IDs can attach a citation to the wrong failure.",
+        "Run the data exporter, inspect the five categories and count records by group and tenant.",
+        "Acceptance requires unique IDs, closed categories, valid durations and disjoint held-out groups."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires unique IDs, closed categories, valid durations and disjoint held-out groups. Retain rejected-record reasons and the dataset version. The data contract must pass before any model metric is interpreted."
+    },
+    "quiz": {
+      "question": "The validate incident identity and source provenance stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The validate incident identity and source provenance stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p41-triage"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-009",
+      "bridge-ai-testing-010",
+      "bridge-ai-testing-011",
+      "bridge-phase-41-3",
+      "bridge-phase-41-4",
+      "bridge-phase-41-5",
+      "bridge-phase-41-6",
+      "bridge-phase-41-7"
+    ]
+  },
+  {
+    "id": "p41-training",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "Train, reload and evaluate a real classifier",
+    "minutes": 35,
+    "objectives": [
+      "Train, reload and evaluate a real classifier",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects train, reload and evaluate a real classifier with test contracts, failure triage, and evidence for release. Acceptance requires successful fitting, finite outputs, saved/reloaded equivalence, group disjointness and class-level evaluation.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A trained classifier learns a mapping from log features to failure labels. The TF-IDF/logistic pipeline is a measurable baseline; its preprocessing must be fitted only within training folds. Grouped cross-validation estimates configuration behavior before the final held-out test.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run the scikit-learn training entry point, inspect macro-F1, per-class precision/recall and confusion matrix, then verify reloaded predictions match. The artifact includes classes, training/test groups and limitations. Preserve category ordering when serving probabilities.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python local-labs/ml/train.py --output artifacts/ml\npython local-labs/deep-learning/train.py --epochs 30",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Perfect accuracy on repeated synthetic phrases is not production readiness. An unknown log, rare class or new module may fall outside the training distribution. Do not label probability output as calibrated confidence without an independent calibration experiment.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires successful fitting, finite outputs, saved/reloaded equivalence, group disjointness and class-level evaluation. Compare the keyword baseline and retain the UNKNOWN review path even when the synthetic trained model scores highly.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "Perfect accuracy on repeated synthetic phrases is not production readiness. An unknown log, rare class or new module may fall outside the training distribution. Do not label probability output as calibrated confidence without an independent calibration experiment.",
+    "takeaway": "Acceptance requires successful fitting, finite outputs, saved/reloaded equivalence, group disjointness and class-level evaluation.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the train, reload and evaluate a real classifier stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires successful fitting, finite outputs, saved/reloaded equivalence, group disjointness and class-level evaluation. Compare the keyword baseline and retain the UNKNOWN review path even when the synthetic trained model scores highly.",
+      "id": "p41-training-exercise",
+      "hints": [
+        "A trained classifier learns a mapping from log features to failure labels.",
+        "Perfect accuracy on repeated synthetic phrases is not production readiness.",
+        "Run the scikit-learn training entry point, inspect macro-F1, per-class precision/recall and confusion matrix, then verify reloaded predictions match.",
+        "Acceptance requires successful fitting, finite outputs, saved/reloaded equivalence, group disjointness and class-level evaluation."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires successful fitting, finite outputs, saved/reloaded equivalence, group disjointness and class-level evaluation. Compare the keyword baseline and retain the UNKNOWN review path even when the synthetic trained model scores highly."
+    },
+    "quiz": {
+      "question": "The train, reload and evaluate a real classifier stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The train, reload and evaluate a real classifier stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p41-data"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-009",
+      "bridge-ai-testing-010",
+      "bridge-ai-testing-011",
+      "bridge-phase-41-3",
+      "bridge-phase-41-4",
+      "bridge-phase-41-5",
+      "bridge-phase-41-6",
+      "bridge-phase-41-7"
+    ]
+  },
+  {
+    "id": "p41-evidence",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "Retrieve similar incidents and constrain explanations",
+    "minutes": 35,
+    "objectives": [
+      "Retrieve similar incidents and constrain explanations",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects retrieve similar incidents and constrain explanations with test contracts, failure triage, and evidence for release. Acceptance requires valid source IDs, no cross-tenant matches, explicit uncertainty and no invented evidence.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A similar historical failure can support investigation but does not establish the current root cause. Rank authorized incident logs, preserve IDs and show why a result matched. Generated explanations must distinguish observed symptoms, suggested causes and the evidence needed to confirm them.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Call search-failures with a known signature and inspect only the authenticated tenant records. Build the explanation from the current source and retrieved evidence. In live mode, parse a typed decision and reject citations outside the supplied evidence set.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "uvicorn app:app --app-dir local-labs/fastapi --port 8000\n# POST /search-failures and /classify-failure with synthetic records",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A lexical match on timeout can combine database outage and slow product code. A model may invent an owner or cite an unrelated incident. Owner suggestions should come from an explicit module registry, and contradictory evidence should trigger review.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires valid source IDs, no cross-tenant matches, explicit uncertainty and no invented evidence. Report retrieval quality separately from classification and explanation correctness so the first failing stage remains diagnosable.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "A lexical match on timeout can combine database outage and slow product code. A model may invent an owner or cite an unrelated incident. Owner suggestions should come from an explicit module registry, and contradictory evidence should trigger review.",
+    "takeaway": "Acceptance requires valid source IDs, no cross-tenant matches, explicit uncertainty and no invented evidence.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the retrieve similar incidents and constrain explanations stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires valid source IDs, no cross-tenant matches, explicit uncertainty and no invented evidence. Report retrieval quality separately from classification and explanation correctness so the first failing stage remains diagnosable.",
+      "id": "p41-evidence-exercise",
+      "hints": [
+        "A similar historical failure can support investigation but does not establish the current root cause.",
+        "A lexical match on timeout can combine database outage and slow product code.",
+        "Call search-failures with a known signature and inspect only the authenticated tenant records.",
+        "Acceptance requires valid source IDs, no cross-tenant matches, explicit uncertainty and no invented evidence."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires valid source IDs, no cross-tenant matches, explicit uncertainty and no invented evidence. Report retrieval quality separately from classification and explanation correctness so the first failing stage remains diagnosable."
+    },
+    "quiz": {
+      "question": "The retrieve similar incidents and constrain explanations stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The retrieve similar incidents and constrain explanations stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p41-training"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-009",
+      "bridge-ai-testing-010",
+      "bridge-ai-testing-011",
+      "bridge-phase-41-3",
+      "bridge-phase-41-4",
+      "bridge-phase-41-5",
+      "bridge-phase-41-6",
+      "bridge-phase-41-7"
+    ]
+  },
+  {
+    "id": "p41-release",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "Package the triage report and prove the gate fails",
+    "minutes": 35,
+    "objectives": [
+      "Package the triage report and prove the gate fails",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects package the triage report and prove the gate fails with test contracts, failure triage, and evidence for release. Acceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "The triage deliverable is a report reviewers can reproduce. It contains dataset/model identity, expected and observed categories, evidence references, uncertainty, latency and run status. Aggregate metrics cannot replace case-level errors on important failure categories.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run the domain tests and evaluation runner, retain JSON/HTML artifacts and link the classifier report. Introduce a known wrong expected category in a copied evaluation case and demonstrate a failing verdict; restore the correct case and rerun.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python -m pytest local-labs/tests local-labs/fastapi -q\npython local-labs/evals/runner.py --output artifacts/evaluation",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A report that excludes crashed cases or ignores its exit code can appear green while the system is incomplete. HTML must escape model/log content, and logs must omit credentials. A rollback needs the compatible old model, prompt and dataset contracts.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure. Explain one rejected alternative and one reproduced regression during the project deep dive.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "A report that excludes crashed cases or ignores its exit code can appear green while the system is incomplete. HTML must escape model/log content, and logs must omit credentials. A rollback needs the compatible old model, prompt and dataset contracts.",
+    "takeaway": "Acceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the package the triage report and prove the gate fails stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure. Explain one rejected alternative and one reproduced regression during the project deep dive.",
+      "id": "p41-release-exercise",
+      "hints": [
+        "The triage deliverable is a report reviewers can reproduce.",
+        "A report that excludes crashed cases or ignores its exit code can appear green while the system is incomplete.",
+        "Run the domain tests and evaluation runner, retain JSON/HTML artifacts and link the classifier report.",
+        "Acceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure. Explain one rejected alternative and one reproduced regression during the project deep dive."
+    },
+    "quiz": {
+      "question": "The package the triage report and prove the gate fails stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The package the triage report and prove the gate fails stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p41-evidence"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-009",
+      "bridge-ai-testing-010",
+      "bridge-ai-testing-011",
+      "bridge-phase-41-3",
+      "bridge-phase-41-4",
+      "bridge-phase-41-5",
+      "bridge-phase-41-6",
+      "bridge-phase-41-7"
+    ]
+  },
+  {
+    "id": "p41-checkpoint",
+    "phase": 41,
+    "module": "Capstone Project 1",
+    "title": "Phase 41 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 41 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 41 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects package the triage report and prove the gate fails to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run the domain tests and evaluation runner, retain JSON/HTML artifacts and link the classifier report. Introduce a known wrong expected category in a copied evaluation case and demonstrate a failing verdict; restore the correct case and rerun.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "python -m pytest local-labs/tests local-labs/fastapi -q\npython local-labs/evals/runner.py --output artifacts/evaluation",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A report that excludes crashed cases or ignores its exit code can appear green while the system is incomplete. HTML must escape model/log content, and logs must omit credentials. A rollback needs the compatible old model, prompt and dataset contracts.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure. Explain one rejected alternative and one reproduced regression during the project deep dive.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A report that excludes crashed cases or ignores its exit code can appear green while the system is incomplete. HTML must escape model/log content, and logs must omit credentials. A rollback needs the compatible old model, prompt and dataset contracts.",
+    "takeaway": "Acceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Package the triage report and prove the gate fails to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure.",
+      "id": "p41-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects package the triage report and prove the gate fails to the shared CI quality platform.",
+        "A report that excludes crashed cases or ignores its exit code can appear green while the system is incomplete.",
+        "Run the domain tests and evaluation runner, retain JSON/HTML artifacts and link the classifier report.",
+        "Acceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance requires complete requested case coverage, visible failures, a nonzero failing exit, redacted artifacts and a rollback procedure."
+    },
+    "quiz": {
+      "question": "A candidate for package the triage report and prove the gate fails meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for package the triage report and prove the gate fails meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p41-release"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-testing-009",
+      "bridge-ai-testing-010",
+      "bridge-ai-testing-011",
+      "bridge-phase-41-3",
+      "bridge-phase-41-4",
+      "bridge-phase-41-5",
+      "bridge-phase-41-6",
+      "bridge-phase-41-7"
+    ]
+  }
+]

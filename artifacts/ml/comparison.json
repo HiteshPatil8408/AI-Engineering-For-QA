@@ -1,0 +1,39 @@
+{
+  "logistic": {
+    "macro_f1": 1.0
+  },
+  "knn": {
+    "macro_f1": 1.0
+  },
+  "tree": {
+    "macro_f1": 0.6261654135338347
+  },
+  "forest": {
+    "macro_f1": 1.0
+  },
+  "boosting": {
+    "macro_f1": 1.0
+  },
+  "linear_duration": {
+    "mae": 1.1368683772161603e-15,
+    "mse": 1.6155871338926322e-29,
+    "rmse": 4.019436694230464e-15,
+    "r2": 1.0,
+    "limitation": "Target has a deliberately linear synthetic feature; not a production timing prediction."
+  },
+  "clustering": {
+    "adjusted_rand_vs_fixture_labels": 0.16291292046934072,
+    "limitation": "Gold labels used only for post-hoc comparison; clusters do not establish causes."
+  },
+  "anomaly": {
+    "flagged_test_indices": [
+      100,
+      102,
+      117,
+      119,
+      121,
+      151
+    ],
+    "limitation": "Flags unusual features for review, not confirmed defects."
+  }
+}

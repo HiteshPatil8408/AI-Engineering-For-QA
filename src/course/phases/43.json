@@ -1,0 +1,798 @@
+[
+  {
+    "id": "p43-rag-quality",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "RAG quality project: ingestion, evaluation and CI",
+    "minutes": 35,
+    "objectives": [
+      "RAG quality project",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects rag quality project: ingestion, evaluation and ci with test contracts, failure triage, and evidence for release. Acceptance includes Recall@K/MRR, groundedness calibration, citation validity, zero tenant leaks, no-answer abstention, Docker/service smoke checks and a failing CI gate for a known regression.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A support assistant answers synthetic CI troubleshooting questions from approved documentation. Its quality depends on ingestion, retrieval, context packing and generation separately. A relevant answer without valid evidence is not accepted, and an unavailable index must yield a truthful fallback.",
+          "The portfolio result must be reproducible from the supplied synthetic fixtures and declared configuration. Keep a deterministic baseline visible alongside any live-provider results."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Build heading-aware chunks with document versions, retrieve with tenant filters, compare sparse and hybrid ranking, and construct cited context. Run golden cases with retrieval metrics, deterministic citation checks and an optional calibrated Ragas/DeepEval judge. Package the service and retain reports in CI.",
+          "The repository labs provide the domain entry points and fixture cases. Run the acceptance checks before recording project completion and keep the generated run ID in your field notes."
+        ],
+        "code": "# Local acceptance workflow\npython -m pytest local-labs\npython local-labs/evals/runner.py --output artifacts/evaluation\n# Inspect JSON verdict and escaped HTML case report",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Seed stale chunks, a cross-tenant relevant document, poisoned instructions and a no-answer query. Determine the first failing pipeline stage from candidate ranks and trace events. Test document deletion and container restart before claiming index durability.",
+          "Trace the actual effect and retain the counterexample as a regression fixture. Fixing presentation alone does not establish that the application boundary is safe."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes Recall@K/MRR, groundedness calibration, citation validity, zero tenant leaks, no-answer abstention, Docker/service smoke checks and a failing CI gate for a known regression. Present baseline versus candidate case-level differences with index and prompt versions.",
+          "Prepare a technical deep dive explaining one rejected design, one detected regression and the tradeoff behind the final implementation. Separate fixture contract evidence from live model quality claims."
+        ]
+      }
+    ],
+    "mistake": "Seed stale chunks, a cross-tenant relevant document, poisoned instructions and a no-answer query. Determine the first failing pipeline stage from candidate ranks and trace events. Test document deletion and container restart before claiming index durability.",
+    "takeaway": "Acceptance includes Recall@K/MRR, groundedness calibration, citation validity, zero tenant leaks, no-answer abstention, Docker/service smoke checks and a failing CI gate for a known regression.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Write your acceptance memo: link a reproducible run, explain a measured failure, the boundary that fixes it, and the release/rollback decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Reproducible evidence",
+          "terms": [
+            "dataset",
+            "run"
+          ]
+        },
+        {
+          "label": "Failure and enforcement",
+          "terms": [
+            "failure",
+            "boundary"
+          ]
+        },
+        {
+          "label": "Release plan",
+          "terms": [
+            "release",
+            "rollback"
+          ]
+        }
+      ],
+      "solution": "Acceptance includes Recall@K/MRR, groundedness calibration, citation validity, zero tenant leaks, no-answer abstention, Docker/service smoke checks and a failing CI gate for a known regression. Present baseline versus candidate case-level differences with index and prompt versions.",
+      "id": "p43-rag-quality-exercise",
+      "hints": [
+        "A support assistant answers synthetic CI troubleshooting questions from approved documentation.",
+        "Seed stale chunks, a cross-tenant relevant document, poisoned instructions and a no-answer query.",
+        "Build heading-aware chunks with document versions, retrieve with tenant filters, compare sparse and hybrid ranking, and construct cited context.",
+        "Acceptance includes Recall@K/MRR, groundedness calibration, citation validity, zero tenant leaks, no-answer abstention, Docker/service smoke checks and a failing CI gate for a known regression."
+      ],
+      "explanation": "Acceptance includes Recall@K/MRR, groundedness calibration, citation validity, zero tenant leaks, no-answer abstention, Docker/service smoke checks and a failing CI gate for a known regression. Present baseline versus candidate case-level differences with index and prompt versions."
+    },
+    "quiz": {
+      "question": "What demonstrates this project is ready for review?",
+      "options": [
+        "Reproducible acceptance evidence with failure cases",
+        "A polished diagram alone",
+        "A model saying the project works"
+      ],
+      "answer": 0,
+      "explanation": "Reviewable artifacts and independent checks establish the claimed behavior."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What demonstrates this project is ready for review?",
+      "options": [
+        "Reproducible acceptance evidence with failure cases",
+        "A polished diagram alone",
+        "A model saying the project works"
+      ],
+      "answer": 0,
+      "explanation": "Reviewable artifacts and independent checks establish the claimed behavior."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p42-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Acceptance evidence"
+    ],
+    "interviewIds": [
+      "bridge-rag-008",
+      "bridge-rag-009",
+      "bridge-rag-010",
+      "bridge-rag-044",
+      "bridge-rag-045",
+      "bridge-rag-046",
+      "bridge-phase-43-6",
+      "bridge-phase-43-7"
+    ]
+  },
+  {
+    "id": "p43-ingest",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "Build a versioned authorized documentation corpus",
+    "minutes": 35,
+    "objectives": [
+      "Build a versioned authorized documentation corpus",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects build a versioned authorized documentation corpus with test contracts, failure triage, and evidence for release. Acceptance requires traceable chunks, stable IDs, version compatibility and zero deleted/other-tenant context.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "The RAG project starts with synthetic auth/payment guides plus retry and locator documents. Every source has a stable ID, tenant and version. A deleted document remains a test fixture but must not enter authorized retrieval or context.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Export support-corpus.json, inspect source metadata and chunk boundaries, and retain document-to-chunk provenance. Use the sparse baseline first, then configure a real sentence-transformer encoder for the optional dense comparison. Label synthetic numerical vectors separately from trained text embeddings.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python local-labs/quality/data.py\npython -m pytest local-labs/tests/test_quality.py -k retrieval_isolation",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Removing a file without deleting its indexed chunks can preserve stale answers. A source permission change can leak through a cached context. Test deletion and authorization at serving time as well as ingestion.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires traceable chunks, stable IDs, version compatibility and zero deleted/other-tenant context. The corpus manifest must explain how updates, deletions and rollback generations behave.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "Removing a file without deleting its indexed chunks can preserve stale answers. A source permission change can leak through a cached context. Test deletion and authorization at serving time as well as ingestion.",
+    "takeaway": "Acceptance requires traceable chunks, stable IDs, version compatibility and zero deleted/other-tenant context.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the build a versioned authorized documentation corpus stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires traceable chunks, stable IDs, version compatibility and zero deleted/other-tenant context. The corpus manifest must explain how updates, deletions and rollback generations behave.",
+      "id": "p43-ingest-exercise",
+      "hints": [
+        "The RAG project starts with synthetic auth/payment guides plus retry and locator documents.",
+        "Removing a file without deleting its indexed chunks can preserve stale answers.",
+        "Export support-corpus.json, inspect source metadata and chunk boundaries, and retain document-to-chunk provenance.",
+        "Acceptance requires traceable chunks, stable IDs, version compatibility and zero deleted/other-tenant context."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires traceable chunks, stable IDs, version compatibility and zero deleted/other-tenant context. The corpus manifest must explain how updates, deletions and rollback generations behave."
+    },
+    "quiz": {
+      "question": "The build a versioned authorized documentation corpus stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The build a versioned authorized documentation corpus stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p43-rag-quality"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-rag-008",
+      "bridge-rag-009",
+      "bridge-rag-010",
+      "bridge-rag-044",
+      "bridge-rag-045",
+      "bridge-rag-046",
+      "bridge-phase-43-6",
+      "bridge-phase-43-7"
+    ]
+  },
+  {
+    "id": "p43-retrieval",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "Compare sparse, dense and hybrid retrieval by query slice",
+    "minutes": 35,
+    "objectives": [
+      "Compare sparse, dense and hybrid retrieval by query slice",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects compare sparse, dense and hybrid retrieval by query slice with test contracts, failure triage, and evidence for release. Acceptance compares exact-code, paraphrase, no-answer and cross-tenant slices.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Sparse retrieval preserves exact identifiers; dense retrieval can find paraphrases. Hybrid rank fusion combines complementary candidate orderings. Choose a design from paired query evidence rather than assuming every additional retrieval component improves the product.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run BM25 fixture queries and the optional real encoder experiment on the same golden queries. Record candidates before and after fusion/reranking, authorized filters and index/model revisions. Calculate Recall@K and MRR independently of generation.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python local-labs/rag/dense.py\npython local-labs/rag/qdrant_lab.py",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A relevant document may disappear during fusion or context packing. A dense encoder may confuse similar error codes. Diagnose the first stage that loses the gold evidence before editing the answer prompt.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance compares exact-code, paraphrase, no-answer and cross-tenant slices. Report latency and marginal quality gain for every added stage. Keep a simpler rollback retriever that preserves the same evidence contract.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "A relevant document may disappear during fusion or context packing. A dense encoder may confuse similar error codes. Diagnose the first stage that loses the gold evidence before editing the answer prompt.",
+    "takeaway": "Acceptance compares exact-code, paraphrase, no-answer and cross-tenant slices.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the compare sparse, dense and hybrid retrieval by query slice stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance compares exact-code, paraphrase, no-answer and cross-tenant slices. Report latency and marginal quality gain for every added stage. Keep a simpler rollback retriever that preserves the same evidence contract.",
+      "id": "p43-retrieval-exercise",
+      "hints": [
+        "Sparse retrieval preserves exact identifiers; dense retrieval can find paraphrases.",
+        "A relevant document may disappear during fusion or context packing.",
+        "Run BM25 fixture queries and the optional real encoder experiment on the same golden queries.",
+        "Acceptance compares exact-code, paraphrase, no-answer and cross-tenant slices."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance compares exact-code, paraphrase, no-answer and cross-tenant slices. Report latency and marginal quality gain for every added stage. Keep a simpler rollback retriever that preserves the same evidence contract."
+    },
+    "quiz": {
+      "question": "The compare sparse, dense and hybrid retrieval by query slice stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The compare sparse, dense and hybrid retrieval by query slice stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p43-ingest"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-rag-008",
+      "bridge-rag-009",
+      "bridge-rag-010",
+      "bridge-rag-044",
+      "bridge-rag-045",
+      "bridge-rag-046",
+      "bridge-phase-43-6",
+      "bridge-phase-43-7"
+    ]
+  },
+  {
+    "id": "p43-evaluation",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "Calibrate answer support and adversarial cases",
+    "minutes": 35,
+    "objectives": [
+      "Calibrate answer support and adversarial cases",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects calibrate answer support and adversarial cases with test contracts, failure triage, and evidence for release. Acceptance includes complete case outcomes, valid citations, no-answer behavior, calibrated support scoring and hard security gates.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Correctness against a reference and faithfulness to supplied context measure different properties. A resolved citation can still misrepresent its source, and a judge can prefer confident verbosity. The project needs deterministic provenance checks and reviewed semantic calibration cases.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run the golden fixture suite, then optionally apply real Ragas/DeepEval adapters using configured evaluator credentials. Compare judge outputs with human labels and record disagreement, false accepts, threshold and evaluator version. Include poisoned and conflicting contexts.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python local-labs/evals/runner.py --output artifacts/rag-evaluation\npython -m pytest local-labs/tests/test_quality.py -k evaluation",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A judge failure cannot silently disappear from the average. A high quality score cannot compensate for tenant leakage or unauthorized effects. Candidate text must remain data for the evaluator rather than evaluator instructions.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes complete case outcomes, valid citations, no-answer behavior, calibrated support scoring and hard security gates. Keep fixture and live judge reports visibly distinct so their evidence is interpreted correctly.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "A judge failure cannot silently disappear from the average. A high quality score cannot compensate for tenant leakage or unauthorized effects. Candidate text must remain data for the evaluator rather than evaluator instructions.",
+    "takeaway": "Acceptance includes complete case outcomes, valid citations, no-answer behavior, calibrated support scoring and hard security gates.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the calibrate answer support and adversarial cases stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance includes complete case outcomes, valid citations, no-answer behavior, calibrated support scoring and hard security gates. Keep fixture and live judge reports visibly distinct so their evidence is interpreted correctly.",
+      "id": "p43-evaluation-exercise",
+      "hints": [
+        "Correctness against a reference and faithfulness to supplied context measure different properties.",
+        "A judge failure cannot silently disappear from the average.",
+        "Run the golden fixture suite, then optionally apply real Ragas/DeepEval adapters using configured evaluator credentials.",
+        "Acceptance includes complete case outcomes, valid citations, no-answer behavior, calibrated support scoring and hard security gates."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance includes complete case outcomes, valid citations, no-answer behavior, calibrated support scoring and hard security gates. Keep fixture and live judge reports visibly distinct so their evidence is interpreted correctly."
+    },
+    "quiz": {
+      "question": "The calibrate answer support and adversarial cases stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The calibrate answer support and adversarial cases stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p43-retrieval"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-rag-008",
+      "bridge-rag-009",
+      "bridge-rag-010",
+      "bridge-rag-044",
+      "bridge-rag-045",
+      "bridge-rag-046",
+      "bridge-phase-43-6",
+      "bridge-phase-43-7"
+    ]
+  },
+  {
+    "id": "p43-deployment",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "Trace, package and gate the RAG service",
+    "minutes": 35,
+    "objectives": [
+      "Trace, package and gate the RAG service",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects trace, package and gate the rag service with test contracts, failure triage, and evidence for release. Acceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "The RAG deliverable connects an authenticated endpoint to authorized evidence, generation or extractive fallback, validation and report artifacts. Docker packages the same shared domain; OpenTelemetry records its stages without exposing credentials or private prompts.",
+          "This stage produces an artifact used by the next stage of the same capstone. Preserve the dataset and operation identities so the reviewer can connect the implementation to its acceptance evidence."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run the service smoke suite, emit safe parent/child spans and build with the repository root Docker context. Compose provides an optional persistent Qdrant service. CI retains JSON/HTML reports and blocks release when required cases fail.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement."
+        ],
+        "code": "python local-labs/frameworks/tracing.py\ndocker compose up --build",
+        "language": "bash"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A container path can point to the wrong dataset root even when local tests pass. A health check can succeed while the index is stale. A deployment rebuilding different dependencies is not the candidate that passed evaluation.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict. Document technical environment limitations explicitly instead of claiming unexecuted deployment evidence.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression."
+        ]
+      }
+    ],
+    "mistake": "A container path can point to the wrong dataset root even when local tests pass. A health check can succeed while the index is stale. A deployment rebuilding different dependencies is not the candidate that passed evaluation.",
+    "takeaway": "Acceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Deliver the trace, package and gate the rag service stage. Write an evidence memo naming its input contract, implementation artifact, failure counterexample, acceptance test and review/release decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Artifact",
+          "terms": [
+            "implementation",
+            "artifact"
+          ]
+        },
+        {
+          "label": "Counterexample",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "review",
+            "release"
+          ]
+        }
+      ],
+      "solution": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict. Document technical environment limitations explicitly instead of claiming unexecuted deployment evidence.",
+      "id": "p43-deployment-exercise",
+      "hints": [
+        "The RAG deliverable connects an authenticated endpoint to authorized evidence, generation or extractive fallback, validation and report artifacts.",
+        "A container path can point to the wrong dataset root even when local tests pass.",
+        "Run the service smoke suite, emit safe parent/child spans and build with the repository root Docker context.",
+        "Acceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict."
+      ],
+      "explanation": "State the input contract and link the implementation artifact. Record a failure counterexample and acceptance test result. Justify the review/release decision using: Acceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict. Document technical environment limitations explicitly instead of claiming unexecuted deployment evidence."
+    },
+    "quiz": {
+      "question": "The trace, package and gate the rag service stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: The trace, package and gate the rag service stage has a failing documented acceptance case. What should its report do?",
+      "options": [
+        "Retain the failure and block the affected release guarantee",
+        "Remove the case from the denominator",
+        "Treat successful command startup as acceptance"
+      ],
+      "answer": 0,
+      "explanation": "The report must preserve evidence that disproves the claimed contract; startup alone is not correctness."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p43-evaluation"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-rag-008",
+      "bridge-rag-009",
+      "bridge-rag-010",
+      "bridge-rag-044",
+      "bridge-rag-045",
+      "bridge-rag-046",
+      "bridge-phase-43-6",
+      "bridge-phase-43-7"
+    ]
+  },
+  {
+    "id": "p43-checkpoint",
+    "phase": 43,
+    "module": "Capstone Project 3",
+    "title": "Phase 43 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 43 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 43 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects trace, package and gate the rag service to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Run the service smoke suite, emit safe parent/child spans and build with the repository root Docker context. Compose provides an optional persistent Qdrant service. CI retains JSON/HTML reports and blocks release when required cases fail.",
+          "Run the stated commands from the repository root after installing the companion lab dependencies. Keep fixture and live execution modes visible in every report; a passing fixture contract is not a live model-quality measurement.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "python local-labs/frameworks/tracing.py\ndocker compose up --build",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A container path can point to the wrong dataset root even when local tests pass. A health check can succeed while the index is stale. A deployment rebuilding different dependencies is not the candidate that passed evaluation.",
+          "Retain the counterexample as a regression case and identify the layer that actually enforces the guarantee. Presentation changes alone cannot establish correct data access, source support or execution behavior.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict. Document technical environment limitations explicitly instead of claiming unexecuted deployment evidence.",
+          "Record the run ID, artifact path and one failed case in your evidence memo. Explain why the chosen invariant matters to an SDET and how the test would detect a future regression.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A container path can point to the wrong dataset root even when local tests pass. A health check can succeed while the index is stale. A deployment rebuilding different dependencies is not the candidate that passed evaluation.",
+    "takeaway": "Acceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Trace, package and gate the RAG service to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict.",
+      "id": "p43-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects trace, package and gate the rag service to the shared CI quality platform.",
+        "A container path can point to the wrong dataset root even when local tests pass.",
+        "Run the service smoke suite, emit safe parent/child spans and build with the repository root Docker context.",
+        "Acceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance requires a container smoke run in a Docker-capable environment, compatible dataset paths, persisted index checks, safe traces and an enforceable CI verdict."
+    },
+    "quiz": {
+      "question": "A candidate for trace, package and gate the rag service meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for trace, package and gate the rag service meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pydantic.dev/latest/",
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://genai.owasp.org/llm-top-10/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p43-deployment"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-rag-008",
+      "bridge-rag-009",
+      "bridge-rag-010",
+      "bridge-rag-044",
+      "bridge-rag-045",
+      "bridge-rag-046",
+      "bridge-phase-43-6",
+      "bridge-phase-43-7"
+    ]
+  }
+]

@@ -1,0 +1,349 @@
+[
+  {
+    "id": "p27-policies",
+    "phase": 27,
+    "module": "AI Guardrails",
+    "title": "Guardrails: layered validation and least privilege",
+    "minutes": 35,
+    "objectives": [
+      "Guardrails",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects guardrails: layered validation and least privilege with test contracts, failure triage, and evidence for release. The safe assistant can read fixtures and propose changes; actual writes require a matching unexpired action approval.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Guardrails are controls applied at specific boundaries: input validation, retrieval authorization, tool permissioning, output validation and rate limits. Moderation can classify content risks but cannot replace authentication or domain policy. Least privilege gives each component only the operations and data it requires.",
+          "Allowlisting provides a positive set of supported actions. Deny lists can supplement it for known attacks but are brittle as the primary permission mechanism. Human confirmation should approve a concrete action with scope and effect, not a vague intent."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Validate input size and types, derive identity from authentication, filter evidence before retrieval, restrict tool arguments and validate returned domain objects. Sandbox code candidates with bounded resources and no production credentials. Record policy decisions separately from model decisions.",
+          "An approval record includes action hash, principal, resource, expiry and status. Before execution, verify that the action still matches the approved payload and current permissions. Rate limits and anomaly checks bound abuse and accidental loops."
+        ],
+        "code": "approved={'hash':'abc','expires':200}\nassert approved['hash']=='abc' and approved['expires']>100",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A user approves a draft patch and the agent later applies a different generated patch using the same approval flag. A tool allowlist includes a generic shell wrapper, effectively restoring unrestricted execution.",
+          "Test action mutation, expired approval, revoked access, oversized input and unknown tools. Review false positives by use case and ensure safe fallback or escalation is available when a guardrail blocks progress."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The safe assistant can read fixtures and propose changes; actual writes require a matching unexpired action approval. This rule is enforced in application code and tested with denied-call fixtures.",
+          "Release evidence identifies every guardrail's boundary and failure mode. Layered controls reduce reliance on any one classifier and make regressions diagnosable with deterministic assertions."
+        ]
+      }
+    ],
+    "mistake": "A user approves a draft patch and the agent later applies a different generated patch using the same approval flag. A tool allowlist includes a generic shell wrapper, effectively restoring unrestricted execution.",
+    "takeaway": "The safe assistant can read fixtures and propose changes; actual writes require a matching unexpired action approval.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def approval_valid(record,action_hash,now):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def approval_valid(record,action_hash,now):\n    return record.get('status')=='approved' and record.get('hash')==action_hash and record.get('expires',0)>now",
+      "starter": "def approval_valid(record,action_hash,now):\n    return False",
+      "tests": "assert approval_valid({'status':'approved','hash':'x','expires':20},'x',10)\nassert not approval_valid({'status':'approved','hash':'x','expires':20},'y',10)\nassert not approval_valid({'status':'approved','hash':'x','expires':20},'x',20)",
+      "id": "p27-policies-exercise",
+      "hints": [
+        "Guardrails are controls applied at specific boundaries: input validation, retrieval authorization, tool permissioning, output validation and rate limits.",
+        "A user approves a draft patch and the agent later applies a different generated patch using the same approval flag.",
+        "Validate input size and types, derive identity from authentication, filter evidence before retrieval, restrict tool arguments and validate returned domain objects.",
+        "The safe assistant can read fixtures and propose changes; actual writes require a matching unexpired action approval."
+      ],
+      "explanation": "def approval_valid(record,action_hash,now):\n    return record.get('status')=='approved' and record.get('hash')==action_hash and record.get('expires',0)>now"
+    },
+    "quiz": {
+      "question": "What must approval bind to?",
+      "options": [
+        "The exact action and current scope",
+        "Any later action by the agent",
+        "The model name alone"
+      ],
+      "answer": 0,
+      "explanation": "A broad flag cannot prove that a changed side effect was approved."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What must approval bind to?",
+      "options": [
+        "The exact action and current scope",
+        "Any later action by the agent",
+        "The model name alone"
+      ],
+      "answer": 0,
+      "explanation": "A broad flag cannot prove that a changed side effect was approved."
+    },
+    "sources": [
+      "https://genai.owasp.org/llm-top-10/",
+      "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p26-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Guardrail",
+      "Least privilege",
+      "Approval expiry"
+    ],
+    "interviewIds": [
+      "bridge-ai-security-002",
+      "bridge-ai-security-003",
+      "bridge-ai-security-005",
+      "bridge-ai-security-011",
+      "bridge-ai-security-012",
+      "bridge-ai-security-014",
+      "bridge-ai-security-020",
+      "bridge-ai-security-023"
+    ]
+  },
+  {
+    "id": "p27-output",
+    "phase": 27,
+    "module": "AI Guardrails",
+    "title": "Output handling: redaction, rendering and policy layers",
+    "minutes": 35,
+    "objectives": [
+      "Output handling",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects output handling: redaction, rendering and policy layers with test contracts, failure triage, and evidence for release. The shared report generator uses escaped HTML from the same JSON artifact.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Model output is untrusted content. Returning JSON does not make embedded strings safe for HTML, logs, SQL or tools. Context-specific encoding prevents output from becoming executable markup, while authorization controls which facts or actions may be produced. Moderation is another classifier with false positives and false negatives.",
+          "A sensitive value may appear in logs or traces even when the final answer is redacted. Apply privacy rules across artifacts, not only the user-facing response."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Render text through React's escaped text nodes and sanitize generated SVG before insertion. Escape model/log text in HTML reports. Redact sensitive structured attributes recursively, and store permitted raw evidence only in a separate controlled location with retention rules.",
+          "Keep schema validation, domain evidence checks, content policy and output encoding separate. A moderation pass cannot authorize a cross-tenant read, and HTML escaping cannot make an unsupported factual claim correct."
+        ],
+        "code": "import html\nassert html.escape('<script>')=='&lt;script&gt;'",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A report directly interpolates <script> from a synthetic failure log. A shallow redactor removes api_key at the top level but misses it inside provider.request.headers. A deny-list phrase check misses paraphrased injection.",
+          "Test nested structures, case-insensitive sensitive field names, malformed output and dangerous markup. Verify that allowed ordinary content still renders and that blocked content produces a visible controlled outcome."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The shared report generator uses escaped HTML from the same JSON artifact. The diagram editor combines strict Mermaid settings with sanitized SVG. These are rendering controls, while tool and tenant policies enforce operational boundaries.",
+          "SDETs should identify which layer each test protects. Passing one layer's test is not evidence that another layer's policy holds; retain separate verdicts for privacy, rendering, authorization and semantic support."
+        ]
+      }
+    ],
+    "mistake": "A report directly interpolates <script> from a synthetic failure log. A shallow redactor removes api_key at the top level but misses it inside provider.request.headers. A deny-list phrase check misses paraphrased injection.",
+    "takeaway": "The shared report generator uses escaped HTML from the same JSON artifact.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def redact_nested(value):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def redact_nested(value):\n    blocked={'api_key','authorization','password','token'}\n    if isinstance(value,dict):return {k:('[REDACTED]' if k.lower() in blocked else redact_nested(v)) for k,v in value.items()}\n    if isinstance(value,list):return [redact_nested(v) for v in value]\n    return value",
+      "starter": "def redact_nested(value):\n    return value",
+      "tests": "assert redact_nested({'x':[{'API_KEY':'s'}]})=={'x':[{'API_KEY':'[REDACTED]'}]}\nassert redact_nested({'task':'F1'})=={'task':'F1'}",
+      "id": "p27-output-exercise",
+      "hints": [
+        "Model output is untrusted content.",
+        "A report directly interpolates <script> from a synthetic failure log.",
+        "Render text through React's escaped text nodes and sanitize generated SVG before insertion.",
+        "The shared report generator uses escaped HTML from the same JSON artifact."
+      ],
+      "explanation": "def redact_nested(value):\n    blocked={'api_key','authorization','password','token'}\n    if isinstance(value,dict):return {k:('[REDACTED]' if k.lower() in blocked else redact_nested(v)) for k,v in value.items()}\n    if isinstance(value,list):return [redact_nested(v) for v in value]\n    return value"
+    },
+    "quiz": {
+      "question": "Can HTML escaping enforce tenant authorization?",
+      "options": [
+        "No: it protects rendering, not access rights",
+        "Yes: all escaped content is authorized",
+        "Only for JSON strings"
+      ],
+      "answer": 0,
+      "explanation": "Encoding and permission checks protect different boundaries."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Can HTML escaping enforce tenant authorization?",
+      "options": [
+        "No: it protects rendering, not access rights",
+        "Yes: all escaped content is authorized",
+        "Only for JSON strings"
+      ],
+      "answer": 0,
+      "explanation": "Encoding and permission checks protect different boundaries."
+    },
+    "sources": [
+      "https://genai.owasp.org/llm-top-10/",
+      "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p27-policies"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Output encoding",
+      "Recursive redaction"
+    ],
+    "interviewIds": [
+      "bridge-ai-security-002",
+      "bridge-ai-security-003",
+      "bridge-ai-security-005",
+      "bridge-ai-security-011",
+      "bridge-ai-security-012",
+      "bridge-ai-security-014",
+      "bridge-ai-security-020",
+      "bridge-ai-security-023"
+    ]
+  },
+  {
+    "id": "p27-checkpoint",
+    "phase": 27,
+    "module": "AI Guardrails",
+    "title": "Phase 27 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 27 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 27 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. The shared report generator uses escaped HTML from the same JSON artifact.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects output handling: redaction, rendering and policy layers to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Render text through React's escaped text nodes and sanitize generated SVG before insertion. Escape model/log text in HTML reports. Redact sensitive structured attributes recursively, and store permitted raw evidence only in a separate controlled location with retention rules.",
+          "Keep schema validation, domain evidence checks, content policy and output encoding separate. A moderation pass cannot authorize a cross-tenant read, and HTML escaping cannot make an unsupported factual claim correct.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "import html\nassert html.escape('<script>')=='&lt;script&gt;'",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A report directly interpolates <script> from a synthetic failure log. A shallow redactor removes api_key at the top level but misses it inside provider.request.headers. A deny-list phrase check misses paraphrased injection.",
+          "Test nested structures, case-insensitive sensitive field names, malformed output and dangerous markup. Verify that allowed ordinary content still renders and that blocked content produces a visible controlled outcome.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The shared report generator uses escaped HTML from the same JSON artifact. The diagram editor combines strict Mermaid settings with sanitized SVG. These are rendering controls, while tool and tenant policies enforce operational boundaries.",
+          "SDETs should identify which layer each test protects. Passing one layer's test is not evidence that another layer's policy holds; retain separate verdicts for privacy, rendering, authorization and semantic support.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A report directly interpolates <script> from a synthetic failure log. A shallow redactor removes api_key at the top level but misses it inside provider.request.headers. A deny-list phrase check misses paraphrased injection.",
+    "takeaway": "The shared report generator uses escaped HTML from the same JSON artifact.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Output handling: redaction, rendering and policy layers to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nThe shared report generator uses escaped HTML from the same JSON artifact.",
+      "id": "p27-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects output handling: redaction, rendering and policy layers to the shared CI quality platform.",
+        "A report directly interpolates <script> from a synthetic failure log.",
+        "Render text through React's escaped text nodes and sanitize generated SVG before insertion.",
+        "The shared report generator uses escaped HTML from the same JSON artifact."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nThe shared report generator uses escaped HTML from the same JSON artifact."
+    },
+    "quiz": {
+      "question": "A candidate for output handling: redaction, rendering and policy layers meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for output handling: redaction, rendering and policy layers meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://genai.owasp.org/llm-top-10/",
+      "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p27-output"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-security-002",
+      "bridge-ai-security-003",
+      "bridge-ai-security-005",
+      "bridge-ai-security-011",
+      "bridge-ai-security-012",
+      "bridge-ai-security-014",
+      "bridge-ai-security-020",
+      "bridge-ai-security-023"
+    ]
+  }
+]

@@ -1,0 +1,516 @@
+[
+  {
+    "id": "orientation",
+    "phase": 0,
+    "module": "Your new engineering role",
+    "title": "From SDET to AI quality engineer",
+    "minutes": 30,
+    "objectives": [
+      "Distinguish testing with AI from testing AI",
+      "Map existing SDET skills to probabilistic systems",
+      "Identify the evidence needed to release an AI feature"
+    ],
+    "relevance": "You already understand contracts, coverage, regression, and release risk. AI extends these skills to systems where valid answers can vary between runs.",
+    "sections": [
+      {
+        "title": "Two tracks, one engineering mindset",
+        "paragraphs": [
+          "Track A uses AI to improve software testing: generating API test candidates, classifying CI failures, or proposing missing edge cases. The generated artifacts still need review and deterministic execution.",
+          "Track B tests the AI application itself: whether a chatbot stays grounded, whether retrieval finds the right document, and whether an agent calls an authorized tool. Treat its output as evidence to evaluate, not a trustworthy oracle."
+        ]
+      },
+      {
+        "title": "Deterministic contracts, probabilistic behavior",
+        "paragraphs": [
+          "A REST endpoint may promise an exact status code and schema. A chatbot can express the same correct answer in many ways. Separate hard invariants (valid JSON, no forbidden tool, citation points to supplied evidence) from quality rubrics (helpfulness, completeness, groundedness).",
+          "Freeze representative test inputs and application versions. Run repeated samples when variation matters. Record outputs, scores, cost, latency, and failure categories. One passing response is not proof of reliability."
+        ]
+      },
+      {
+        "title": "Your learning path",
+        "paragraphs": [
+          "Build Python, data, SQL, and statistical foundations before abstractions. Then learn embeddings and retrieval before RAG frameworks; tool calling before agents; evaluation before release.",
+          "An AI engineer assembles useful model-powered systems. An ML engineer develops model training and serving pipelines. A data scientist investigates data and experiments. An AI quality engineer designs evidence and controls across those systems. Roles overlap; judge work by its purpose."
+        ]
+      }
+    ],
+    "mistake": "Using exact text equality for every LLM response rejects good paraphrases and misses groundedness failures.",
+    "takeaway": "Preserve deterministic invariants and measure uncertain behavior across a representative dataset.",
+    "exercise": {
+      "id": "orientation-exercise",
+      "kind": "classification",
+      "prompt": "Classify these 15 engineering tasks. Consider the primary purpose of each task.",
+      "answer": "",
+      "explanation": "Building an AI helper belongs to AI engineering; evaluating its output belongs to testing AI; training its learned classifier belongs to ML engineering.",
+      "hints": [
+        "Start with the invariant: distinguish testing with ai from testing ai.",
+        "Consider this constraint: Using exact text equality for every LLM response rejects good paraphrases and misses groundedness failures.",
+        "Work through a tiny example before generalizing. Preserve deterministic invariants and measure uncertain behavior across a representative dataset.",
+        "Building an AI helper belongs to AI engineering; evaluating its output belongs to testing AI; training its learned classifier belongs to ML engineering."
+      ],
+      "options": [
+        "Traditional SDET",
+        "Using AI for testing",
+        "Testing AI",
+        "ML engineering",
+        "AI engineering"
+      ],
+      "tasks": [
+        {
+          "text": "Assert REST status 201",
+          "answer": "Traditional SDET"
+        },
+        {
+          "text": "Write a Playwright login test",
+          "answer": "Traditional SDET"
+        },
+        {
+          "text": "Verify a database migration",
+          "answer": "Traditional SDET"
+        },
+        {
+          "text": "Use an LLM to draft API cases",
+          "answer": "Using AI for testing"
+        },
+        {
+          "text": "Summarize CI logs with an LLM",
+          "answer": "Using AI for testing"
+        },
+        {
+          "text": "Suggest locator repairs with AI",
+          "answer": "Using AI for testing"
+        },
+        {
+          "text": "Measure chatbot groundedness",
+          "answer": "Testing AI"
+        },
+        {
+          "text": "Validate agent tool arguments",
+          "answer": "Testing AI"
+        },
+        {
+          "text": "Run prompt-injection cases",
+          "answer": "Testing AI"
+        },
+        {
+          "text": "Train a failure classifier",
+          "answer": "ML engineering"
+        },
+        {
+          "text": "Tune a learned model threshold",
+          "answer": "ML engineering"
+        },
+        {
+          "text": "Cross-validate model features",
+          "answer": "ML engineering"
+        },
+        {
+          "text": "Build a retrieval chatbot",
+          "answer": "AI engineering"
+        },
+        {
+          "text": "Integrate a model API",
+          "answer": "AI engineering"
+        },
+        {
+          "text": "Implement an agent workflow",
+          "answer": "AI engineering"
+        }
+      ]
+    },
+    "quiz": {
+      "question": "A chatbot gives five different correct paraphrases. What do you assert?",
+      "options": [
+        "Exact string equality",
+        "Meaning, evidence, schema, and forbidden behavior",
+        "Only response length"
+      ],
+      "answer": 1,
+      "explanation": "Correctness should tolerate phrasing variation while enforcing measurable contracts."
+    },
+    "checkpoint": {
+      "question": "An AI test generator creates 80 tests. What proves value?",
+      "options": [
+        "The number of generated tests",
+        "Reviewed coverage and execution against meaningful faults",
+        "An eloquent explanation"
+      ],
+      "answer": 1,
+      "explanation": "Measure whether generated tests expose faults and cover risks."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/",
+      "https://www.nist.gov/itl/ai-risk-management-framework"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-python-001",
+      "bridge-python-002",
+      "bridge-python-003",
+      "q-11",
+      "bridge-phase-00-4",
+      "bridge-phase-00-5",
+      "q-9",
+      "bridge-phase-00-7"
+    ]
+  },
+  {
+    "id": "environment",
+    "phase": 0,
+    "module": "Your new engineering role",
+    "title": "A reproducible engineering workspace",
+    "minutes": 26,
+    "objectives": [
+      "Isolate dependencies in a virtual environment",
+      "Separate experiments from production modules",
+      "Keep secrets out of browser applications"
+    ],
+    "relevance": "A reproducible lab turns a notebook experiment into a testable CI artifact that colleagues can run.",
+    "sections": [
+      {
+        "title": "An environment is part of the program",
+        "paragraphs": [
+          "Use a project-specific virtual environment. Select its interpreter in VS Code. Keep dependency declarations in the repository and record the Python version in your README. A package imported from your global machine can hide a missing dependency.",
+          "A notebook is useful for inspecting data and plots. Move durable logic into importable modules with tests. Git should track source and small synthetic datasets, not virtual environments or secret files."
+        ],
+        "code": "python -m venv .venv\n# Linux / macOS\nsource .venv/bin/activate\npython -m pip install pytest\npython -m pytest"
+      },
+      {
+        "title": "Static safe mode and local labs",
+        "paragraphs": [
+          "The course executes educational Python and SQL in your browser. It has no provider key and no model API requirement. Optional local labs use a Python process on your machine.",
+          "A browser bundle is downloadable by every visitor. An environment variable prefixed for Vite client use is still public after bundling. Keep provider credentials exclusively in local processes or a properly authenticated server."
+        ],
+        "code": "import os\napi_key = os.environ.get(\"OPENAI_API_KEY\")\n# Never print api_key or commit a populated .env file."
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "A notebook is useful for inspecting one experiment, but execution order can hide dependencies: a cell may succeed only because an earlier cell created a variable. Move the analyzer into an importable function and run it from a fresh interpreter. Keep a small notebook as a consumer of that function rather than a second implementation.",
+          "Use a virtual environment per project and install from a reviewed manifest. Record Python and package versions with the run artifact; a requirements range alone does not recreate a particular installation. Store a tested lock or freeze after validation. Verify setup with an import smoke test and the analyzer's behavior tests before connecting a provider. A key belongs in the local process environment and must be excluded from Git, browser bundles and progress backups."
+        ]
+      }
+    ],
+    "mistake": "Committing .env or putting a provider key into a VITE_ variable exposes the secret.",
+    "takeaway": "A clean checkout plus documented setup should reproduce your test results.",
+    "exercise": {
+      "id": "environment-exercise",
+      "kind": "order",
+      "prompt": "Put workspace setup in a reproducible order.",
+      "answer": "Create virtual environment|Activate interpreter|Install declared dependencies|Run tests",
+      "explanation": "Create isolation first, activate it, then install into it and verify the application.",
+      "hints": [
+        "Start with the invariant: isolate dependencies in a virtual environment.",
+        "Consider this constraint: Committing .env or putting a provider key into a VITE_ variable exposes the secret.",
+        "Work through a tiny example before generalizing. A clean checkout plus documented setup should reproduce your test results.",
+        "Create isolation first, activate it, then install into it and verify the application."
+      ],
+      "options": [
+        "Run tests",
+        "Install declared dependencies",
+        "Create virtual environment",
+        "Activate interpreter"
+      ]
+    },
+    "quiz": {
+      "question": "Where should a provider key live?",
+      "options": [
+        "In a VITE_API_KEY variable",
+        "In local server environment variables",
+        "In localStorage"
+      ],
+      "answer": 1,
+      "explanation": "The browser and its storage are inspectable; keep keys outside the client bundle."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/venv.html"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "orientation"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-python-001",
+      "bridge-python-002",
+      "bridge-python-003",
+      "q-11",
+      "bridge-phase-00-4",
+      "bridge-phase-00-5",
+      "q-9",
+      "bridge-phase-00-7"
+    ]
+  },
+  {
+    "id": "p00-risk-contract",
+    "phase": 0,
+    "module": "Orientation: From SDET To AI Quality Engineer",
+    "title": "Define an AI release contract",
+    "minutes": 35,
+    "objectives": [
+      "Define an AI release contract",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects define an ai release contract with test contracts, failure triage, and evidence for release. Build a small suite with an allowed request, a forbidden request, an unanswerable question, and a valid paraphrase.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "An AI feature is a system of deterministic boundaries around probabilistic inference. A useful release contract separates hard constraints from graded usefulness: a tool must never read another tenant\u2019s logs, while a summary may be correct in several phrasings. Model quality cannot compensate for an unauthorized action.",
+          "Write a risk register before selecting a framework. Identify who can be harmed, the action scope, evidence sources, uncertainty tolerance, and fallback. An AI quality engineer collaborates on these product decisions rather than merely choosing an evaluator after implementation."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Represent each invariant as an executable predicate and each graded requirement as a documented rubric. Version the dataset, prompt, model, retriever, and policy with the run. Compare matched cases and retain per-case evidence instead of storing only an average.",
+          "A project README should distinguish observations on synthetic data from production claims. Define who adjudicates uncertain outputs and how a release can be rolled back. The risk contract becomes acceptance criteria for the learner\u2019s portfolio."
+        ],
+        "code": "checks = {\"schema_valid\": True, \"tenant_allowed\": False, \"quality\": 0.92}\nrelease = checks[\"schema_valid\"] and checks[\"tenant_allowed\"]\nprint(release)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A score of 92% can hide a single severe cross-tenant failure. Segment the report by risk and prohibit aggregation from overriding critical gates. A model refusal is not automatically correct: an authorized, answerable request may have been refused unnecessarily.",
+          "Reproduce the request using its exact versions, check the authorization decision, and inspect evidence passed to the model. Determine whether the defect is a broken deterministic boundary or an uncertain response."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Build a small suite with an allowed request, a forbidden request, an unanswerable question, and a valid paraphrase. Record contract compliance separately from usefulness. Show which boundary prevented a forbidden action and which rubric scored the paraphrase.",
+          "The release review should include failures, confidence limits, and operating budgets. An SDET\u2019s regression mindset becomes especially valuable when every model upgrade can change behavior without changing application code."
+        ]
+      }
+    ],
+    "mistake": "A score of 92% can hide a single severe cross-tenant failure. Segment the report by risk and prohibit aggregation from overriding critical gates. A model refusal is not automatically correct: an authorized, answerable request may have been refused unnecessarily.",
+    "takeaway": "Build a small suite with an allowed request, a forbidden request, an unanswerable question, and a valid paraphrase.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Design the release contract for a CI-log summarizer that can access two synthetic tenants. Include hard gates, quality evidence, and an outage fallback.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Tenant boundary",
+          "terms": [
+            "tenant",
+            "authorization"
+          ]
+        },
+        {
+          "label": "Measured quality",
+          "terms": [
+            "dataset",
+            "rubric"
+          ]
+        },
+        {
+          "label": "Recovery",
+          "terms": [
+            "fallback",
+            "rollback"
+          ]
+        }
+      ],
+      "solution": "Authorize tenant access before retrieval, validate the response schema, and reject forbidden tool proposals. Evaluate grounded summaries on a versioned dataset using a calibrated rubric. On outage return a deterministic evidence-only report and retain rollback versions.",
+      "id": "p00-risk-contract-exercise",
+      "hints": [
+        "An AI feature is a system of deterministic boundaries around probabilistic inference.",
+        "A score of 92% can hide a single severe cross-tenant failure.",
+        "Represent each invariant as an executable predicate and each graded requirement as a documented rubric.",
+        "Build a small suite with an allowed request, a forbidden request, an unanswerable question, and a valid paraphrase."
+      ],
+      "explanation": "Authorize tenant access before retrieval, validate the response schema, and reject forbidden tool proposals. Evaluate grounded summaries on a versioned dataset using a calibrated rubric. On outage return a deterministic evidence-only report and retain rollback versions."
+    },
+    "quiz": {
+      "question": "A high average score hides a cross-tenant read. What wins?",
+      "options": [
+        "The mean score",
+        "The hard authorization gate",
+        "The longest answer"
+      ],
+      "answer": 1,
+      "explanation": "Authorization is a release constraint independent of averaged quality."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A high average score hides a cross-tenant read. What wins?",
+      "options": [
+        "The mean score",
+        "The hard authorization gate",
+        "The longest answer"
+      ],
+      "answer": 1,
+      "explanation": "Authorization is a release constraint independent of averaged quality."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/",
+      "https://www.nist.gov/itl/ai-risk-management-framework"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "environment"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-python-001",
+      "bridge-python-002",
+      "bridge-python-003",
+      "q-11",
+      "bridge-phase-00-4",
+      "bridge-phase-00-5",
+      "q-9",
+      "bridge-phase-00-7"
+    ]
+  },
+  {
+    "id": "p00-checkpoint",
+    "phase": 0,
+    "module": "Orientation: From SDET To AI Quality Engineer",
+    "title": "Phase 00 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 00 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 00 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Build a small suite with an allowed request, a forbidden request, an unanswerable question, and a valid paraphrase.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects define an ai release contract to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Represent each invariant as an executable predicate and each graded requirement as a documented rubric. Version the dataset, prompt, model, retriever, and policy with the run. Compare matched cases and retain per-case evidence instead of storing only an average.",
+          "A project README should distinguish observations on synthetic data from production claims. Define who adjudicates uncertain outputs and how a release can be rolled back. The risk contract becomes acceptance criteria for the learner\u2019s portfolio.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "checks = {\"schema_valid\": True, \"tenant_allowed\": False, \"quality\": 0.92}\nrelease = checks[\"schema_valid\"] and checks[\"tenant_allowed\"]\nprint(release)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A score of 92% can hide a single severe cross-tenant failure. Segment the report by risk and prohibit aggregation from overriding critical gates. A model refusal is not automatically correct: an authorized, answerable request may have been refused unnecessarily.",
+          "Reproduce the request using its exact versions, check the authorization decision, and inspect evidence passed to the model. Determine whether the defect is a broken deterministic boundary or an uncertain response.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Build a small suite with an allowed request, a forbidden request, an unanswerable question, and a valid paraphrase. Record contract compliance separately from usefulness. Show which boundary prevented a forbidden action and which rubric scored the paraphrase.",
+          "The release review should include failures, confidence limits, and operating budgets. An SDET\u2019s regression mindset becomes especially valuable when every model upgrade can change behavior without changing application code.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A score of 92% can hide a single severe cross-tenant failure. Segment the report by risk and prohibit aggregation from overriding critical gates. A model refusal is not automatically correct: an authorized, answerable request may have been refused unnecessarily.",
+    "takeaway": "Build a small suite with an allowed request, a forbidden request, an unanswerable question, and a valid paraphrase.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Define an AI release contract to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nBuild a small suite with an allowed request, a forbidden request, an unanswerable question, and a valid paraphrase.",
+      "id": "p00-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects define an ai release contract to the shared CI quality platform.",
+        "A score of 92% can hide a single severe cross-tenant failure.",
+        "Represent each invariant as an executable predicate and each graded requirement as a documented rubric.",
+        "Build a small suite with an allowed request, a forbidden request, an unanswerable question, and a valid paraphrase."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nBuild a small suite with an allowed request, a forbidden request, an unanswerable question, and a valid paraphrase."
+    },
+    "quiz": {
+      "question": "A candidate for define an ai release contract meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for define an ai release contract meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/",
+      "https://www.nist.gov/itl/ai-risk-management-framework"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p00-risk-contract"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-python-001",
+      "bridge-python-002",
+      "bridge-python-003",
+      "q-11",
+      "bridge-phase-00-4",
+      "bridge-phase-00-5",
+      "q-9",
+      "bridge-phase-00-7"
+    ]
+  }
+]

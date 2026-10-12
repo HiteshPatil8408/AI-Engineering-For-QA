@@ -1,0 +1,350 @@
+[
+  {
+    "id": "p35-economics",
+    "phase": 35,
+    "module": "Cost Engineering",
+    "title": "Cost engineering: useful-task budgets and routing",
+    "minutes": 35,
+    "objectives": [
+      "Cost engineering",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects cost engineering: useful-task budgets and routing with test contracts, failure triage, and evidence for release. Produce a cost-quality-latency comparison for baseline, cached, routed and shortened-context variants.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "AI cost includes input/output tokens, embedding/indexing work, retries, agent steps, evaluation and human review. Price per token is only one input to cost per accepted task. Smaller models, shorter context and caching help only if they preserve the required outcome.",
+          "A routing policy sends simple cases to a low-cost path and escalates difficult or uncertain cases. Routing must be evaluated for false confidence, not merely average savings."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Set per-task and monthly budgets using dated provider rates. Track measured usage rather than estimating solely from characters. Cache authorized deterministic work and stable retrieval results, batch offline embedding jobs and reduce duplicate context.",
+          "Use confidence thresholds calibrated on held-out cases to route accepted classifications, uncertain cases to stronger analysis and unsupported cases to humans. Bound agent steps and judge calls as part of the same budget."
+        ],
+        "code": "attempt_costs=[.003,.004,.002]\naccepted=2\ncost_per_accepted=sum(attempt_costs)/accepted",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A cheap classifier confidently mislabels product defects as automation issues, lowering billed cost while increasing operational risk. An optimization removes the evidence needed for correct answers. A cache saves tokens but serves stale permissions.",
+          "Compare accepted accuracy, abstention, review labor and total spend before and after optimization. Include cold-start/indexing costs and failed attempts in the report."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Produce a cost-quality-latency comparison for baseline, cached, routed and shortened-context variants. Reject candidates that violate hard safety or quality constraints even if they are cheaper.",
+          "SDETs should validate budget enforcement with synthetic high-usage responses and ensure over-budget tasks terminate or degrade visibly rather than continuing hidden work."
+        ]
+      }
+    ],
+    "mistake": "A cheap classifier confidently mislabels product defects as automation issues, lowering billed cost while increasing operational risk. An optimization removes the evidence needed for correct answers. A cache saves tokens but serves stale permissions.",
+    "takeaway": "Produce a cost-quality-latency comparison for baseline, cached, routed and shortened-context variants.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def cost_per_success(costs,successes):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def cost_per_success(costs,successes):\n    if successes<=0:return None\n    if any(c<0 for c in costs):raise ValueError('cost')\n    return sum(costs)/successes",
+      "starter": "def cost_per_success(costs,successes):\n    return 0",
+      "tests": "assert cost_per_success([2,4],2)==3\nassert cost_per_success([2],0) is None",
+      "id": "p35-economics-exercise",
+      "hints": [
+        "AI cost includes input/output tokens, embedding/indexing work, retries, agent steps, evaluation and human review.",
+        "A cheap classifier confidently mislabels product defects as automation issues, lowering billed cost while increasing operational risk.",
+        "Set per-task and monthly budgets using dated provider rates.",
+        "Produce a cost-quality-latency comparison for baseline, cached, routed and shortened-context variants."
+      ],
+      "explanation": "def cost_per_success(costs,successes):\n    if successes<=0:return None\n    if any(c<0 for c in costs):raise ValueError('cost')\n    return sum(costs)/successes"
+    },
+    "quiz": {
+      "question": "Which optimization must be evaluated for false confidence?",
+      "options": [
+        "Model routing by confidence",
+        "Renaming a log field",
+        "Changing a heading"
+      ],
+      "answer": 0,
+      "explanation": "Routing can save money by accepting wrong low-cost results unless confidence is calibrated."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which optimization must be evaluated for false confidence?",
+      "options": [
+        "Model routing by confidence",
+        "Renaming a log field",
+        "Changing a heading"
+      ],
+      "answer": 0,
+      "explanation": "Routing can save money by accepting wrong low-cost results unless confidence is calibrated."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/latency-optimization",
+      "https://docs.python.org/3/library/decimal.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p34-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Cost per task",
+      "Routing",
+      "Budget"
+    ],
+    "interviewIds": [
+      "bridge-production-008",
+      "bridge-production-009",
+      "bridge-production-025",
+      "bridge-phase-35-3",
+      "bridge-phase-35-4",
+      "bridge-phase-35-5",
+      "bridge-phase-35-6",
+      "bridge-phase-35-7"
+    ],
+    "demo": "cost"
+  },
+  {
+    "id": "p35-budget",
+    "phase": 35,
+    "module": "Cost Engineering",
+    "title": "Enforce task budgets before hidden work grows",
+    "minutes": 35,
+    "objectives": [
+      "Enforce task budgets before hidden work grows",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects enforce task budgets before hidden work grows with test contracts, failure triage, and evidence for release. Acceptance includes bounded work, dated rate configuration and measured usage artifacts.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A task budget bounds total attempts and their resource use, not only the final accepted response. Retries, discarded generations, judge calls and agent tools all contribute. A request can stay within each component's local limit while exceeding the user's total allowance.",
+          "Estimates and measured usage serve different purposes. Reserve estimated capacity before work, then reconcile actual usage returned by the provider. Rates are dated configuration; this course does not embed current pricing as a permanent fact."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Track remaining input/output token allowance, call count, wall time and estimated currency cost in task state. Refuse or degrade before beginning work that cannot fit the budget. Include cached-token and reasoning usage according to provider accounting rather than guessing.",
+          "Calculate cost per accepted task over all attempts. Compare routing and caching variants on the same dataset with quality and privacy constraints held fixed. A low billed cost that increases wrong automated decisions is not a successful optimization."
+        ],
+        "code": "remaining=1000\nusage_events=[200,300,400]\nassert sum(usage_events)<=remaining",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "An agent gives each retry a fresh token limit and never reconciles total usage. A judge runs on every intermediate draft, multiplying spend. A cache uses tenant-free keys and saves cost by leaking evidence.",
+          "Test budget exhaustion before and after a provider response, duplicated retries and negative/invalid usage values. Ensure the visible status explains budget termination rather than claiming a completed investigation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes bounded work, dated rate configuration and measured usage artifacts. Report total spend, accepted tasks, abstentions and review load together.",
+          "For SDETs, budgets are deterministic state invariants that can be tested with synthetic usage events. Live provider measurements then establish actual operating cost under the declared workload."
+        ]
+      }
+    ],
+    "mistake": "An agent gives each retry a fresh token limit and never reconciles total usage. A judge runs on every intermediate draft, multiplying spend. A cache uses tenant-free keys and saves cost by leaking evidence.",
+    "takeaway": "Acceptance includes bounded work, dated rate configuration and measured usage artifacts.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def remaining_budget(total,usage):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def remaining_budget(total,usage):\n    if total<0 or any(u<0 for u in usage):raise ValueError('usage')\n    return max(0,total-sum(usage))",
+      "starter": "def remaining_budget(total,usage):\n    return total",
+      "tests": "assert remaining_budget(100,[20,30])==50\nassert remaining_budget(100,[80,40])==0\ntry:remaining_budget(100,[-1]);assert False\nexcept ValueError:pass",
+      "id": "p35-budget-exercise",
+      "hints": [
+        "A task budget bounds total attempts and their resource use, not only the final accepted response.",
+        "An agent gives each retry a fresh token limit and never reconciles total usage.",
+        "Track remaining input/output token allowance, call count, wall time and estimated currency cost in task state.",
+        "Acceptance includes bounded work, dated rate configuration and measured usage artifacts."
+      ],
+      "explanation": "def remaining_budget(total,usage):\n    if total<0 or any(u<0 for u in usage):raise ValueError('usage')\n    return max(0,total-sum(usage))"
+    },
+    "quiz": {
+      "question": "Which attempts belong in cost per accepted task?",
+      "options": [
+        "All attempts, including failures and retries",
+        "Only the final success",
+        "Only the cheapest model"
+      ],
+      "answer": 0,
+      "explanation": "Useful-task economics include the work spent on unsuccessful outcomes."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which attempts belong in cost per accepted task?",
+      "options": [
+        "All attempts, including failures and retries",
+        "Only the final success",
+        "Only the cheapest model"
+      ],
+      "answer": 0,
+      "explanation": "Useful-task economics include the work spent on unsuccessful outcomes."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/latency-optimization",
+      "https://docs.python.org/3/library/decimal.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p35-economics"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Usage reconciliation",
+      "Task budget"
+    ],
+    "interviewIds": [
+      "bridge-production-008",
+      "bridge-production-009",
+      "bridge-production-025",
+      "bridge-phase-35-3",
+      "bridge-phase-35-4",
+      "bridge-phase-35-5",
+      "bridge-phase-35-6",
+      "bridge-phase-35-7"
+    ]
+  },
+  {
+    "id": "p35-checkpoint",
+    "phase": 35,
+    "module": "Cost Engineering",
+    "title": "Phase 35 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 35 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 35 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance includes bounded work, dated rate configuration and measured usage artifacts.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects enforce task budgets before hidden work grows to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Track remaining input/output token allowance, call count, wall time and estimated currency cost in task state. Refuse or degrade before beginning work that cannot fit the budget. Include cached-token and reasoning usage according to provider accounting rather than guessing.",
+          "Calculate cost per accepted task over all attempts. Compare routing and caching variants on the same dataset with quality and privacy constraints held fixed. A low billed cost that increases wrong automated decisions is not a successful optimization.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "remaining=1000\nusage_events=[200,300,400]\nassert sum(usage_events)<=remaining",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "An agent gives each retry a fresh token limit and never reconciles total usage. A judge runs on every intermediate draft, multiplying spend. A cache uses tenant-free keys and saves cost by leaking evidence.",
+          "Test budget exhaustion before and after a provider response, duplicated retries and negative/invalid usage values. Ensure the visible status explains budget termination rather than claiming a completed investigation.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes bounded work, dated rate configuration and measured usage artifacts. Report total spend, accepted tasks, abstentions and review load together.",
+          "For SDETs, budgets are deterministic state invariants that can be tested with synthetic usage events. Live provider measurements then establish actual operating cost under the declared workload.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "An agent gives each retry a fresh token limit and never reconciles total usage. A judge runs on every intermediate draft, multiplying spend. A cache uses tenant-free keys and saves cost by leaking evidence.",
+    "takeaway": "Acceptance includes bounded work, dated rate configuration and measured usage artifacts.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Enforce task budgets before hidden work grows to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance includes bounded work, dated rate configuration and measured usage artifacts.",
+      "id": "p35-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects enforce task budgets before hidden work grows to the shared CI quality platform.",
+        "An agent gives each retry a fresh token limit and never reconciles total usage.",
+        "Track remaining input/output token allowance, call count, wall time and estimated currency cost in task state.",
+        "Acceptance includes bounded work, dated rate configuration and measured usage artifacts."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance includes bounded work, dated rate configuration and measured usage artifacts."
+    },
+    "quiz": {
+      "question": "A candidate for enforce task budgets before hidden work grows meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for enforce task budgets before hidden work grows meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/latency-optimization",
+      "https://docs.python.org/3/library/decimal.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p35-budget"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-production-008",
+      "bridge-production-009",
+      "bridge-production-025",
+      "bridge-phase-35-3",
+      "bridge-phase-35-4",
+      "bridge-phase-35-5",
+      "bridge-phase-35-6",
+      "bridge-phase-35-7"
+    ]
+  }
+]

@@ -1,0 +1,243 @@
+[
+  {
+    "id": "p26-injection",
+    "phase": 26,
+    "module": "AI Safety And Security Testing",
+    "title": "Security testing: injection, poisoning and tenant isolation",
+    "minutes": 35,
+    "objectives": [
+      "Security testing",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects security testing: injection, poisoning and tenant isolation with test contracts, failure triage, and evidence for release. Gate on zero unauthorized reads/writes and zero canary disclosure.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Prompt injection occurs when untrusted text attempts to redirect model behavior. Indirect injection arrives through retrieved documents, logs or tool results rather than the direct user request. Retrieval poisoning manipulates which evidence is selected; sensitive disclosure exposes data to an unauthorized audience.",
+          "These risks are connected but distinct. A document can be relevant yet malicious, or benign yet forbidden to the current tenant. Instructions to ignore prior rules are observable attack content; the enforceable boundary is application policy, not a promise that the model will ignore them."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Build synthetic attacks with a case ID, entry point, requested forbidden effect and expected safe behavior. Include cross-tenant document IDs, fake tool instructions, secrets marked as synthetic canaries and oversized inputs. Assert actual tool effects and returned evidence, not merely whether the answer says it refused.",
+          "Authorize before retrieval and tool execution, escape output before display, restrict network destinations and bound model/tool work. Keep adversarial text out of production credentials and services; the lab uses isolated synthetic records."
+        ],
+        "code": "def allowed(doc,tenant):return doc['tenant']==tenant\nassert not allowed({'tenant':'other'},'current')",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A model says it cannot reveal secrets while an earlier tool call already retrieved another tenant's record. A filter removes one injection phrase but an encoded paraphrase bypasses it. The issue is enforcement below the language layer.",
+          "Inspect the full trace to identify entry point, trust-boundary crossing and effect. Add a regression case for the invariant, then vary phrasing so the fix is not a single-string deny list."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Gate on zero unauthorized reads/writes and zero canary disclosure. Report false blocks on legitimate queries so security controls do not silently make the assistant unusable.",
+          "SDETs should preserve attack provenance, observed effect, defense layer and replay instructions. A passing prompt-level refusal test cannot substitute for permission checks in the service and tool implementations."
+        ]
+      }
+    ],
+    "mistake": "A model says it cannot reveal secrets while an earlier tool call already retrieved another tenant's record. A filter removes one injection phrase but an encoded paraphrase bypasses it. The issue is enforcement below the language layer.",
+    "takeaway": "Gate on zero unauthorized reads/writes and zero canary disclosure.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def leaks(text,canaries):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def leaks(text,canaries):\n    return [c for c in canaries if c in text]",
+      "starter": "def leaks(text,canaries):\n    return []",
+      "tests": "assert leaks('public answer',['SYNTHETIC_SECRET'])==[]\nassert leaks('SYNTHETIC_SECRET',['SYNTHETIC_SECRET'])==['SYNTHETIC_SECRET']",
+      "id": "p26-injection-exercise",
+      "hints": [
+        "Prompt injection occurs when untrusted text attempts to redirect model behavior.",
+        "A model says it cannot reveal secrets while an earlier tool call already retrieved another tenant's record.",
+        "Build synthetic attacks with a case ID, entry point, requested forbidden effect and expected safe behavior.",
+        "Gate on zero unauthorized reads/writes and zero canary disclosure."
+      ],
+      "explanation": "def leaks(text,canaries):\n    return [c for c in canaries if c in text]"
+    },
+    "quiz": {
+      "question": "What is stronger evidence than a refusal sentence?",
+      "options": [
+        "No forbidden effect in the trace",
+        "A polite tone",
+        "A higher temperature"
+      ],
+      "answer": 0,
+      "explanation": "The trace and tool effects reveal whether the boundary was actually enforced."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What is stronger evidence than a refusal sentence?",
+      "options": [
+        "No forbidden effect in the trace",
+        "A polite tone",
+        "A higher temperature"
+      ],
+      "answer": 0,
+      "explanation": "The trace and tool effects reveal whether the boundary was actually enforced."
+    },
+    "sources": [
+      "https://genai.owasp.org/llm-top-10/",
+      "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p25-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Prompt injection",
+      "Retrieval poisoning",
+      "Tenant isolation"
+    ],
+    "interviewIds": [
+      "bridge-ai-security-001",
+      "bridge-ai-security-004",
+      "bridge-ai-security-007",
+      "bridge-ai-security-010",
+      "bridge-ai-security-013",
+      "bridge-ai-security-016",
+      "bridge-ai-security-019",
+      "bridge-ai-security-022"
+    ]
+  },
+  {
+    "id": "p26-checkpoint",
+    "phase": 26,
+    "module": "AI Safety And Security Testing",
+    "title": "Phase 26 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 26 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 26 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Gate on zero unauthorized reads/writes and zero canary disclosure.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects security testing: injection, poisoning and tenant isolation to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Build synthetic attacks with a case ID, entry point, requested forbidden effect and expected safe behavior. Include cross-tenant document IDs, fake tool instructions, secrets marked as synthetic canaries and oversized inputs. Assert actual tool effects and returned evidence, not merely whether the answer says it refused.",
+          "Authorize before retrieval and tool execution, escape output before display, restrict network destinations and bound model/tool work. Keep adversarial text out of production credentials and services; the lab uses isolated synthetic records.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "def allowed(doc,tenant):return doc['tenant']==tenant\nassert not allowed({'tenant':'other'},'current')",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A model says it cannot reveal secrets while an earlier tool call already retrieved another tenant's record. A filter removes one injection phrase but an encoded paraphrase bypasses it. The issue is enforcement below the language layer.",
+          "Inspect the full trace to identify entry point, trust-boundary crossing and effect. Add a regression case for the invariant, then vary phrasing so the fix is not a single-string deny list.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Gate on zero unauthorized reads/writes and zero canary disclosure. Report false blocks on legitimate queries so security controls do not silently make the assistant unusable.",
+          "SDETs should preserve attack provenance, observed effect, defense layer and replay instructions. A passing prompt-level refusal test cannot substitute for permission checks in the service and tool implementations.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A model says it cannot reveal secrets while an earlier tool call already retrieved another tenant's record. A filter removes one injection phrase but an encoded paraphrase bypasses it. The issue is enforcement below the language layer.",
+    "takeaway": "Gate on zero unauthorized reads/writes and zero canary disclosure.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Security testing: injection, poisoning and tenant isolation to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nGate on zero unauthorized reads/writes and zero canary disclosure.",
+      "id": "p26-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects security testing: injection, poisoning and tenant isolation to the shared CI quality platform.",
+        "A model says it cannot reveal secrets while an earlier tool call already retrieved another tenant's record.",
+        "Build synthetic attacks with a case ID, entry point, requested forbidden effect and expected safe behavior.",
+        "Gate on zero unauthorized reads/writes and zero canary disclosure."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nGate on zero unauthorized reads/writes and zero canary disclosure."
+    },
+    "quiz": {
+      "question": "A candidate for security testing: injection, poisoning and tenant isolation meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for security testing: injection, poisoning and tenant isolation meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://genai.owasp.org/llm-top-10/",
+      "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p26-injection"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ai-security-001",
+      "bridge-ai-security-004",
+      "bridge-ai-security-007",
+      "bridge-ai-security-010",
+      "bridge-ai-security-013",
+      "bridge-ai-security-016",
+      "bridge-ai-security-019",
+      "bridge-ai-security-022"
+    ]
+  }
+]

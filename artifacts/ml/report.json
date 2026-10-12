@@ -1,0 +1,140 @@
+{
+  "mode": "trained-synthetic-tfidf",
+  "dataset": "synthetic-ci-v1",
+  "cv_macro_f1": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "heldout": {
+    "AUTOMATION_DEFECT": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 5.0
+    },
+    "ENVIRONMENT": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 3.0
+    },
+    "PRODUCT_DEFECT": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 9.0
+    },
+    "TEST_DATA": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 18.0
+    },
+    "UNKNOWN": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 15.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      5,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      3,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      9,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      18,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      15
+    ]
+  ],
+  "classes": [
+    "AUTOMATION_DEFECT",
+    "ENVIRONMENT",
+    "PRODUCT_DEFECT",
+    "TEST_DATA",
+    "UNKNOWN"
+  ],
+  "train_groups": [
+    "incident-0",
+    "incident-1",
+    "incident-10",
+    "incident-11",
+    "incident-13",
+    "incident-15",
+    "incident-16",
+    "incident-17",
+    "incident-18",
+    "incident-19",
+    "incident-2",
+    "incident-21",
+    "incident-22",
+    "incident-25",
+    "incident-26",
+    "incident-27",
+    "incident-28",
+    "incident-29",
+    "incident-3",
+    "incident-33",
+    "incident-34",
+    "incident-36",
+    "incident-4",
+    "incident-5",
+    "incident-6",
+    "incident-7",
+    "incident-9"
+  ],
+  "test_groups": [
+    "incident-12",
+    "incident-14",
+    "incident-20",
+    "incident-23",
+    "incident-24",
+    "incident-30",
+    "incident-31",
+    "incident-32",
+    "incident-35",
+    "incident-8"
+  ],
+  "limitations": "Synthetic repeated patterns demonstrate training mechanics; results do not estimate real production accuracy."
+}

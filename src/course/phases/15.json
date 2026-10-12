@@ -1,0 +1,350 @@
+[
+  {
+    "id": "p15-ingestion",
+    "phase": 15,
+    "module": "Retrieval-Augmented Generation",
+    "title": "RAG ingestion: chunk boundaries, metadata and citations",
+    "minutes": 35,
+    "objectives": [
+      "RAG ingestion",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects rag ingestion: chunk boundaries, metadata and citations with test contracts, failure triage, and evidence for release. The support assistant must answer CI troubleshooting questions from synthetic approved documents and cite their IDs.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Retrieval-augmented generation supplies selected external evidence to a model at answer time. Ingestion loads, cleans, splits and versions documents; query-time retrieval selects context; generation produces an answer constrained by that context. RAG does not automatically prevent hallucination.",
+          "Chunking balances coherent evidence against retrieval specificity and context budget. Overlap can preserve cross-boundary facts but duplicates context. A heading-aware chunk should retain document ID, section, version, tenant and source offsets."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Normalize whitespace without destroying code indentation or error signatures. Split synthetic automation docs by heading, then enforce a token budget. Embed each chunk with a declared revision and create deterministic IDs from document version and offsets.",
+          "Retrieve authorized chunks, rank, deduplicate overlap and construct context containing stable citation IDs. After generation, resolve cited IDs to the actual provided context and require abstention when evidence is absent. Keep ingestion and serving versions separately for rollback."
+        ],
+        "code": "def chunk(words,size,overlap):\n    step=size-overlap\n    return [words[i:i+size] for i in range(0,len(words),step)]",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A deletion removes the source file but leaves vectors searchable. Another pipeline overwrites document content while keeping old citation offsets. Both generate apparently credible stale citations.",
+          "Test incremental updates, deletion tombstones, duplicated ingestion, chunk boundaries and permission changes. Inject a sentence spanning a boundary and verify it is retrievable without including the entire document."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The support assistant must answer CI troubleshooting questions from synthetic approved documents and cite their IDs. Evaluate retrieval independently from generation so a missing chunk is not misdiagnosed as a prompt failure.",
+          "Record chunk size, overlap, index generation and evidence IDs in every case report. SDET release evidence includes deletion and tenant tests alongside Recall@K and answer groundedness."
+        ]
+      }
+    ],
+    "mistake": "A deletion removes the source file but leaves vectors searchable. Another pipeline overwrites document content while keeping old citation offsets. Both generate apparently credible stale citations.",
+    "takeaway": "The support assistant must answer CI troubleshooting questions from synthetic approved documents and cite their IDs.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def chunks(words,size,overlap):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def chunks(words,size,overlap):\n    if size<=0 or not 0<=overlap<size: raise ValueError('bounds')\n    out=[];i=0\n    while i<len(words):\n        out.append(words[i:i+size])\n        if i+size>=len(words): break\n        i+=size-overlap\n    return out",
+      "starter": "def chunks(words,size,overlap):\n    return []",
+      "tests": "assert chunks(list('abcde'),3,1)==[list('abc'),list('cde')]\nassert chunks([],3,0)==[]\ntry: chunks(['a'],2,2); assert False\nexcept ValueError: pass",
+      "id": "p15-ingestion-exercise",
+      "hints": [
+        "Retrieval-augmented generation supplies selected external evidence to a model at answer time.",
+        "A deletion removes the source file but leaves vectors searchable.",
+        "Normalize whitespace without destroying code indentation or error signatures.",
+        "The support assistant must answer CI troubleshooting questions from synthetic approved documents and cite their IDs."
+      ],
+      "explanation": "def chunks(words,size,overlap):\n    if size<=0 or not 0<=overlap<size: raise ValueError('bounds')\n    out=[];i=0\n    while i<len(words):\n        out.append(words[i:i+size])\n        if i+size>=len(words): break\n        i+=size-overlap\n    return out"
+    },
+    "quiz": {
+      "question": "What must a citation resolve to?",
+      "options": [
+        "Evidence actually supplied to the answer",
+        "Any similar document",
+        "A plausible-looking URL"
+      ],
+      "answer": 0,
+      "explanation": "Citation validity requires identity and provenance, not just a familiar title."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What must a citation resolve to?",
+      "options": [
+        "Evidence actually supplied to the answer",
+        "Any similar document",
+        "A plausible-looking URL"
+      ],
+      "answer": 0,
+      "explanation": "Citation validity requires identity and provenance, not just a familiar title."
+    },
+    "sources": [
+      "https://developers.llamaindex.ai/python/framework/",
+      "https://qdrant.tech/documentation/concepts/search/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p14-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "RAG",
+      "Chunk overlap",
+      "Grounding"
+    ],
+    "interviewIds": [
+      "bridge-rag-001",
+      "bridge-rag-002",
+      "bridge-rag-013",
+      "bridge-rag-037",
+      "bridge-rag-038",
+      "bridge-phase-15-5",
+      "bridge-phase-15-6",
+      "bridge-phase-15-7"
+    ],
+    "demo": "rag"
+  },
+  {
+    "id": "p15-citations",
+    "phase": 15,
+    "module": "Retrieval-Augmented Generation",
+    "title": "Context construction: resolved citations and missing evidence",
+    "minutes": 35,
+    "objectives": [
+      "Context construction",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects context construction: resolved citations and missing evidence with test contracts, failure triage, and evidence for release. The extractive baseline returns authorized source text with citations, visibly labeled as extractive rather than a live LLM answer.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Context construction turns retrieved chunks into a bounded evidence package. Each chunk should carry an immutable evidence ID and enough source metadata for a citation to resolve. The answer must cite only supplied, authorized evidence; a plausible URL or title is not a valid provenance check.",
+          "A no-answer case is not a retrieval exception. The service may function correctly while no evidence supports the request. In that state, abstention is a valid outcome and should be present in the evaluation dataset."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Deduplicate overlapping chunks, reserve output/instruction tokens and pack evidence according to relevance and coverage. Use explicit evidence blocks with IDs; treat their text as untrusted data. After generation, validate cited IDs against the actual packed set, then evaluate whether the cited passage supports the claim.",
+          "These are two levels: deterministic resolution checks identity, while groundedness checks semantic support. Neither a resolved ID nor a high relevance score establishes every generated statement."
+        ],
+        "code": "supplied={'D1','D2'}\ncited=['D1']\nassert set(cited)<=supplied",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "The retriever finds the correct document, but context packing drops it. The model cites an ID remembered from an earlier session that was not supplied this turn. Another answer cites an authorized document that discusses the opposite rule.",
+          "Test unresolved IDs, empty context, conflicting evidence and revocation. Retain retrieval and packed-context IDs separately so the first failing stage can be identified."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The extractive baseline returns authorized source text with citations, visibly labeled as extractive rather than a live LLM answer. Live generation must meet the same provenance checks and an independently calibrated support rubric.",
+          "SDETs should report citation resolution, claim support and no-answer behavior separately. This makes a retrieval regression distinguishable from a hallucination or a context-budget defect."
+        ]
+      }
+    ],
+    "mistake": "The retriever finds the correct document, but context packing drops it. The model cites an ID remembered from an earlier session that was not supplied this turn. Another answer cites an authorized document that discusses the opposite rule.",
+    "takeaway": "The extractive baseline returns authorized source text with citations, visibly labeled as extractive rather than a live LLM answer.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def citations_valid(cited,supplied,tenant,documents):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def citations_valid(cited,supplied,tenant,documents):\n    by_id={d['id']:d for d in documents}\n    return bool(cited) and all(i in supplied and i in by_id and by_id[i]['tenant']==tenant and not by_id[i].get('deleted') for i in cited)",
+      "starter": "def citations_valid(cited,supplied,tenant,documents):\n    return False",
+      "tests": "docs=[{'id':'D1','tenant':'a'},{'id':'D2','tenant':'b'}]\nassert citations_valid(['D1'],{'D1'},'a',docs)\nassert not citations_valid(['D2'],{'D2'},'a',docs)\nassert not citations_valid([],set(),'a',docs)",
+      "id": "p15-citations-exercise",
+      "hints": [
+        "Context construction turns retrieved chunks into a bounded evidence package.",
+        "The retriever finds the correct document, but context packing drops it.",
+        "Deduplicate overlapping chunks, reserve output/instruction tokens and pack evidence according to relevance and coverage.",
+        "The extractive baseline returns authorized source text with citations, visibly labeled as extractive rather than a live LLM answer."
+      ],
+      "explanation": "def citations_valid(cited,supplied,tenant,documents):\n    by_id={d['id']:d for d in documents}\n    return bool(cited) and all(i in supplied and i in by_id and by_id[i]['tenant']==tenant and not by_id[i].get('deleted') for i in cited)"
+    },
+    "quiz": {
+      "question": "Does a resolved citation prove claim support?",
+      "options": [
+        "No: semantic support is a separate check",
+        "Yes: IDs guarantee meaning",
+        "Only with top-k=1"
+      ],
+      "answer": 0,
+      "explanation": "Resolution establishes source identity; the claim can still misrepresent the passage."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Does a resolved citation prove claim support?",
+      "options": [
+        "No: semantic support is a separate check",
+        "Yes: IDs guarantee meaning",
+        "Only with top-k=1"
+      ],
+      "answer": 0,
+      "explanation": "Resolution establishes source identity; the claim can still misrepresent the passage."
+    },
+    "sources": [
+      "https://developers.llamaindex.ai/python/framework/",
+      "https://qdrant.tech/documentation/concepts/search/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p15-ingestion"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Citation resolution",
+      "Context packing"
+    ],
+    "interviewIds": [
+      "bridge-rag-001",
+      "bridge-rag-002",
+      "bridge-rag-013",
+      "bridge-rag-037",
+      "bridge-rag-038",
+      "bridge-phase-15-5",
+      "bridge-phase-15-6",
+      "bridge-phase-15-7"
+    ]
+  },
+  {
+    "id": "p15-checkpoint",
+    "phase": 15,
+    "module": "Retrieval-Augmented Generation",
+    "title": "Phase 15 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 15 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 15 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. The extractive baseline returns authorized source text with citations, visibly labeled as extractive rather than a live LLM answer.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects context construction: resolved citations and missing evidence to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Deduplicate overlapping chunks, reserve output/instruction tokens and pack evidence according to relevance and coverage. Use explicit evidence blocks with IDs; treat their text as untrusted data. After generation, validate cited IDs against the actual packed set, then evaluate whether the cited passage supports the claim.",
+          "These are two levels: deterministic resolution checks identity, while groundedness checks semantic support. Neither a resolved ID nor a high relevance score establishes every generated statement.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "supplied={'D1','D2'}\ncited=['D1']\nassert set(cited)<=supplied",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "The retriever finds the correct document, but context packing drops it. The model cites an ID remembered from an earlier session that was not supplied this turn. Another answer cites an authorized document that discusses the opposite rule.",
+          "Test unresolved IDs, empty context, conflicting evidence and revocation. Retain retrieval and packed-context IDs separately so the first failing stage can be identified.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The extractive baseline returns authorized source text with citations, visibly labeled as extractive rather than a live LLM answer. Live generation must meet the same provenance checks and an independently calibrated support rubric.",
+          "SDETs should report citation resolution, claim support and no-answer behavior separately. This makes a retrieval regression distinguishable from a hallucination or a context-budget defect.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "The retriever finds the correct document, but context packing drops it. The model cites an ID remembered from an earlier session that was not supplied this turn. Another answer cites an authorized document that discusses the opposite rule.",
+    "takeaway": "The extractive baseline returns authorized source text with citations, visibly labeled as extractive rather than a live LLM answer.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Context construction: resolved citations and missing evidence to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nThe extractive baseline returns authorized source text with citations, visibly labeled as extractive rather than a live LLM answer.",
+      "id": "p15-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects context construction: resolved citations and missing evidence to the shared CI quality platform.",
+        "The retriever finds the correct document, but context packing drops it.",
+        "Deduplicate overlapping chunks, reserve output/instruction tokens and pack evidence according to relevance and coverage.",
+        "The extractive baseline returns authorized source text with citations, visibly labeled as extractive rather than a live LLM answer."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nThe extractive baseline returns authorized source text with citations, visibly labeled as extractive rather than a live LLM answer."
+    },
+    "quiz": {
+      "question": "A candidate for context construction: resolved citations and missing evidence meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for context construction: resolved citations and missing evidence meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://developers.llamaindex.ai/python/framework/",
+      "https://qdrant.tech/documentation/concepts/search/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p15-citations"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-rag-001",
+      "bridge-rag-002",
+      "bridge-rag-013",
+      "bridge-rag-037",
+      "bridge-rag-038",
+      "bridge-phase-15-5",
+      "bridge-phase-15-6",
+      "bridge-phase-15-7"
+    ]
+  }
+]

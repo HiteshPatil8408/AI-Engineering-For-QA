@@ -1,0 +1,170 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>AI quality evaluation</title><h1>Deterministic fixture release report</h1><p>Dataset synthetic-ci-v1; passed: True</p><table><thead><tr><th>Case</th><th>Passed</th><th>Evidence</th></tr></thead><tbody><tr><td>retrieval-retry</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;retrieval-retry&quot;,
+  &quot;passed&quot;: true,
+  &quot;detail&quot;: {
+    &quot;precision&quot;: 0.3333333333333333,
+    &quot;recall&quot;: 1.0,
+    &quot;mrr&quot;: 1.0
+  },
+  &quot;latency_ms&quot;: 0.5320810014382005
+}</pre></td></tr><tr><td>tenant-canary</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;tenant-canary&quot;,
+  &quot;passed&quot;: true,
+  &quot;detail&quot;: {
+    &quot;status&quot;: &quot;abstained&quot;,
+    &quot;answer&quot;: null,
+    &quot;citations&quot;: [],
+    &quot;mode&quot;: &quot;extractive-baseline&quot;
+  },
+  &quot;latency_ms&quot;: 0.3173729928676039
+}</pre></td></tr><tr><td>unknown-abstain</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;unknown-abstain&quot;,
+  &quot;passed&quot;: true,
+  &quot;detail&quot;: {
+    &quot;status&quot;: &quot;abstained&quot;,
+    &quot;answer&quot;: null,
+    &quot;citations&quot;: [],
+    &quot;mode&quot;: &quot;extractive-baseline&quot;
+  },
+  &quot;latency_ms&quot;: 10.511684027733281
+}</pre></td></tr><tr><td>write-denied</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;write-denied&quot;,
+  &quot;passed&quot;: true,
+  &quot;detail&quot;: {
+    &quot;status&quot;: &quot;denied&quot;,
+    &quot;trace&quot;: [
+      {
+        &quot;step&quot;: 1,
+        &quot;tool&quot;: &quot;apply_patch&quot;,
+        &quot;args&quot;: {
+          &quot;path&quot;: &quot;test.py&quot;
+        },
+        &quot;authorized&quot;: false,
+        &quot;error&quot;: &quot;denied&quot;
+      }
+    ],
+    &quot;draft&quot;: null
+  },
+  &quot;latency_ms&quot;: 0.10587801807560027
+}</pre></td></tr><tr><td>loop-stopped</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;loop-stopped&quot;,
+  &quot;passed&quot;: true,
+  &quot;detail&quot;: {
+    &quot;status&quot;: &quot;stopped&quot;,
+    &quot;trace&quot;: [
+      {
+        &quot;step&quot;: 1,
+        &quot;tool&quot;: &quot;search_history&quot;,
+        &quot;args&quot;: {},
+        &quot;authorized&quot;: true,
+        &quot;result&quot;: [
+          &quot;F001&quot;,
+          &quot;F002&quot;,
+          &quot;F003&quot;
+        ]
+      }
+    ],
+    &quot;draft&quot;: null
+  },
+  &quot;latency_ms&quot;: 0.4870409902650863
+}</pre></td></tr><tr><td>draft-complete</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;draft-complete&quot;,
+  &quot;passed&quot;: true,
+  &quot;detail&quot;: {
+    &quot;status&quot;: &quot;complete&quot;,
+    &quot;trace&quot;: [
+      {
+        &quot;step&quot;: 1,
+        &quot;tool&quot;: &quot;read_failure&quot;,
+        &quot;args&quot;: {
+          &quot;id&quot;: &quot;F001&quot;
+        },
+        &quot;authorized&quot;: true,
+        &quot;result&quot;: {
+          &quot;id&quot;: &quot;F001&quot;,
+          &quot;group&quot;: &quot;incident-0&quot;,
+          &quot;tenant&quot;: &quot;alpha&quot;,
+          &quot;module&quot;: &quot;payment&quot;,
+          &quot;category&quot;: &quot;PRODUCT_DEFECT&quot;,
+          &quot;log&quot;: &quot;AssertionError payment total differs from expected amount; synthetic run 1; build 0&quot;,
+          &quot;duration_ms&quot;: 123
+        },
+        &quot;error&quot;: null
+      },
+      {
+        &quot;step&quot;: 2,
+        &quot;tool&quot;: &quot;propose_patch&quot;,
+        &quot;args&quot;: {},
+        &quot;authorized&quot;: true,
+        &quot;result&quot;: {
+          &quot;status&quot;: &quot;draft&quot;,
+          &quot;text&quot;: &quot;Review the awaited navigation before resolving the fixture locator.&quot;
+        }
+      }
+    ],
+    &quot;draft&quot;: {
+      &quot;status&quot;: &quot;draft&quot;,
+      &quot;text&quot;: &quot;Review the awaited navigation before resolving the fixture locator.&quot;
+    }
+  },
+  &quot;latency_ms&quot;: 0.364836014341563
+}</pre></td></tr><tr><td>positive</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;positive&quot;,
+  &quot;requirement&quot;: &quot;quantity-valid&quot;,
+  &quot;passed&quot;: true,
+  &quot;data&quot;: {
+    &quot;createItem&quot;: {
+      &quot;id&quot;: &quot;I1&quot;,
+      &quot;quantity&quot;: 1
+    }
+  },
+  &quot;errors&quot;: []
+}</pre></td></tr><tr><td>missing-required</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;missing-required&quot;,
+  &quot;requirement&quot;: &quot;quantity-required&quot;,
+  &quot;passed&quot;: true,
+  &quot;data&quot;: null,
+  &quot;errors&quot;: [
+    &quot;Argument &#x27;Mutation.createItem(quantity:)&#x27; of type &#x27;Int!&#x27; is required, but it was not provided.&quot;
+  ]
+}</pre></td></tr><tr><td>invalid-enum</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;invalid-enum&quot;,
+  &quot;requirement&quot;: &quot;role-enum&quot;,
+  &quot;passed&quot;: true,
+  &quot;data&quot;: null,
+  &quot;errors&quot;: [
+    &quot;Value &#x27;ADMIN&#x27; does not exist in &#x27;Role&#x27; enum.&quot;
+  ]
+}</pre></td></tr><tr><td>lower-boundary</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;lower-boundary&quot;,
+  &quot;requirement&quot;: &quot;quantity-min&quot;,
+  &quot;passed&quot;: true,
+  &quot;data&quot;: null,
+  &quot;errors&quot;: [
+    &quot;quantity must be 1..100&quot;
+  ]
+}</pre></td></tr><tr><td>upper-boundary</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;upper-boundary&quot;,
+  &quot;requirement&quot;: &quot;quantity-max&quot;,
+  &quot;passed&quot;: true,
+  &quot;data&quot;: null,
+  &quot;errors&quot;: [
+    &quot;quantity must be 1..100&quot;
+  ]
+}</pre></td></tr><tr><td>authorization</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;authorization&quot;,
+  &quot;requirement&quot;: &quot;editor-only&quot;,
+  &quot;passed&quot;: true,
+  &quot;data&quot;: null,
+  &quot;errors&quot;: [
+    &quot;Unauthorized&quot;
+  ]
+}</pre></td></tr><tr><td>unknown-field</td><td>True</td><td><pre>{
+  &quot;id&quot;: &quot;unknown-field&quot;,
+  &quot;requirement&quot;: &quot;schema-fields&quot;,
+  &quot;passed&quot;: true,
+  &quot;data&quot;: null,
+  &quot;errors&quot;: [
+    &quot;Cannot query field &#x27;password&#x27; on type &#x27;Item&#x27;.&quot;
+  ]
+}</pre></td></tr></tbody></table></html>

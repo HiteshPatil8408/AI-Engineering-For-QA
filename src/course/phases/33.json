@@ -1,0 +1,349 @@
+[
+  {
+    "id": "p33-ci",
+    "phase": 33,
+    "module": "CI/CD And GitHub Actions",
+    "title": "CI/CD: ordered checks, artifacts and release gates",
+    "minutes": 35,
+    "objectives": [
+      "CI/CD",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects ci/cd: ordered checks, artifacts and release gates with test contracts, failure triage, and evidence for release. The course integrity script is a required gate for missing phases, broken lesson references, absent checkpoints and invalid exercise schemas.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Continuous integration validates changes before they become release candidates. A useful pipeline installs locked dependencies, checks content and contracts, runs unit/integration tests, builds the app and executes representative browser and service tests. Continuous delivery packages a candidate after those gates; deployment publishes an approved artifact.",
+          "An AI quality report belongs in the gate sequence. Producing HTML without using its exit verdict does not protect a release."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use GitHub Actions jobs with explicit permissions, dependency caches and immutable artifacts. Run deterministic checks on every pull request. Live provider evaluations, when authorized and configured, use bounded datasets and protected secrets; forks must not receive those secrets.",
+          "Upload failure traces and evaluation reports using always() while keeping the job failed. Build GitHub Pages with the repository base path and test route reloads before publishing. Link the artifact to code, dataset and prompt revisions."
+        ],
+        "code": "# CI command\npython -m pytest local-labs\npython local-labs/evals/runner.py --cases data/evaluation.json\nnpm run lint\nnpm test\nnpm run build",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A workflow appends || true to the evaluator and deploys despite hard-gate failures. A deployment rebuilds with different dependencies instead of publishing the tested artifact. A path filter skips tests when course JSON changes.",
+          "Test that deliberate content corruption and failing cases produce nonzero checks. Review workflow permissions and ensure deployment depends on the complete validation job."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The course integrity script is a required gate for missing phases, broken lesson references, absent checkpoints and invalid exercise schemas. Local evaluation returns a failing exit code for missing cases or violated invariants.",
+          "SDETs should demonstrate a red build from a known regression, then a green build after the fix. This proves that checks are connected to release behavior, not only documented."
+        ]
+      }
+    ],
+    "mistake": "A workflow appends || true to the evaluator and deploys despite hard-gate failures. A deployment rebuilds with different dependencies instead of publishing the tested artifact. A path filter skips tests when course JSON changes.",
+    "takeaway": "The course integrity script is a required gate for missing phases, broken lesson references, absent checkpoints and invalid exercise schemas.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def deployable(checks):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def deployable(checks):\n    required={'content','unit','integration','build','evaluation'}\n    return required<=set(checks) and all(checks[k]=='passed' for k in required)",
+      "starter": "def deployable(checks):\n    return False",
+      "tests": "assert deployable(dict.fromkeys(['content','unit','integration','build','evaluation'],'passed'))\nassert not deployable({'build':'passed'})",
+      "id": "p33-ci-exercise",
+      "hints": [
+        "Continuous integration validates changes before they become release candidates.",
+        "A workflow appends || true to the evaluator and deploys despite hard-gate failures.",
+        "Use GitHub Actions jobs with explicit permissions, dependency caches and immutable artifacts.",
+        "The course integrity script is a required gate for missing phases, broken lesson references, absent checkpoints and invalid exercise schemas."
+      ],
+      "explanation": "def deployable(checks):\n    required={'content','unit','integration','build','evaluation'}\n    return required<=set(checks) and all(checks[k]=='passed' for k in required)"
+    },
+    "quiz": {
+      "question": "Why deploy the tested artifact rather than rebuild it?",
+      "options": [
+        "To preserve the validated inputs and output",
+        "To avoid all future tests",
+        "To make the bundle larger"
+      ],
+      "answer": 0,
+      "explanation": "A new build can differ from the candidate that passed the gates."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Why deploy the tested artifact rather than rebuild it?",
+      "options": [
+        "To preserve the validated inputs and output",
+        "To avoid all future tests",
+        "To make the bundle larger"
+      ],
+      "answer": 0,
+      "explanation": "A new build can differ from the candidate that passed the gates."
+    },
+    "sources": [
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p32-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "CI",
+      "Artifact",
+      "Release gate"
+    ],
+    "interviewIds": [
+      "bridge-production-004",
+      "bridge-production-005",
+      "bridge-production-021",
+      "bridge-phase-33-3",
+      "bridge-phase-33-4",
+      "bridge-phase-33-5",
+      "bridge-phase-33-6",
+      "bridge-phase-33-7"
+    ]
+  },
+  {
+    "id": "p33-artifacts",
+    "phase": 33,
+    "module": "CI/CD And GitHub Actions",
+    "title": "GitHub Actions: failure artifacts and protected evaluation modes",
+    "minutes": 35,
+    "objectives": [
+      "GitHub Actions",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects github actions: failure artifacts and protected evaluation modes with test contracts, failure triage, and evidence for release. Acceptance includes a red gate that retained its artifacts and a corrected green gate using the same cases.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "CI should make failures reviewable. Unit results, browser traces, case reports and version manifests are artifacts that explain why a gate failed. Uploading them only on success loses the most useful evidence. Secret-bearing live evaluation requires a distinct protected execution context from forked contributions.",
+          "Deterministic fixture checks can run without credentials on every change. Live model-quality measurements should use configured budgets and stable cases, with mode prominently recorded."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Order install, content integrity, lint, unit/API checks, build and browser tests. Run the local evaluator and preserve its exit code. Upload reports with always() so a failed case still leaves its JSON/HTML evidence. Restrict workflow permissions to the job's actual needs.",
+          "Deploy the tested build artifact with the configured GitHub Pages base path. Content JSON changes must trigger validation just as code changes do. A separate completion-depth gate prevents structural validity from being mistaken for finished curriculum."
+        ],
+        "code": "# Required local equivalents\nnpm run content:check\nnpm run lint\nnpm test\nnpm run build\npython local-labs/evals/runner.py",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A workflow runs an evaluator but adds continue-on-error, making the release green. A fork is allowed to access provider secrets. A path filter runs only for src/**/*.tsx and skips broken lesson JSON.",
+          "Test the workflow logic with a known failing case and inspect that deployment cannot proceed. Review secret scope and artifact redaction, and record which checks were fixture-only versus live."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes a red gate that retained its artifacts and a corrected green gate using the same cases. Workflow YAML is a design artifact until its checks actually run in the intended environment.",
+          "For SDETs, connect every advertised guarantee to a required check and ensure missing evidence fails visibly. This is the difference between a report that informs a release and one that controls it."
+        ]
+      }
+    ],
+    "mistake": "A workflow runs an evaluator but adds continue-on-error, making the release green. A fork is allowed to access provider secrets. A path filter runs only for src/**/*.tsx and skips broken lesson JSON.",
+    "takeaway": "Acceptance includes a red gate that retained its artifacts and a corrected green gate using the same cases.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def artifact_policy(status):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def artifact_policy(status):\n    return {'upload':status in {'passed','failed','cancelled'},'deploy':status=='passed'}",
+      "starter": "def artifact_policy(status):\n    return {}",
+      "tests": "assert artifact_policy('failed')=={'upload':True,'deploy':False}\nassert artifact_policy('passed')['deploy']",
+      "id": "p33-artifacts-exercise",
+      "hints": [
+        "CI should make failures reviewable.",
+        "A workflow runs an evaluator but adds continue-on-error, making the release green.",
+        "Order install, content integrity, lint, unit/API checks, build and browser tests.",
+        "Acceptance includes a red gate that retained its artifacts and a corrected green gate using the same cases."
+      ],
+      "explanation": "def artifact_policy(status):\n    return {'upload':status in {'passed','failed','cancelled'},'deploy':status=='passed'}"
+    },
+    "quiz": {
+      "question": "Should failed evaluation artifacts still be uploaded?",
+      "options": [
+        "Yes, while preserving a failed job verdict",
+        "No, failure evidence should disappear",
+        "Only if deployment already happened"
+      ],
+      "answer": 0,
+      "explanation": "Failure evidence supports diagnosis without allowing release."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Should failed evaluation artifacts still be uploaded?",
+      "options": [
+        "Yes, while preserving a failed job verdict",
+        "No, failure evidence should disappear",
+        "Only if deployment already happened"
+      ],
+      "answer": 0,
+      "explanation": "Failure evidence supports diagnosis without allowing release."
+    },
+    "sources": [
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p33-ci"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Protected secret",
+      "Failure artifact"
+    ],
+    "interviewIds": [
+      "bridge-production-004",
+      "bridge-production-005",
+      "bridge-production-021",
+      "bridge-phase-33-3",
+      "bridge-phase-33-4",
+      "bridge-phase-33-5",
+      "bridge-phase-33-6",
+      "bridge-phase-33-7"
+    ]
+  },
+  {
+    "id": "p33-checkpoint",
+    "phase": 33,
+    "module": "CI/CD And GitHub Actions",
+    "title": "Phase 33 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 33 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 33 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance includes a red gate that retained its artifacts and a corrected green gate using the same cases.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects github actions: failure artifacts and protected evaluation modes to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Order install, content integrity, lint, unit/API checks, build and browser tests. Run the local evaluator and preserve its exit code. Upload reports with always() so a failed case still leaves its JSON/HTML evidence. Restrict workflow permissions to the job's actual needs.",
+          "Deploy the tested build artifact with the configured GitHub Pages base path. Content JSON changes must trigger validation just as code changes do. A separate completion-depth gate prevents structural validity from being mistaken for finished curriculum.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "# Required local equivalents\nnpm run content:check\nnpm run lint\nnpm test\nnpm run build\npython local-labs/evals/runner.py",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A workflow runs an evaluator but adds continue-on-error, making the release green. A fork is allowed to access provider secrets. A path filter runs only for src/**/*.tsx and skips broken lesson JSON.",
+          "Test the workflow logic with a known failing case and inspect that deployment cannot proceed. Review secret scope and artifact redaction, and record which checks were fixture-only versus live.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance includes a red gate that retained its artifacts and a corrected green gate using the same cases. Workflow YAML is a design artifact until its checks actually run in the intended environment.",
+          "For SDETs, connect every advertised guarantee to a required check and ensure missing evidence fails visibly. This is the difference between a report that informs a release and one that controls it.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A workflow runs an evaluator but adds continue-on-error, making the release green. A fork is allowed to access provider secrets. A path filter runs only for src/**/*.tsx and skips broken lesson JSON.",
+    "takeaway": "Acceptance includes a red gate that retained its artifacts and a corrected green gate using the same cases.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply GitHub Actions: failure artifacts and protected evaluation modes to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance includes a red gate that retained its artifacts and a corrected green gate using the same cases.",
+      "id": "p33-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects github actions: failure artifacts and protected evaluation modes to the shared CI quality platform.",
+        "A workflow runs an evaluator but adds continue-on-error, making the release green.",
+        "Order install, content integrity, lint, unit/API checks, build and browser tests.",
+        "Acceptance includes a red gate that retained its artifacts and a corrected green gate using the same cases."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance includes a red gate that retained its artifacts and a corrected green gate using the same cases."
+    },
+    "quiz": {
+      "question": "A candidate for github actions: failure artifacts and protected evaluation modes meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for github actions: failure artifacts and protected evaluation modes meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://docs.github.com/en/actions/writing-workflows",
+      "https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p33-artifacts"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-production-004",
+      "bridge-production-005",
+      "bridge-production-021",
+      "bridge-phase-33-3",
+      "bridge-phase-33-4",
+      "bridge-phase-33-5",
+      "bridge-phase-33-6",
+      "bridge-phase-33-7"
+    ]
+  }
+]

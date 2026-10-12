@@ -1,0 +1,951 @@
+[
+  {
+    "id": "python-values",
+    "phase": 1,
+    "module": "Python fundamentals",
+    "title": "Values, collections, and API contracts",
+    "minutes": 26,
+    "objectives": [
+      "Choose the right collection for a test result",
+      "Understand mutable objects and missing fields",
+      "Normalize external values at a contract boundary"
+    ],
+    "relevance": "Test reports and API responses arrive as nested data. The first quality boundary is explicit, predictable normalization.",
+    "sections": [
+      {
+        "title": "Python values are objects",
+        "paragraphs": [
+          "Names bind to objects; they are not storage boxes with fixed types. Integers, floats, strings, booleans, and None represent distinct meanings. The string \"false\" is truthy because it is non-empty. Never convert an API flag with bool(raw) when raw might be a string.",
+          "Lists preserve order and allow mutation; tuples represent fixed ordered records; dictionaries map keys to values; sets store unique hashable values. Choose a set for duplicate test IDs and a list for ordered execution results."
+        ],
+        "code": "result = {\"name\": \"login\", \"status\": \"failed\", \"duration\": 4.5}\nfailed_ids = {\"login\", \"checkout\", \"login\"}\nprint(len(failed_ids))  # 2\nprint(result.get(\"retries\", 0))  # 0"
+      },
+      {
+        "title": "Aliasing and boundary validation",
+        "paragraphs": [
+          "Assigning a list to another name does not copy it. Mutating through either name changes the same object. A shallow copy only copies the outer collection; nested dictionaries still share identity.",
+          "Use direct indexing for a required field when absence is an error. Use .get for optional values only when a default has a defined meaning. Validate status values before computing pass rate; silently treating unknown status as pass corrupts metrics."
+        ],
+        "code": "original = [{\"status\": \"failed\"}]\ncopy = original.copy()\ncopy[0][\"status\"] = \"passed\"\nprint(original[0][\"status\"])  # passed"
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "A dictionary maps stable test IDs to records; a set records membership such as already-seen IDs; a list preserves an ordered event stream. Choosing a set for the event stream discards ordering and duplicates, which can hide repeated failures. A tuple can represent a fixed composite identity such as tenant, build and test.",
+          "Mutability matters when fixtures are shared. Assigning second = first does not copy a list, and a shallow dictionary copy still shares nested lists. A test that appends to a nested fixture can change later tests. Build a fresh fixture for each test or copy the exact mutable boundary. Test duplicates, absent keys and unexpected field types, and avoid using a mutable default argument such as failures=[] in a function signature."
+        ]
+      }
+    ],
+    "mistake": "A shallow list copy still shares nested dictionaries.",
+    "takeaway": "Model the data contract before transforming the data.",
+    "exercise": {
+      "id": "python-values-exercise",
+      "kind": "choice",
+      "prompt": "What does original[0][\"status\"] print after the shallow-copy example?",
+      "answer": "passed",
+      "explanation": "The copied list references the same inner dictionary. Use a deep copy or construct new records when isolation is needed.",
+      "hints": [
+        "Start with the invariant: choose the right collection for a test result.",
+        "Consider this constraint: A shallow list copy still shares nested dictionaries.",
+        "Work through a tiny example before generalizing. Model the data contract before transforming the data.",
+        "The copied list references the same inner dictionary. Use a deep copy or construct new records when isolation is needed."
+      ],
+      "options": [
+        "failed",
+        "passed",
+        "None",
+        "Raises TypeError"
+      ]
+    },
+    "quiz": {
+      "question": "Which collection deduplicates test IDs?",
+      "options": [
+        "List",
+        "Set",
+        "Tuple"
+      ],
+      "answer": 1,
+      "explanation": "A set stores each unique hashable value once."
+    },
+    "checkpoint": {
+      "question": "A required status field is missing. What is the best boundary behavior?",
+      "options": [
+        "Assume passed",
+        "Reject or explicitly quarantine the record",
+        "Always default to failed"
+      ],
+      "answer": 1,
+      "explanation": "Missing required data is a contract violation, not an implicit outcome."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "p00-checkpoint"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "q-1",
+      "bridge-python-004",
+      "bridge-python-005",
+      "q-2",
+      "q-16",
+      "bridge-phase-01-5",
+      "bridge-phase-01-6",
+      "bridge-phase-01-7"
+    ]
+  },
+  {
+    "id": "python-control",
+    "phase": 1,
+    "module": "Python fundamentals",
+    "title": "Filter, transform, and summarize test runs",
+    "minutes": 26,
+    "objectives": [
+      "Use loops and comprehensions for explicit transformations",
+      "Implement a pure function with clear return values",
+      "Handle empty inputs deliberately"
+    ],
+    "relevance": "A small pure analyzer is easier to unit test than a script that reads files, mutates globals, and prints everything.",
+    "sections": [
+      {
+        "title": "From API response to useful evidence",
+        "paragraphs": [
+          "An if statement branches by a condition. A for loop iterates over objects directly. A comprehension expresses a simple filter and transformation together; keep complex business decisions in a named function.",
+          "A function should have an explicit contract: inputs, output shape, and exceptional cases. Parameters are local names. return sends a value to the caller; print only writes a display message."
+        ],
+        "code": "runs = [{\"name\": \"login\", \"status\": \"failed\"},\n        {\"name\": \"search\", \"status\": \"passed\"}]\nfailed = [r[\"name\"] for r in runs if r[\"status\"] == \"failed\"]\nprint(failed)"
+      },
+      {
+        "title": "Empty input and scope",
+        "paragraphs": [
+          "A pass rate for no test executions is undefined; return None or raise a domain error rather than claiming 100%. Use type hints to communicate that possibility.",
+          "Avoid hidden globals and mutable default arguments. A default list is created once when the function is defined, so repeated calls can unintentionally share state. Use None and create a new list inside the function."
+        ],
+        "code": "def pass_rate(runs):\n    if not runs:\n        return None\n    return sum(r[\"status\"] == \"passed\" for r in runs) / len(runs)"
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "A comprehension is a transformation, not a substitute for readable error handling. Collect failed records with a clear predicate, then compute summaries separately. If a status is missing, decide explicitly whether to reject the record or label it unknown; silently treating it as passed changes the denominator.",
+          "Short-circuit operators return operands, which can be useful but surprising: value or default replaces valid falsy values such as zero. A zero duration is different from a missing duration. Use is None when absence is the intended condition. Test an empty run list, all passes, all failures, missing fields and zero durations. These cases establish the analyzer's contract independently of the large synthetic dataset."
+        ]
+      }
+    ],
+    "mistake": "A function that prints a result but never returns it gives the caller None.",
+    "takeaway": "Pure transformations let you test the contract independently of files and APIs.",
+    "exercise": {
+      "id": "python-control-exercise",
+      "kind": "python",
+      "prompt": "Implement failed_names(runs). Return failed test names in input order; do not mutate the input.",
+      "answer": "",
+      "explanation": "The filter must compare status to \"failed\", map to name, and return a new list.",
+      "hints": [
+        "Start with the invariant: use loops and comprehensions for explicit transformations.",
+        "Consider this constraint: A function that prints a result but never returns it gives the caller None.",
+        "Work through a tiny example before generalizing. Pure transformations let you test the contract independently of files and APIs.",
+        "The filter must compare status to \"failed\", map to name, and return a new list."
+      ],
+      "starter": "def failed_names(runs):\n    # Return a list of failed test names\n    return []\n\nprint(failed_names([{\"name\": \"login\", \"status\": \"failed\"}]))",
+      "tests": "from copy import deepcopy\na = [{\"name\":\"login\",\"status\":\"failed\"},{\"name\":\"search\",\"status\":\"passed\"},{\"name\":\"pay\",\"status\":\"failed\"}]\nb = deepcopy(a)\nassert failed_names(a) == [\"login\", \"pay\"], \"Preserve order and filter failures\"\nassert failed_names([]) == [], \"Empty input should produce an empty list\"\nassert a == b, \"Do not mutate input\"",
+      "solution": "def failed_names(runs):\n    return [r[\"name\"] for r in runs if r[\"status\"] == \"failed\"]"
+    },
+    "quiz": {
+      "question": "What value does a function return without a return statement?",
+      "options": [
+        "0",
+        "None",
+        "Its last expression"
+      ],
+      "answer": 1,
+      "explanation": "Python implicitly returns None."
+    },
+    "checkpoint": {
+      "question": "Why avoid a list as a default argument?",
+      "options": [
+        "Lists cannot be arguments",
+        "It is shared across calls",
+        "It always copies input"
+      ],
+      "answer": 1,
+      "explanation": "Default values are evaluated once when the function is defined."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "python-values"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "q-1",
+      "bridge-python-004",
+      "bridge-python-005",
+      "q-2",
+      "q-16",
+      "bridge-phase-01-5",
+      "bridge-phase-01-6",
+      "bridge-phase-01-7"
+    ]
+  },
+  {
+    "id": "python-functions",
+    "phase": 1,
+    "module": "Python fundamentals",
+    "title": "Functions, arguments, and maintainable modules",
+    "minutes": 26,
+    "objectives": [
+      "Use keyword-only arguments for important options",
+      "Understand module import behavior and scope",
+      "Separate I/O from transformation logic"
+    ],
+    "relevance": "Reusable test utilities need stable public interfaces and predictable imports.",
+    "sections": [
+      {
+        "title": "Design an explicit interface",
+        "paragraphs": [
+          "Positional arguments fit obvious small inputs. Keyword-only arguments make policy visible at the call site: summarize(runs, slow_threshold=3.0). The * marker in a function signature makes following parameters keyword-only.",
+          "Local scope belongs to each function call. Read-only access to a global configuration can look convenient, but passing configuration makes tests independent and deterministic."
+        ],
+        "code": "def slow_tests(runs, *, threshold=3.0):\n    return [r[\"name\"] for r in runs if r[\"duration\"] > threshold]\n\nprint(slow_tests([{ \"name\": \"checkout\", \"duration\": 4.2}], threshold=4.0))"
+      },
+      {
+        "title": "Modules should be safe to import",
+        "paragraphs": [
+          "A module executes its top-level statements when imported. Guard CLI entry points with if __name__ == \"__main__\" so imports do not read files or start network requests. Packages group related modules; keep core logic separate from transport and presentation.",
+          "Decorators wrap functions, so preserve metadata with functools.wraps. Generators yield values lazily and avoid holding every record in memory, but they are consumed once. Materialize a list if downstream operations need multiple passes."
+        ],
+        "code": "def failures(records):\n    for record in records:\n        if record[\"status\"] == \"failed\":\n            yield record\n\nif __name__ == \"__main__\":\n    print(list(failures([])))"
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "Function contracts should name accepted input, returned shape and failure behavior. A pure summarize function receives records and returns metrics without opening files or reading environment variables. A thin command-line wrapper owns file loading and report writing. This separation makes malformed-file tests different from aggregation tests.",
+          "Avoid global mutable counters and hidden configuration, because tests then depend on execution order. Use keyword-only arguments for optional policies such as unknown_status='reject', and document when an exception is raised. A decorator can add timing while preserving the wrapped function's metadata with functools.wraps, but it must return the result and propagate errors. Verify both success and failure paths after wrapping; observability should not change the domain contract."
+        ]
+      }
+    ],
+    "mistake": "Iterating over an exhausted generator again produces no values.",
+    "takeaway": "Use explicit arguments and import-safe modules to keep test utilities reusable.",
+    "exercise": {
+      "id": "python-functions-exercise",
+      "kind": "choice",
+      "prompt": "A generator yielded three failures. You iterate over it again. What happens?",
+      "answer": "It yields no records",
+      "explanation": "Generators retain iteration state and are exhausted after consumption.",
+      "hints": [
+        "Start with the invariant: use keyword-only arguments for important options.",
+        "Consider this constraint: Iterating over an exhausted generator again produces no values.",
+        "Work through a tiny example before generalizing. Use explicit arguments and import-safe modules to keep test utilities reusable.",
+        "Generators retain iteration state and are exhausted after consumption."
+      ],
+      "options": [
+        "It yields the same three failures",
+        "It yields no records",
+        "It raises ImportError"
+      ]
+    },
+    "quiz": {
+      "question": "What does the * in def f(runs, *, threshold=3) do?",
+      "options": [
+        "Makes runs optional",
+        "Makes threshold keyword-only",
+        "Multiplies the arguments"
+      ],
+      "answer": 1,
+      "explanation": "Parameters after * must be named at the call site."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "python-control"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "q-1",
+      "bridge-python-004",
+      "bridge-python-005",
+      "q-2",
+      "q-16",
+      "bridge-phase-01-5",
+      "bridge-phase-01-6",
+      "bridge-phase-01-7"
+    ]
+  },
+  {
+    "id": "python-production",
+    "phase": 1,
+    "module": "Production Python",
+    "title": "Types, validation, and error boundaries",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish type hints from runtime validation",
+      "Represent domain records with dataclasses",
+      "Catch errors at the layer that can handle them"
+    ],
+    "relevance": "Invalid API data should fail at the boundary instead of creating misleading CI analytics.",
+    "sections": [
+      {
+        "title": "Type hints describe, validation enforces",
+        "paragraphs": [
+          "A type hint helps tooling find incompatible calls; Python does not automatically reject a wrong runtime value. A dataclass reduces boilerplate for domain objects but also does not validate fields automatically.",
+          "Validate external JSON with explicit checks or a schema library such as Pydantic in local labs. Separate transport errors, parsing errors, and domain validation errors so a retry policy can distinguish temporary failures from bad requests."
+        ],
+        "code": "from dataclasses import dataclass\n\n@dataclass(frozen=True)\nclass TestResult:\n    name: str\n    status: str\n    duration: float\n\ndef validate(result):\n    if result.status not in {\"passed\", \"failed\", \"skipped\"}:\n        raise ValueError(\"unknown status\")\n    if result.duration < 0:\n        raise ValueError(\"negative duration\")\n    return result"
+      },
+      {
+        "title": "Reliable I/O and concurrency",
+        "paragraphs": [
+          "Use pathlib for portable paths and context managers to guarantee file cleanup. Log event metadata without credentials or private payloads. JSON parsing is not schema validation.",
+          "async/await helps overlap I/O, not accelerate CPU work. Use bounded concurrency to avoid flooding a service. Propagate cancellation and set timeouts; broad except Exception plus an empty return makes service failures look like successful zero-result runs."
+        ],
+        "code": "import json\nfrom pathlib import Path\n\nwith Path(\"test-results.json\").open(encoding=\"utf-8\") as stream:\n    records = json.load(stream)"
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "Runtime validation must distinguish coercion from a strict contract. A duration supplied as the string '2.4' may be intentionally accepted by an ingestion adapter, but a tool's write approval should never interpret arbitrary nonempty strings as true. Validate boundaries according to the domain and preserve rejected records with safe error categories.",
+          "Use pathlib for explicit fixture roots and context managers for file handles. Validate parsed JSON structure after parsing: syntactically valid JSON can still be an array where a dictionary is required. Write reports to a temporary file and replace the target after the complete artifact is ready, preventing readers from observing partial output. Test missing files, invalid encoding, malformed JSON and valid-but-wrong types separately."
+        ]
+      }
+    ],
+    "mistake": "Catching every exception and returning [] hides outages as valid empty datasets.",
+    "takeaway": "Validate at boundaries and preserve error meaning.",
+    "exercise": {
+      "id": "python-production-exercise",
+      "kind": "python",
+      "prompt": "Implement validate_duration(value): accept non-negative int/float values, reject booleans, negatives, and other types with ValueError.",
+      "answer": "",
+      "explanation": "bool is a subclass of int. Reject bool before checking numeric types; then enforce non-negativity.",
+      "hints": [
+        "Start with the invariant: distinguish type hints from runtime validation.",
+        "Consider this constraint: Catching every exception and returning [] hides outages as valid empty datasets.",
+        "Work through a tiny example before generalizing. Validate at boundaries and preserve error meaning.",
+        "bool is a subclass of int. Reject bool before checking numeric types; then enforce non-negativity."
+      ],
+      "starter": "def validate_duration(value):\n    return value\n\nprint(validate_duration(4.5))",
+      "tests": "assert validate_duration(0) == 0\nassert validate_duration(4.5) == 4.5\nfor v in [-1, True, \"4.5\", None]:\n    try:\n        validate_duration(v)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(f\"Expected ValueError for {v!r}\")",
+      "solution": "def validate_duration(value):\n    if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:\n        raise ValueError(\"Expected a non-negative numeric duration\")\n    return value"
+    },
+    "quiz": {
+      "question": "Do Python type hints enforce JSON types at runtime?",
+      "options": [
+        "Always",
+        "No, validation must be explicit",
+        "Only for dictionaries"
+      ],
+      "answer": 1,
+      "explanation": "Type annotations are not an automatic runtime validator."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "python-functions"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "q-1",
+      "bridge-python-004",
+      "bridge-python-005",
+      "q-2",
+      "q-16",
+      "bridge-phase-01-5",
+      "bridge-phase-01-6",
+      "bridge-phase-01-7"
+    ]
+  },
+  {
+    "id": "python-tests",
+    "phase": 1,
+    "module": "Python testing",
+    "title": "Test the analyzer, including what can break",
+    "minutes": 26,
+    "objectives": [
+      "Design boundary tests with pytest",
+      "Use parametrization and fixtures deliberately",
+      "Mock external dependencies at their boundary"
+    ],
+    "relevance": "Your existing SDET skills apply directly: test small functions deterministically and integration points separately.",
+    "sections": [
+      {
+        "title": "Useful tests specify behavior",
+        "paragraphs": [
+          "pytest discovers test_ functions and reports assertion differences. Parametrization describes a set of cases without duplicated code. A fixture owns setup and cleanup; avoid session-scoped mutable objects that leak state between tests.",
+          "Test empty input, one record, mixed outcomes, duplicate test names, invalid duration, and ties in slowest tests. A passing line-coverage target does not prove these behaviors."
+        ],
+        "code": "import pytest\n\n@pytest.mark.parametrize(\"runs, expected\", [\n    ([], []),\n    ([{\"name\": \"login\", \"status\": \"failed\"}], [\"login\"]),\n    ([{\"name\": \"search\", \"status\": \"passed\"}], []),\n])\ndef test_failed_names(runs, expected):\n    assert failed_names(runs) == expected"
+      },
+      {
+        "title": "Mocks and properties",
+        "paragraphs": [
+          "Mock the HTTP client, not the internal implementation you want to test. monkeypatch can replace environment values or functions for one test. Test real schema validation against malformed synthetic API responses.",
+          "A property is an invariant over many inputs: the failure count is between zero and total count; reordering results should not change a rate. Property-based tests generate cases to challenge those invariants, complementing carefully chosen examples."
+        ]
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "A useful test must fail when the behavior it protects is broken. For the analyzer, independently compute a tiny expected result rather than calling the same helper used by production code to create the expectation. Change failed to passed in one input and confirm only the intended count changes.",
+          "Parametrize boundary cases and use fixtures to provide fresh records. Monkeypatch environment variables and mock network adapters at the application's dependency boundary, not inside the function under test. Property-based testing can generate many inputs for invariants such as 0 <= pass_rate <= 1 and failure_count <= total_count, but those invariants do not prove the exact formula. Combine broad properties with hand-computed examples and targeted counterexamples."
+        ]
+      }
+    ],
+    "mistake": "A mock that returns the same answer the implementation expects can pass while the real integration is broken.",
+    "takeaway": "Test behavior at boundaries and use properties to explore more inputs.",
+    "exercise": {
+      "id": "python-tests-exercise",
+      "kind": "choice",
+      "prompt": "Which test catches hidden state between calls?",
+      "answer": "Call the analyzer twice with different inputs and assert independent results",
+      "explanation": "Repeated calls reveal shared mutable defaults and global accumulators.",
+      "hints": [
+        "Start with the invariant: design boundary tests with pytest.",
+        "Consider this constraint: A mock that returns the same answer the implementation expects can pass while the real integration is broken.",
+        "Work through a tiny example before generalizing. Test behavior at boundaries and use properties to explore more inputs.",
+        "Repeated calls reveal shared mutable defaults and global accumulators."
+      ],
+      "options": [
+        "Assert only that no exception occurs",
+        "Call the analyzer twice with different inputs and assert independent results",
+        "Mock the analyzer itself"
+      ]
+    },
+    "quiz": {
+      "question": "What should you mock when testing a result analyzer with an API source?",
+      "options": [
+        "The transformation function",
+        "The external API boundary",
+        "All assertions"
+      ],
+      "answer": 1,
+      "explanation": "Keep the behavior under test real and isolate external I/O."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "python-production"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "q-1",
+      "bridge-python-004",
+      "bridge-python-005",
+      "q-2",
+      "q-16",
+      "bridge-phase-01-5",
+      "bridge-phase-01-6",
+      "bridge-phase-01-7"
+    ]
+  },
+  {
+    "id": "p01-async",
+    "phase": 1,
+    "module": "Python For AI And Test Automation Engineers",
+    "title": "Bounded async, cancellation, and retry",
+    "minutes": 35,
+    "objectives": [
+      "Bounded async, cancellation, and retry",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects bounded async, cancellation, and retry with test contracts, failure triage, and evidence for release. Exercise a bounded fetcher with slow, successful, transient, and permanent responses.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Async functions suspend at await so other tasks can progress during I/O. They do not turn CPU-heavy parsing into parallel computation. Blocking a model SDK or file transform inside an async route can still stall every concurrent request.",
+          "Concurrency should be a budget: use a semaphore to bound outstanding API calls and define a deadline for the whole operation. A generator yields records lazily; an async generator can stream observations without retaining an entire report."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use async with for locks and resource lifetimes. asyncio.wait_for bounds a coroutine and cancels it on timeout; propagate cancellation rather than catching it as an ordinary successful result. Retry only classified transient errors within the original deadline.",
+          "Decorators can add timing while functools.wraps preserves names and metadata. Keep retry/timing wrappers separate from business transformation. Test both the returned values and whether cancellation closes the underlying resource."
+        ],
+        "code": "import asyncio\nasync def collect(items, fetch, limit=2):\n    sem = asyncio.Semaphore(limit)\n    async def one(item):\n        async with sem:\n            return await asyncio.wait_for(fetch(item), 2)\n    return await asyncio.gather(*(one(x) for x in items))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Unbounded gather over thousands of CI logs can exhaust sockets and trigger rate limits. A synchronous sleep in an async retry blocks the event loop; use asyncio.sleep. Repeated retries with a fresh timeout can exceed the user\u2019s overall request budget.",
+          "Inject a fake clock or zero delay and a fake transport for tests. Count attempts, assert a permanent error is not retried, and check cancellation leaves no background write. Do not retry a non-idempotent action without an idempotency contract."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Exercise a bounded fetcher with slow, successful, transient, and permanent responses. Measure maximum simultaneous calls, total deadline, and abandoned work. Testing concurrency is about observable contracts rather than an exact scheduler order.",
+          "This applies to Playwright API checks, batched log analysis, provider requests, and future agent tools. A good interview explanation names the independent I/O work and the enforced concurrency budget."
+        ]
+      }
+    ],
+    "mistake": "Unbounded gather over thousands of CI logs can exhaust sockets and trigger rate limits. A synchronous sleep in an async retry blocks the event loop; use asyncio.sleep. Repeated retries with a fresh timeout can exceed the user\u2019s overall request budget.",
+    "takeaway": "Exercise a bounded fetcher with slow, successful, transient, and permanent responses.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement retryable(status): retry only 429 and 500\u2013599. A 400 validation failure must not retry.",
+      "answer": "",
+      "solution": "def retryable(status):\n    return status == 429 or 500 <= status <= 599",
+      "starter": "def retryable(status):\n    return False",
+      "tests": "assert retryable(429) and retryable(503)\nassert not retryable(400) and not retryable(200)",
+      "id": "p01-async-exercise",
+      "hints": [
+        "Async functions suspend at await so other tasks can progress during I/O.",
+        "Unbounded gather over thousands of CI logs can exhaust sockets and trigger rate limits.",
+        "Use async with for locks and resource lifetimes.",
+        "Exercise a bounded fetcher with slow, successful, transient, and permanent responses."
+      ],
+      "explanation": "def retryable(status):\n    return status == 429 or 500 <= status <= 599"
+    },
+    "quiz": {
+      "question": "Which operation blocks an async event loop?",
+      "options": [
+        "await asyncio.sleep(1)",
+        "time.sleep(1)",
+        "Awaiting a socket read"
+      ],
+      "answer": 1,
+      "explanation": "Synchronous sleep prevents other tasks on the loop from progressing."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which operation blocks an async event loop?",
+      "options": [
+        "await asyncio.sleep(1)",
+        "time.sleep(1)",
+        "Awaiting a socket read"
+      ],
+      "answer": 1,
+      "explanation": "Synchronous sleep prevents other tasks on the loop from progressing."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/",
+      "https://docs.pytest.org/en/stable/",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "python-tests"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "q-1",
+      "bridge-python-004",
+      "bridge-python-005",
+      "q-2",
+      "q-16",
+      "bridge-phase-01-5",
+      "bridge-phase-01-6",
+      "bridge-phase-01-7"
+    ]
+  },
+  {
+    "id": "p01-models",
+    "phase": 1,
+    "module": "Python For AI And Test Automation Engineers",
+    "title": "Classes, enums, Pydantic, and contract testing",
+    "minutes": 35,
+    "objectives": [
+      "Classes, enums, Pydantic, and contract testing",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects classes, enums, pydantic, and contract testing with test contracts, failure triage, and evidence for release. Keep request, response, and internal state models distinct so a response cannot leak private transport fields.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Classes group state and behavior; a dataclass is convenient for an internal record, and an enum restricts named domain choices. Inheritance can model a stable substitutable interface, but composition is usually clearer for a transport, validator, and reporter.",
+          "Static types assist review and tools. External JSON still needs runtime validation. Pydantic models can enforce bounds and forbid extra fields; strict behavior must be selected deliberately because coercion can otherwise accept a string where a number was intended."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Create a request model with a bounded log, explicit category enum, and strict duration. Use model_validate at the API boundary and model_dump for serialization. Use field validators for rules that involve more than basic types.",
+          "In tests, parameterize valid and invalid requests. A fixture constructs a new service per test; monkeypatch replaces environment values without leaking them to the next test. Mock an adapter protocol so schema validation and business logic remain real."
+        ],
+        "code": "from enum import Enum\nfrom pydantic import BaseModel, ConfigDict, Field\nclass Status(str, Enum):\n    passed=\"passed\"\n    failed=\"failed\"\nclass Result(BaseModel):\n    model_config = ConfigDict(extra=\"forbid\")\n    name: str = Field(min_length=1)\n    status: Status\n    duration: float = Field(ge=0, strict=True)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A unit mock that returns prevalidated domain objects bypasses the dangerous parsing boundary. Include integration cases with missing keys, extra keys, negative values, booleans in numeric fields, and invalid enums. Property tests verify invariants over generated records.",
+          "A marker can separate network integration tests, but excluding all of them forever is not a quality strategy. Know which tests ran, and retain one meaningful adapter contract check with synthetic payloads."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Keep request, response, and internal state models distinct so a response cannot leak private transport fields. Test serialization and exception mapping as part of the public API contract. Demonstrate a fixture\u2019s cleanup with a failing test.",
+          "This pattern transfers directly to REST/GraphQL contract testing and structured AI output. A valid schema is necessary, but it cannot establish that a predicted defect category is factually correct."
+        ]
+      }
+    ],
+    "mistake": "A unit mock that returns prevalidated domain objects bypasses the dangerous parsing boundary. Include integration cases with missing keys, extra keys, negative values, booleans in numeric fields, and invalid enums. Property tests verify invariants over generated records.",
+    "takeaway": "Keep request, response, and internal state models distinct so a response cannot leak private transport fields.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Propose tests for a Pydantic result API that currently accepts unknown status strings and leaked internal fields.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Boundary inputs",
+          "terms": [
+            "enum",
+            "extra"
+          ]
+        },
+        {
+          "label": "Runtime enforcement",
+          "terms": [
+            "validation",
+            "strict"
+          ]
+        },
+        {
+          "label": "Behavior isolation",
+          "terms": [
+            "fixture",
+            "mock"
+          ]
+        }
+      ],
+      "solution": "Use enum categories, strict bounded duration validation, and extra=forbid. Parameterize malformed JSON and missing/extra fields. Use fresh fixtures and mock only the external transport; test real validation and response serialization.",
+      "id": "p01-models-exercise",
+      "hints": [
+        "Classes group state and behavior; a dataclass is convenient for an internal record, and an enum restricts named domain choices.",
+        "A unit mock that returns prevalidated domain objects bypasses the dangerous parsing boundary.",
+        "Create a request model with a bounded log, explicit category enum, and strict duration.",
+        "Keep request, response, and internal state models distinct so a response cannot leak private transport fields."
+      ],
+      "explanation": "Use enum categories, strict bounded duration validation, and extra=forbid. Parameterize malformed JSON and missing/extra fields. Use fresh fixtures and mock only the external transport; test real validation and response serialization."
+    },
+    "quiz": {
+      "question": "Does a schema-valid prediction prove a correct classification?",
+      "options": [
+        "Yes",
+        "No; compare with labeled evidence",
+        "Only with strict validation"
+      ],
+      "answer": 1,
+      "explanation": "Validation establishes structure, while correctness requires domain evidence."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Does a schema-valid prediction prove a correct classification?",
+      "options": [
+        "Yes",
+        "No; compare with labeled evidence",
+        "Only with strict validation"
+      ],
+      "answer": 1,
+      "explanation": "Validation establishes structure, while correctness requires domain evidence."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/",
+      "https://docs.pytest.org/en/stable/",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p01-async"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "q-1",
+      "bridge-python-004",
+      "bridge-python-005",
+      "q-2",
+      "q-16",
+      "bridge-phase-01-5",
+      "bridge-phase-01-6",
+      "bridge-phase-01-7"
+    ]
+  },
+  {
+    "id": "p01-files",
+    "phase": 1,
+    "module": "Python For AI And Test Automation Engineers",
+    "title": "Files, structured logs, and streaming reports",
+    "minutes": 35,
+    "objectives": [
+      "Files, structured logs, and streaming reports",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects files, structured logs, and streaming reports with test contracts, failure triage, and evidence for release. Build a CLI report containing accepted rows, rejected rows, failure frequency, and duration summaries.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "pathlib makes path composition explicit across operating systems. JSON preserves nested records; CSV represents rows and needs a defined dialect, schema, and encoding. Environment variables configure processes without committing secrets.",
+          "A context manager owns cleanup even when parsing fails. Iterators and generators let a result analyzer process large histories incrementally, but consumers must understand that a stream is exhausted after iteration."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Separate reading from transformation and writing. Open files with encoding=utf-8 and newline=\"\" for CSV. Validate rows as they are read and retain rejected-row counts. Emit JSON logs containing event, run_id, stage, and outcome; redact log bodies and credentials.",
+          "Write reports atomically: create a temporary sibling file, flush it, then replace the final path. A crash should leave either the previous complete report or the new one, rather than a partially written artifact."
+        ],
+        "code": "import csv\nfrom pathlib import Path\ndef rows(path):\n    with Path(path).open(encoding=\"utf-8\", newline=\"\") as stream:\n        yield from csv.DictReader(stream)\n# list(rows(\"datasets/test-runs.csv\"))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A relative path can refer to a different directory in CI than in VS Code. Anchor fixture paths to the repository or require an explicit CLI argument. Logging the entire environment can expose provider credentials.",
+          "A reused generator can produce an empty second metric pass. Aggregate in one pass or deliberately materialize bounded input. Test a corrupt row halfway through a stream and verify cleanup and error reporting."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Build a CLI report containing accepted rows, rejected rows, failure frequency, and duration summaries. Make exit status nonzero for violated ingestion policy so GitHub Actions can block the pipeline. Keep ordinary empty input distinguishable from a failed read.",
+          "The same boundaries support dataset ingestion, evaluation artifacts, and incident reports. An SDET should be able to reproduce an artifact from a clean checkout and explain every excluded record."
+        ]
+      }
+    ],
+    "mistake": "A relative path can refer to a different directory in CI than in VS Code. Anchor fixture paths to the repository or require an explicit CLI argument. Logging the entire environment can expose provider credentials.",
+    "takeaway": "Build a CLI report containing accepted rows, rejected rows, failure frequency, and duration summaries.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement count_status(rows): return status counts in a single pass over any iterable. Do not iterate twice.",
+      "answer": "",
+      "solution": "def count_status(rows):\n    counts = {}\n    for row in rows:\n        key = row[\"status\"]\n        counts[key] = counts.get(key, 0) + 1\n    return counts",
+      "starter": "def count_status(rows):\n    return {}",
+      "tests": "assert count_status(iter([{\"status\":\"failed\"},{\"status\":\"passed\"},{\"status\":\"failed\"}])) == {\"failed\":2,\"passed\":1}\nassert count_status(iter([])) == {}",
+      "id": "p01-files-exercise",
+      "hints": [
+        "pathlib makes path composition explicit across operating systems.",
+        "A relative path can refer to a different directory in CI than in VS Code.",
+        "Separate reading from transformation and writing.",
+        "Build a CLI report containing accepted rows, rejected rows, failure frequency, and duration summaries."
+      ],
+      "explanation": "def count_status(rows):\n    counts = {}\n    for row in rows:\n        key = row[\"status\"]\n        counts[key] = counts.get(key, 0) + 1\n    return counts"
+    },
+    "quiz": {
+      "question": "What does an exhausted generator produce on the next pass?",
+      "options": [
+        "Its original rows",
+        "No rows",
+        "A fresh file read"
+      ],
+      "answer": 1,
+      "explanation": "A generator tracks iteration state and cannot automatically restart."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What does an exhausted generator produce on the next pass?",
+      "options": [
+        "Its original rows",
+        "No rows",
+        "A fresh file read"
+      ],
+      "answer": 1,
+      "explanation": "A generator tracks iteration state and cannot automatically restart."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/",
+      "https://docs.pytest.org/en/stable/",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p01-models"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "q-1",
+      "bridge-python-004",
+      "bridge-python-005",
+      "q-2",
+      "q-16",
+      "bridge-phase-01-5",
+      "bridge-phase-01-6",
+      "bridge-phase-01-7"
+    ]
+  },
+  {
+    "id": "p01-checkpoint",
+    "phase": 1,
+    "module": "Python For AI And Test Automation Engineers",
+    "title": "Phase 01 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 01 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 01 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Build a CLI report containing accepted rows, rejected rows, failure frequency, and duration summaries.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects files, structured logs, and streaming reports to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Separate reading from transformation and writing. Open files with encoding=utf-8 and newline=\"\" for CSV. Validate rows as they are read and retain rejected-row counts. Emit JSON logs containing event, run_id, stage, and outcome; redact log bodies and credentials.",
+          "Write reports atomically: create a temporary sibling file, flush it, then replace the final path. A crash should leave either the previous complete report or the new one, rather than a partially written artifact.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "import csv\nfrom pathlib import Path\ndef rows(path):\n    with Path(path).open(encoding=\"utf-8\", newline=\"\") as stream:\n        yield from csv.DictReader(stream)\n# list(rows(\"datasets/test-runs.csv\"))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A relative path can refer to a different directory in CI than in VS Code. Anchor fixture paths to the repository or require an explicit CLI argument. Logging the entire environment can expose provider credentials.",
+          "A reused generator can produce an empty second metric pass. Aggregate in one pass or deliberately materialize bounded input. Test a corrupt row halfway through a stream and verify cleanup and error reporting.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Build a CLI report containing accepted rows, rejected rows, failure frequency, and duration summaries. Make exit status nonzero for violated ingestion policy so GitHub Actions can block the pipeline. Keep ordinary empty input distinguishable from a failed read.",
+          "The same boundaries support dataset ingestion, evaluation artifacts, and incident reports. An SDET should be able to reproduce an artifact from a clean checkout and explain every excluded record.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A relative path can refer to a different directory in CI than in VS Code. Anchor fixture paths to the repository or require an explicit CLI argument. Logging the entire environment can expose provider credentials.",
+    "takeaway": "Build a CLI report containing accepted rows, rejected rows, failure frequency, and duration summaries.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Files, structured logs, and streaming reports to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nBuild a CLI report containing accepted rows, rejected rows, failure frequency, and duration summaries.",
+      "id": "p01-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects files, structured logs, and streaming reports to the shared CI quality platform.",
+        "A relative path can refer to a different directory in CI than in VS Code.",
+        "Separate reading from transformation and writing.",
+        "Build a CLI report containing accepted rows, rejected rows, failure frequency, and duration summaries."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nBuild a CLI report containing accepted rows, rejected rows, failure frequency, and duration summaries."
+    },
+    "quiz": {
+      "question": "A candidate for files, structured logs, and streaming reports meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for files, structured logs, and streaming reports meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://docs.python.org/3/tutorial/",
+      "https://docs.pytest.org/en/stable/",
+      "https://docs.pydantic.dev/latest/"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p01-files"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "q-1",
+      "bridge-python-004",
+      "bridge-python-005",
+      "q-2",
+      "q-16",
+      "bridge-phase-01-5",
+      "bridge-phase-01-6",
+      "bridge-phase-01-7"
+    ]
+  }
+]

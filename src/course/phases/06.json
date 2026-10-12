@@ -1,0 +1,673 @@
+[
+  {
+    "id": "p06-formulation",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Formulate a failure-classification problem",
+    "minutes": 35,
+    "objectives": [
+      "Formulate a failure-classification problem",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects formulate a failure-classification problem with test contracts, failure triage, and evidence for release. Report per-class precision, recall, support, and a confusion matrix; distinguish product-defect misses from harmless route mistakes.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Machine learning estimates a mapping from observed features to a target using examples. Supervised learning has labels; unsupervised learning discovers structure without a predefined target. A classifier chooses a category, a regressor predicts a numeric value, and anomaly detection flags unusual observations without proving a defect.",
+          "For CI failures, define PRODUCT_DEFECT, AUTOMATION_DEFECT, ENVIRONMENT, TEST_DATA, and UNKNOWN. Label by evidence available to expert triage, record disagreements, and retain UNKNOWN instead of forcing false certainty. Define the prediction moment before choosing features."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Build one record per independent incident with log text, runtime context, label, timestamp, and group ID. Separate same-incident retries into the same split. Establish a majority-class or deterministic keyword baseline before a learned model.",
+          "Feature extraction turns text and metadata into numbers: TF-IDF for log tokens, numeric duration, and one-hot environment categories. Fit preprocessing only on training examples in a Pipeline. Validate on later incidents or held-out groups to approximate real deployment."
+        ],
+        "code": "from sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nmodel=Pipeline([(\"tfidf\",TfidfVectorizer()),(\"classifier\",LogisticRegression(class_weight=\"balanced\",max_iter=1000))])\n# model.fit(train_logs, train_labels); evaluate only on held-out incidents",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A resolved defect ID or eventual owner is not available at failure time and leaks the answer. Randomly splitting identical stack traces gives near-duplicates to both train and test, making the benchmark unrealistically easy.",
+          "Inspect high-confidence errors and compare feature availability to the prediction timestamp. Find duplicate groups across splits. A useful classifier needs a review path for uncertain cases and a failure taxonomy that reflects meaningful routing decisions."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Report per-class precision, recall, support, and a confusion matrix; distinguish product-defect misses from harmless route mistakes. Compare with the baseline on the same held-out incidents and record latency and review burden.",
+          "The SDET owns dataset and labeling quality as much as model training. A report that says only model.fit succeeded does not answer whether the system can improve triage safely."
+        ]
+      }
+    ],
+    "mistake": "A resolved defect ID or eventual owner is not available at failure time and leaks the answer. Randomly splitting identical stack traces gives near-duplicates to both train and test, making the benchmark unrealistically easy.",
+    "takeaway": "Report per-class precision, recall, support, and a confusion matrix; distinguish product-defect misses from harmless route mistakes.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement disjoint_groups(train, test): return True only if incident-group identifiers do not overlap.",
+      "answer": "",
+      "solution": "def disjoint_groups(train,test):\n    return set(train).isdisjoint(test)",
+      "starter": "def disjoint_groups(train,test):\n    return True",
+      "tests": "assert disjoint_groups([\"i1\",\"i2\"],[\"i3\"])\nassert not disjoint_groups([\"i1\"],[\"i1\",\"i2\"])",
+      "id": "p06-formulation-exercise",
+      "hints": [
+        "Machine learning estimates a mapping from observed features to a target using examples.",
+        "A resolved defect ID or eventual owner is not available at failure time and leaks the answer.",
+        "Build one record per independent incident with log text, runtime context, label, timestamp, and group ID.",
+        "Report per-class precision, recall, support, and a confusion matrix; distinguish product-defect misses from harmless route mistakes."
+      ],
+      "explanation": "def disjoint_groups(train,test):\n    return set(train).isdisjoint(test)"
+    },
+    "quiz": {
+      "question": "Which feature is leakage for prediction at failure time?",
+      "options": [
+        "Current log text",
+        "Resolved defect owner",
+        "Current environment"
+      ],
+      "answer": 1,
+      "explanation": "A resolution produced after triage is unavailable at prediction time."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which feature is leakage for prediction at failure time?",
+      "options": [
+        "Current log text",
+        "Resolved defect owner",
+        "Current environment"
+      ],
+      "answer": 1,
+      "explanation": "A resolution produced after triage is unavailable at prediction time."
+    },
+    "sources": [
+      "https://scikit-learn.org/stable/user_guide.html",
+      "https://scikit-learn.org/stable/common_pitfalls.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p05-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ml-fundamentals-001",
+      "bridge-ml-fundamentals-002",
+      "bridge-ml-fundamentals-003",
+      "bridge-ml-fundamentals-016",
+      "bridge-ml-fundamentals-017",
+      "bridge-ml-fundamentals-018",
+      "bridge-phase-06-6",
+      "bridge-phase-06-7"
+    ]
+  },
+  {
+    "id": "p06-splits",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Preprocessing, cross-validation, and generalization",
+    "minutes": 35,
+    "objectives": [
+      "Preprocessing, cross-validation, and generalization",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects preprocessing, cross-validation, and generalization with test contracts, failure triage, and evidence for release. Repeat model selection on reproducible folds and report mean and variation with the grouping strategy.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Training fits parameters, validation selects architecture and thresholds, and a final test set estimates the behavior of the selected system. Overfitting captures accidental training patterns; underfitting misses useful structure. Bias is systematic error from restrictions, while variance reflects sensitivity to the sample.",
+          "Cross-validation trains and validates repeatedly on different folds. It does not excuse leakage: time order, incident grouping, and transformation fitting still matter. A scaler or vocabulary fitted on all records exposes validation information."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Use GroupKFold for related incident records or a time-based split for changing releases. Put imputation, encoding, feature selection, and estimator in a Pipeline so each fold fits them only on its training partition.",
+          "Compare learning curves: a persistent poor fit on both train and validation suggests insufficient representation or excessive regularization; a strong train score and weak validation score suggests overfit, shift, or leakage. Keep the final test set untouched until model selection is complete."
+        ],
+        "code": "from sklearn.model_selection import GroupKFold\ncv=GroupKFold(n_splits=3)\n# for train_idx,val_idx in cv.split(X,y,groups=incident_ids):\n#     fold_model.fit(X[train_idx],y[train_idx])\n#     score=fold_model.score(X[val_idx],y[val_idx])",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Scaling before the split and selecting features using test labels both invalidate the result. A benchmark can also fail without leakage when a new service produces vocabulary absent from training.",
+          "Break performance down by time, module, and environment. Compare model confidence with actual correctness, inspect mislabeled samples, and measure an abstention policy rather than hiding unknown categories."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Repeat model selection on reproducible folds and report mean and variation with the grouping strategy. Serialize the entire transformation pipeline and its vocabulary, not only model coefficients.",
+          "This is the ML version of test-environment parity: the code used to transform production input must match the code that generated the reported evaluation result."
+        ]
+      }
+    ],
+    "mistake": "Scaling before the split and selecting features using test labels both invalidate the result. A benchmark can also fail without leakage when a new service produces vocabulary absent from training.",
+    "takeaway": "Repeat model selection on reproducible folds and report mean and variation with the grouping strategy.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "A classifier scores 99% after TF-IDF was fit on all data and retries were split randomly. Repair the evaluation plan.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Grouped splitting",
+          "terms": [
+            "incident",
+            "group"
+          ]
+        },
+        {
+          "label": "Preprocessing boundary",
+          "terms": [
+            "pipeline",
+            "training"
+          ]
+        },
+        {
+          "label": "Independent final evidence",
+          "terms": [
+            "held-out",
+            "baseline"
+          ]
+        }
+      ],
+      "solution": "Group retries by incident, reserve a held-out time window, and fit TF-IDF plus classifier in a Pipeline within each training fold. Compare a baseline on matched held-out cases; report class-level errors and confidence calibration.",
+      "id": "p06-splits-exercise",
+      "hints": [
+        "Training fits parameters, validation selects architecture and thresholds, and a final test set estimates the behavior of the selected system.",
+        "Scaling before the split and selecting features using test labels both invalidate the result.",
+        "Use GroupKFold for related incident records or a time-based split for changing releases.",
+        "Repeat model selection on reproducible folds and report mean and variation with the grouping strategy."
+      ],
+      "explanation": "Group retries by incident, reserve a held-out time window, and fit TF-IDF plus classifier in a Pipeline within each training fold. Compare a baseline on matched held-out cases; report class-level errors and confidence calibration."
+    },
+    "quiz": {
+      "question": "Which operation belongs inside the training fold?",
+      "options": [
+        "Vocabulary fitting",
+        "Final test-set reporting",
+        "Business approval"
+      ],
+      "answer": 0,
+      "explanation": "A vocabulary learned from validation data is a form of leakage."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which operation belongs inside the training fold?",
+      "options": [
+        "Vocabulary fitting",
+        "Final test-set reporting",
+        "Business approval"
+      ],
+      "answer": 0,
+      "explanation": "A vocabulary learned from validation data is a form of leakage."
+    },
+    "sources": [
+      "https://scikit-learn.org/stable/user_guide.html",
+      "https://scikit-learn.org/stable/common_pitfalls.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p06-formulation"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ml-fundamentals-001",
+      "bridge-ml-fundamentals-002",
+      "bridge-ml-fundamentals-003",
+      "bridge-ml-fundamentals-016",
+      "bridge-ml-fundamentals-017",
+      "bridge-ml-fundamentals-018",
+      "bridge-phase-06-6",
+      "bridge-phase-06-7"
+    ]
+  },
+  {
+    "id": "p06-algorithms",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Linear models, neighbors, trees, and ensembles",
+    "minutes": 35,
+    "objectives": [
+      "Linear models, neighbors, trees, and ensembles",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects linear models, neighbors, trees, and ensembles with test contracts, failure triage, and evidence for release. Use one preprocessing and evaluation protocol across candidate models.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Linear regression fits a numeric target by combining weighted features. Logistic regression applies a sigmoid or multiclass softmax to linear scores to model class probabilities; its name does not mean it predicts a continuous regression target. k-NN votes among nearby observations and depends strongly on representation and scaling.",
+          "A decision tree repeatedly partitions features into regions and can express interactions, but a deep tree overfits. Random forests average many randomized trees to reduce variance. Gradient boosting adds learners that correct remaining errors, often requiring careful regularization and validation."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Choose a model based on feature type, dataset size, interpretability, and operational budget. Start with a regularized linear text model; compare tree ensembles on meaningful numeric/categorical features. Use standardized distances for k-NN and evaluate memory and query time because it retains training examples.",
+          "Tune depth, regularization, and ensemble size using validation rather than the final test set. For regression report MAE in original units, RMSE to emphasize large mistakes, and R\u00b2 relative to a mean predictor; R\u00b2 can be negative."
+        ],
+        "code": "from sklearn.metrics import mean_absolute_error,mean_squared_error,r2_score\ny=[2.,4.,6.]\np=[2.,3.,7.]\nprint(mean_absolute_error(y,p))\nprint(mean_squared_error(y,p)**.5)\nprint(r2_score(y,p))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A tree can memorize a build ID that merely correlates with one incident. k-NN can call logs similar because of frequent boilerplate. An ensemble can improve average score while worsening the rare category engineers care about.",
+          "Inspect feature importance cautiously: importance does not establish causality, and correlated features divide or distort attribution. Run ablations and compare errors before choosing complexity."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Use one preprocessing and evaluation protocol across candidate models. Compare per-class tradeoffs, stability over releases, inference latency, artifact size, and analyst review time.",
+          "A simple, calibrated baseline with a reliable UNKNOWN path is often preferable to a more accurate opaque model that routes serious defects confidently to the wrong owner."
+        ]
+      }
+    ],
+    "mistake": "A tree can memorize a build ID that merely correlates with one incident. k-NN can call logs similar because of frequent boilerplate. An ensemble can improve average score while worsening the rare category engineers care about.",
+    "takeaway": "Use one preprocessing and evaluation protocol across candidate models.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement mae(actual,predicted): equal non-empty lengths are required. Return mean absolute error.",
+      "answer": "",
+      "solution": "def mae(actual,predicted):\n    if len(actual)!=len(predicted) or not actual: raise ValueError(\"invalid pair lengths\")\n    return sum(abs(a-b) for a,b in zip(actual,predicted))/len(actual)",
+      "starter": "def mae(actual,predicted):\n    return 0",
+      "tests": "assert abs(mae([2,4,6],[2,3,7])-2/3)<1e-9\ntry: mae([],[])\nexcept ValueError: pass\nelse: raise AssertionError(\"empty MAE is undefined\")",
+      "id": "p06-algorithms-exercise",
+      "hints": [
+        "Linear regression fits a numeric target by combining weighted features.",
+        "A tree can memorize a build ID that merely correlates with one incident.",
+        "Choose a model based on feature type, dataset size, interpretability, and operational budget.",
+        "Use one preprocessing and evaluation protocol across candidate models."
+      ],
+      "explanation": "def mae(actual,predicted):\n    if len(actual)!=len(predicted) or not actual: raise ValueError(\"invalid pair lengths\")\n    return sum(abs(a-b) for a,b in zip(actual,predicted))/len(actual)"
+    },
+    "quiz": {
+      "question": "Which algorithm typically retains training instances for inference?",
+      "options": [
+        "k-NN",
+        "Logistic regression",
+        "A fitted decision tree"
+      ],
+      "answer": 0,
+      "explanation": "Neighbor prediction depends on stored examples and distance comparisons."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which algorithm typically retains training instances for inference?",
+      "options": [
+        "k-NN",
+        "Logistic regression",
+        "A fitted decision tree"
+      ],
+      "answer": 0,
+      "explanation": "Neighbor prediction depends on stored examples and distance comparisons."
+    },
+    "sources": [
+      "https://scikit-learn.org/stable/user_guide.html",
+      "https://scikit-learn.org/stable/common_pitfalls.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p06-splits"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ml-fundamentals-001",
+      "bridge-ml-fundamentals-002",
+      "bridge-ml-fundamentals-003",
+      "bridge-ml-fundamentals-016",
+      "bridge-ml-fundamentals-017",
+      "bridge-ml-fundamentals-018",
+      "bridge-phase-06-6",
+      "bridge-phase-06-7"
+    ]
+  },
+  {
+    "id": "p06-metrics",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Confusion matrices, imbalance, and thresholds",
+    "minutes": 35,
+    "objectives": [
+      "Confusion matrices, imbalance, and thresholds",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects confusion matrices, imbalance, and thresholds with test contracts, failure triage, and evidence for release. Hand-calculate a small confusion matrix, then compare the calculation with sklearn.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Accuracy can be high when a rare class is always missed. A confusion matrix counts actual and predicted categories. For a positive class, precision is TP/(TP+FP), recall is TP/(TP+FN), specificity is TN/(TN+FP), and F1 is the harmonic mean of precision and recall.",
+          "ROC plots true-positive versus false-positive rates as the threshold varies. PR curves focus on precision/recall and can be more informative when positives are rare. AUC summarizes ranking over thresholds and does not choose your deployed operating point."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Select the threshold on validation data using the cost of misses, false alarms, and human review. Use class weights or sampling carefully and keep evaluation at the natural population prevalence. Calibrate probabilities if decisions require meaningful confidence.",
+          "For multiclass triage, compute each class\u2019s metrics and macro averages so frequent environment failures do not hide product-defect errors. A top probability below a validated threshold can route to UNKNOWN."
+        ],
+        "code": "tp,fp,fn,tn=18,6,2,74\nprecision=tp/(tp+fp)\nrecall=tp/(tp+fn)\nf1=2*precision*recall/(precision+recall)\nprint(precision,recall,f1)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Oversampling before splitting copies examples into evaluation. Reporting only weighted F1 can conceal a rare-category failure. A confidence of 0.95 is not a 95% correctness guarantee without calibration evidence.",
+          "Trace the chosen threshold to analyst capacity and missed-defect risk. Recheck its operating point after a prevalence change. Confidence intervals and support counts matter more than tiny decimal gains."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Hand-calculate a small confusion matrix, then compare the calculation with sklearn. Evaluate a threshold sweep on the same validation cases and record the resulting review workload.",
+          "This turns model selection into quality engineering: define a release gate that protects product-defect recall while placing a realistic ceiling on false alarms and review cost."
+        ]
+      }
+    ],
+    "mistake": "Oversampling before splitting copies examples into evaluation. Reporting only weighted F1 can conceal a rare-category failure. A confidence of 0.95 is not a 95% correctness guarantee without calibration evidence.",
+    "takeaway": "Hand-calculate a small confusion matrix, then compare the calculation with sklearn.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement prf(tp,fp,fn): return (precision, recall, f1). Use 0.0 for zero denominators.",
+      "answer": "",
+      "solution": "def prf(tp,fp,fn):\n    p=tp/(tp+fp) if tp+fp else 0.0\n    r=tp/(tp+fn) if tp+fn else 0.0\n    return p,r,2*p*r/(p+r) if p+r else 0.0",
+      "starter": "def prf(tp,fp,fn):\n    return 0.,0.,0.",
+      "tests": "p,r,f=prf(18,6,2)\nassert abs(p-.75)<1e-9 and abs(r-.9)<1e-9\nassert prf(0,0,0)==(0.,0.,0.)",
+      "id": "p06-metrics-exercise",
+      "hints": [
+        "Accuracy can be high when a rare class is always missed.",
+        "Oversampling before splitting copies examples into evaluation.",
+        "Select the threshold on validation data using the cost of misses, false alarms, and human review.",
+        "Hand-calculate a small confusion matrix, then compare the calculation with sklearn."
+      ],
+      "explanation": "def prf(tp,fp,fn):\n    p=tp/(tp+fp) if tp+fp else 0.0\n    r=tp/(tp+fn) if tp+fn else 0.0\n    return p,r,2*p*r/(p+r) if p+r else 0.0"
+    },
+    "quiz": {
+      "question": "Which metric directly measures missed actual product defects?",
+      "options": [
+        "Recall",
+        "Overall accuracy",
+        "MAE"
+      ],
+      "answer": 0,
+      "explanation": "Recall\u2019s denominator contains actual positive cases, including false negatives."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which metric directly measures missed actual product defects?",
+      "options": [
+        "Recall",
+        "Overall accuracy",
+        "MAE"
+      ],
+      "answer": 0,
+      "explanation": "Recall\u2019s denominator contains actual positive cases, including false negatives."
+    },
+    "sources": [
+      "https://scikit-learn.org/stable/user_guide.html",
+      "https://scikit-learn.org/stable/common_pitfalls.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p06-algorithms"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ml-fundamentals-001",
+      "bridge-ml-fundamentals-002",
+      "bridge-ml-fundamentals-003",
+      "bridge-ml-fundamentals-016",
+      "bridge-ml-fundamentals-017",
+      "bridge-ml-fundamentals-018",
+      "bridge-phase-06-6",
+      "bridge-phase-06-7"
+    ],
+    "demo": "threshold"
+  },
+  {
+    "id": "p06-unsupervised",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Clustering and anomaly detection for CI triage",
+    "minutes": 35,
+    "objectives": [
+      "Clustering and anomaly detection for CI triage",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects clustering and anomaly detection for ci triage with test contracts, failure triage, and evidence for release. Compare anomaly flags with an adjudicated slice and report review yield, time-to-detection, and missed known incidents.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Clustering groups observations using a representation and distance rule; it does not assign trustworthy business labels. k-means approximates points with centroids and expects a chosen number of clusters. Density methods can identify noise, while anomaly models flag unusual patterns.",
+          "An unfamiliar error may be a new product defect, a valid new feature, or merely a changed logging format. Treat novelty as a review signal. The connection to supervised learning is representation: poor features produce misleading clusters and neighbors."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Normalize comparable vectors when cosine-like geometry is appropriate, inspect cluster samples, and join expert labels only for analysis. Compare clusters across time and modules. A distance threshold should be selected using known normal and anomalous cases, not guessed from a chart.",
+          "Build a baseline anomaly score from duration deviation and use it alongside log novelty. Keep environment and workload changes visible so a deployment does not trigger thousands of false alarms."
+        ],
+        "code": "from statistics import mean,pstdev\ndurations=[2.,2.1,1.9,2.2]\nmu,sd=mean(durations),pstdev(durations)\nprint((5.-mu)/sd)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A cluster can reflect boilerplate or tenant names rather than failure mechanism. Outlier removal before analysis can delete precisely the incidents you wanted to find. Fitting an anomaly model on a dataset dominated by incidents teaches it that incidents are normal.",
+          "Inspect nearest neighbors and the feature contribution, then reproduce the condition. Measure how many flagged cases an engineer can meaningfully review and how quickly a novel defect is discovered."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Compare anomaly flags with an adjudicated slice and report review yield, time-to-detection, and missed known incidents. Retain a stable random sample of unflagged cases to estimate misses.",
+          "An SDET uses unsupervised tools to prioritize investigation, not to replace assertions. Your interview explanation should say what a distance score can and cannot establish."
+        ]
+      }
+    ],
+    "mistake": "A cluster can reflect boilerplate or tenant names rather than failure mechanism. Outlier removal before analysis can delete precisely the incidents you wanted to find. Fitting an anomaly model on a dataset dominated by incidents teaches it that incidents are normal.",
+    "takeaway": "Compare anomaly flags with an adjudicated slice and report review yield, time-to-detection, and missed known incidents.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement unusual(value,mean,sd,limit=3): flag an absolute z-score above limit. Reject sd <= 0.",
+      "answer": "",
+      "solution": "def unusual(value,mean,sd,limit=3):\n    if sd<=0: raise ValueError(\"positive spread required\")\n    return abs(value-mean)/sd > limit",
+      "starter": "def unusual(value,mean,sd,limit=3):\n    return False",
+      "tests": "assert unusual(10,2,1)\nassert not unusual(3,2,1)\ntry: unusual(2,2,0)\nexcept ValueError: pass\nelse: raise AssertionError(\"undefined z score\")",
+      "id": "p06-unsupervised-exercise",
+      "hints": [
+        "Clustering groups observations using a representation and distance rule; it does not assign trustworthy business labels.",
+        "A cluster can reflect boilerplate or tenant names rather than failure mechanism.",
+        "Normalize comparable vectors when cosine-like geometry is appropriate, inspect cluster samples, and join expert labels only for analysis.",
+        "Compare anomaly flags with an adjudicated slice and report review yield, time-to-detection, and missed known incidents."
+      ],
+      "explanation": "def unusual(value,mean,sd,limit=3):\n    if sd<=0: raise ValueError(\"positive spread required\")\n    return abs(value-mean)/sd > limit"
+    },
+    "quiz": {
+      "question": "An anomaly score establishes what?",
+      "options": [
+        "A proven product defect",
+        "Unusualness under the chosen representation",
+        "A correct owner"
+      ],
+      "answer": 1,
+      "explanation": "Novelty is evidence for investigation, not a causal diagnosis."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: An anomaly score establishes what?",
+      "options": [
+        "A proven product defect",
+        "Unusualness under the chosen representation",
+        "A correct owner"
+      ],
+      "answer": 1,
+      "explanation": "Novelty is evidence for investigation, not a causal diagnosis."
+    },
+    "sources": [
+      "https://scikit-learn.org/stable/user_guide.html",
+      "https://scikit-learn.org/stable/common_pitfalls.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p06-metrics"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ml-fundamentals-001",
+      "bridge-ml-fundamentals-002",
+      "bridge-ml-fundamentals-003",
+      "bridge-ml-fundamentals-016",
+      "bridge-ml-fundamentals-017",
+      "bridge-ml-fundamentals-018",
+      "bridge-phase-06-6",
+      "bridge-phase-06-7"
+    ]
+  },
+  {
+    "id": "p06-checkpoint",
+    "phase": 6,
+    "module": "Machine Learning Fundamentals",
+    "title": "Phase 06 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 06 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 06 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Compare anomaly flags with an adjudicated slice and report review yield, time-to-detection, and missed known incidents.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects clustering and anomaly detection for ci triage to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Normalize comparable vectors when cosine-like geometry is appropriate, inspect cluster samples, and join expert labels only for analysis. Compare clusters across time and modules. A distance threshold should be selected using known normal and anomalous cases, not guessed from a chart.",
+          "Build a baseline anomaly score from duration deviation and use it alongside log novelty. Keep environment and workload changes visible so a deployment does not trigger thousands of false alarms.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "from statistics import mean,pstdev\ndurations=[2.,2.1,1.9,2.2]\nmu,sd=mean(durations),pstdev(durations)\nprint((5.-mu)/sd)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A cluster can reflect boilerplate or tenant names rather than failure mechanism. Outlier removal before analysis can delete precisely the incidents you wanted to find. Fitting an anomaly model on a dataset dominated by incidents teaches it that incidents are normal.",
+          "Inspect nearest neighbors and the feature contribution, then reproduce the condition. Measure how many flagged cases an engineer can meaningfully review and how quickly a novel defect is discovered.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Compare anomaly flags with an adjudicated slice and report review yield, time-to-detection, and missed known incidents. Retain a stable random sample of unflagged cases to estimate misses.",
+          "An SDET uses unsupervised tools to prioritize investigation, not to replace assertions. Your interview explanation should say what a distance score can and cannot establish.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A cluster can reflect boilerplate or tenant names rather than failure mechanism. Outlier removal before analysis can delete precisely the incidents you wanted to find. Fitting an anomaly model on a dataset dominated by incidents teaches it that incidents are normal.",
+    "takeaway": "Compare anomaly flags with an adjudicated slice and report review yield, time-to-detection, and missed known incidents.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Clustering and anomaly detection for CI triage to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nCompare anomaly flags with an adjudicated slice and report review yield, time-to-detection, and missed known incidents.",
+      "id": "p06-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects clustering and anomaly detection for ci triage to the shared CI quality platform.",
+        "A cluster can reflect boilerplate or tenant names rather than failure mechanism.",
+        "Normalize comparable vectors when cosine-like geometry is appropriate, inspect cluster samples, and join expert labels only for analysis.",
+        "Compare anomaly flags with an adjudicated slice and report review yield, time-to-detection, and missed known incidents."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nCompare anomaly flags with an adjudicated slice and report review yield, time-to-detection, and missed known incidents."
+    },
+    "quiz": {
+      "question": "A candidate for clustering and anomaly detection for ci triage meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for clustering and anomaly detection for ci triage meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://scikit-learn.org/stable/user_guide.html",
+      "https://scikit-learn.org/stable/common_pitfalls.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p06-unsupervised"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-ml-fundamentals-001",
+      "bridge-ml-fundamentals-002",
+      "bridge-ml-fundamentals-003",
+      "bridge-ml-fundamentals-016",
+      "bridge-ml-fundamentals-017",
+      "bridge-ml-fundamentals-018",
+      "bridge-phase-06-6",
+      "bridge-phase-06-7"
+    ]
+  }
+]

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "auth",
+    "tenant": "alpha",
+    "version": "1",
+    "text": "# Fictional authentication policy\n\nSessions expire after 30 minutes of inactivity. Password reset links expire after 15 minutes. Rate limits permit five failed login attempts in ten minutes.\n",
+    "deleted": false
+  },
+  {
+    "id": "payments",
+    "tenant": "alpha",
+    "version": "1",
+    "text": "# Fictional payment policy\n\nPayment requests must include an idempotency key. Transient gateway errors may be retried up to twice with exponential backoff. Never retry a declined card automatically.\n",
+    "deleted": false
+  },
+  {
+    "id": "retry",
+    "tenant": "alpha",
+    "version": "1",
+    "text": "Retry HTTP 429 and transient 5xx with jitter and a total deadline. Do not retry 401 authentication errors.",
+    "deleted": false
+  },
+  {
+    "id": "locators",
+    "tenant": "alpha",
+    "version": "1",
+    "text": "Use unique accessible roles or stable test IDs. Await navigation before resolving a locator. Never accept ambiguous selectors.",
+    "deleted": false
+  },
+  {
+    "id": "beta-secret",
+    "tenant": "beta",
+    "version": "1",
+    "text": "SYNTHETIC_BETA_CANARY payment troubleshooting belongs only to beta.",
+    "deleted": false
+  },
+  {
+    "id": "deleted-doc",
+    "tenant": "alpha",
+    "version": "0",
+    "text": "Obsolete payment retry unlimited attempts",
+    "deleted": true
+  }
+]

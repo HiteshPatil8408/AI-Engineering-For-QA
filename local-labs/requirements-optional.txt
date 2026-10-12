@@ -1,0 +1,11 @@
+-r requirements.txt
+sentence-transformers>=4,<6
+langchain>=1,<2
+langchain-openai>=1,<2
+llama-index-core>=0.12,<1
+llama-index-embeddings-huggingface>=0.5,<1
+ragas>=0.3,<1
+deepeval>=3,<4
+mlflow>=3,<4
+peft>=0.15,<1
+transformers>=4.51,<6

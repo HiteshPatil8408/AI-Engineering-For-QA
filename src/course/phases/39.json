@@ -1,0 +1,349 @@
+[
+  {
+    "id": "p39-adaptation",
+    "phase": 39,
+    "module": "Fine-Tuning Foundations",
+    "title": "Fine-tuning: data splits, LoRA and independent evaluation",
+    "minutes": 35,
+    "objectives": [
+      "Fine-tuning",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects fine-tuning: data splits, lora and independent evaluation with test contracts, failure triage, and evidence for release. Choose adaptation only if held-out gains justify operational complexity.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Prompting changes instructions, RAG supplies changing evidence, and fine-tuning changes model parameters for repeated task behavior. Fine-tuning is not a reliable way to maintain rapidly changing facts or enforce authorization. Start with a baseline and a measured failure pattern before paying training and maintenance costs.",
+          "Supervised fine-tuning uses input/target examples. LoRA learns low-rank update matrices while keeping base weights frozen; PEFT is a broader family of parameter-efficient methods. These reduce trainable parameters, not the need for careful data and evaluation."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Create reviewed training examples with UNKNOWN and difficult classes, group related incidents to prevent leakage and reserve a held-out evaluation set. The optional local lab trains a tiny text classifier with torch; the PEFT example uses a configured public base checkpoint and LoRA adapter with explicit download/cost requirements.",
+          "Record base/tokenizer revisions, training hyperparameters, data hash and adapter artifacts. Compare against prompting and RAG baselines on accepted accuracy, calibration, safety, latency and total cost. Preserve source evidence outside weights."
+        ],
+        "code": "rank=4;input_dim=100;output_dim=80\nfull=input_dim*output_dim\nlora=rank*(input_dim+output_dim)\nassert lora<full",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Near-duplicate incidents appear in training and test, inflating accuracy. A fine-tuned model memorizes synthetic secret strings. Training loss falls while held-out performance declines, indicating overfitting.",
+          "Test deduplication and grouped splits, evaluate rare classes and check that unsupported requests still abstain. Red-team the adapted model and do not infer security from a lower training loss."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Choose adaptation only if held-out gains justify operational complexity. Report what improved, what regressed and how the adapter can be disabled or rolled back.",
+          "For SDETs, the training pipeline itself needs contracts: split disjointness, label schema, finite losses, saved/reloaded equivalence and stable evaluation. Fine-tuning acceptance is based on independent task evidence."
+        ]
+      }
+    ],
+    "mistake": "Near-duplicate incidents appear in training and test, inflating accuracy. A fine-tuned model memorizes synthetic secret strings. Training loss falls while held-out performance declines, indicating overfitting.",
+    "takeaway": "Choose adaptation only if held-out gains justify operational complexity.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def lora_params(input_dim,output_dim,rank):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def lora_params(input_dim,output_dim,rank):\n    if min(input_dim,output_dim,rank)<=0:raise ValueError('dimensions')\n    return rank*(input_dim+output_dim)",
+      "starter": "def lora_params(input_dim,output_dim,rank):\n    return 0",
+      "tests": "assert lora_params(100,80,4)==720\ntry:lora_params(1,1,0);assert False\nexcept ValueError:pass",
+      "id": "p39-adaptation-exercise",
+      "hints": [
+        "Prompting changes instructions, RAG supplies changing evidence, and fine-tuning changes model parameters for repeated task behavior.",
+        "Near-duplicate incidents appear in training and test, inflating accuracy.",
+        "Create reviewed training examples with UNKNOWN and difficult classes, group related incidents to prevent leakage and reserve a held-out evaluation set.",
+        "Choose adaptation only if held-out gains justify operational complexity."
+      ],
+      "explanation": "def lora_params(input_dim,output_dim,rank):\n    if min(input_dim,output_dim,rank)<=0:raise ValueError('dimensions')\n    return rank*(input_dim+output_dim)"
+    },
+    "quiz": {
+      "question": "When is RAG generally better than fine-tuning?",
+      "options": [
+        "When the main need is current external knowledge",
+        "When authorization must be learned",
+        "When no evaluation data exists"
+      ],
+      "answer": 0,
+      "explanation": "Retrieval can update evidence without retraining weights and preserve source provenance."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: When is RAG generally better than fine-tuning?",
+      "options": [
+        "When the main need is current external knowledge",
+        "When authorization must be learned",
+        "When no evaluation data exists"
+      ],
+      "answer": 0,
+      "explanation": "Retrieval can update evidence without retraining weights and preserve source provenance."
+    },
+    "sources": [
+      "https://huggingface.co/docs/peft/index",
+      "https://huggingface.co/docs/trl/sft_trainer"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p38-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Fine-tuning",
+      "LoRA",
+      "PEFT"
+    ],
+    "interviewIds": [
+      "bridge-production-016",
+      "bridge-production-017",
+      "bridge-phase-39-2",
+      "bridge-phase-39-3",
+      "bridge-phase-39-4",
+      "bridge-phase-39-5",
+      "bridge-phase-39-6",
+      "bridge-phase-39-7"
+    ]
+  },
+  {
+    "id": "p39-lora",
+    "phase": 39,
+    "module": "Fine-Tuning Foundations",
+    "title": "LoRA initialization, training and acceptance are separate stages",
+    "minutes": 35,
+    "objectives": [
+      "LoRA initialization, training and acceptance are separate stages",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects lora initialization, training and acceptance are separate stages with test contracts, failure triage, and evidence for release. Acceptance distinguishes initialized, trained and evaluated artifacts in both filenames and reports.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "LoRA parameterizes an update as low-rank factors rather than training every base weight. For an output-by-input matrix, factors with rank r use r times input+output trainable parameters. This reduces trainable state but does not prove better task behavior or reduce every inference cost automatically.",
+          "Initializing an adapter and running a forward pass are integration checks. Fine-tuning additionally optimizes it on reviewed examples, and acceptance additionally evaluates a held-out task and safety dataset."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The optional PEFT script requires a chosen compatible public checkpoint and target projection names. It builds a sequence-classification adapter, checks output shape and saves the initialized adapter with an explicit untrained label. Use the real PyTorch training lab to understand optimizer, loss and holdout mechanics before extending the adapter script.",
+          "Record training examples, base/tokenizer revisions, rank, alpha, dropout and adapter artifact. Use grouped splits and compare prompting/RAG/baseline alternatives on the same independent evaluation cases."
+        ],
+        "code": "python local-labs/deep-learning/lora.py\n# Requires FINETUNE_MODEL and LORA_TARGETS\n# Output explicitly identifies an initialized, untrained adapter",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A developer presents initialized adapter weights as a fine-tuned model. Another selects target module names from a different architecture and attaches no useful trainable projections. Training loss falls while test performance declines.",
+          "Inspect trainable parameter counts and gradient flow, run saved/reloaded equivalence and evaluate unknown/rare cases. Check data contamination and privacy behavior before serving an adapted model."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance distinguishes initialized, trained and evaluated artifacts in both filenames and reports. A trained adapter is promoted only if held-out gains justify its maintenance and rollback cost.",
+          "SDETs should demand executable evidence for each stage. Framework calls and decreasing training loss establish mechanics, while independent task and safety tests establish whether the adapted behavior meets the product contract."
+        ]
+      }
+    ],
+    "mistake": "A developer presents initialized adapter weights as a fine-tuned model. Another selects target module names from a different architecture and attaches no useful trainable projections. Training loss falls while test performance declines.",
+    "takeaway": "Acceptance distinguishes initialized, trained and evaluated artifacts in both filenames and reports.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def adapter_status(initialized,trained,evaluated):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def adapter_status(initialized,trained,evaluated):\n    if evaluated and not trained:raise ValueError('evaluation requires trained artifact')\n    if trained and not initialized:raise ValueError('training requires initialization')\n    return 'evaluated' if evaluated else 'trained' if trained else 'initialized' if initialized else 'absent'",
+      "starter": "def adapter_status(initialized,trained,evaluated):\n    return 'trained'",
+      "tests": "assert adapter_status(True,False,False)=='initialized'\nassert adapter_status(True,True,True)=='evaluated'\ntry:adapter_status(True,False,True);assert False\nexcept ValueError:pass",
+      "id": "p39-lora-exercise",
+      "hints": [
+        "LoRA parameterizes an update as low-rank factors rather than training every base weight.",
+        "A developer presents initialized adapter weights as a fine-tuned model.",
+        "The optional PEFT script requires a chosen compatible public checkpoint and target projection names.",
+        "Acceptance distinguishes initialized, trained and evaluated artifacts in both filenames and reports."
+      ],
+      "explanation": "def adapter_status(initialized,trained,evaluated):\n    if evaluated and not trained:raise ValueError('evaluation requires trained artifact')\n    if trained and not initialized:raise ValueError('training requires initialization')\n    return 'evaluated' if evaluated else 'trained' if trained else 'initialized' if initialized else 'absent'"
+    },
+    "quiz": {
+      "question": "What does an adapter forward-pass smoke test establish?",
+      "options": [
+        "Integration and shape compatibility, not fine-tuning quality",
+        "Held-out accuracy",
+        "Guaranteed privacy"
+      ],
+      "answer": 0,
+      "explanation": "Initialization and inference mechanics are distinct from trained, independently evaluated behavior."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What does an adapter forward-pass smoke test establish?",
+      "options": [
+        "Integration and shape compatibility, not fine-tuning quality",
+        "Held-out accuracy",
+        "Guaranteed privacy"
+      ],
+      "answer": 0,
+      "explanation": "Initialization and inference mechanics are distinct from trained, independently evaluated behavior."
+    },
+    "sources": [
+      "https://huggingface.co/docs/peft/index",
+      "https://huggingface.co/docs/trl/sft_trainer"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p39-adaptation"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Adapter",
+      "Trainable parameters"
+    ],
+    "interviewIds": [
+      "bridge-production-016",
+      "bridge-production-017",
+      "bridge-phase-39-2",
+      "bridge-phase-39-3",
+      "bridge-phase-39-4",
+      "bridge-phase-39-5",
+      "bridge-phase-39-6",
+      "bridge-phase-39-7"
+    ]
+  },
+  {
+    "id": "p39-checkpoint",
+    "phase": 39,
+    "module": "Fine-Tuning Foundations",
+    "title": "Phase 39 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 39 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 39 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance distinguishes initialized, trained and evaluated artifacts in both filenames and reports.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects lora initialization, training and acceptance are separate stages to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "The optional PEFT script requires a chosen compatible public checkpoint and target projection names. It builds a sequence-classification adapter, checks output shape and saves the initialized adapter with an explicit untrained label. Use the real PyTorch training lab to understand optimizer, loss and holdout mechanics before extending the adapter script.",
+          "Record training examples, base/tokenizer revisions, rank, alpha, dropout and adapter artifact. Use grouped splits and compare prompting/RAG/baseline alternatives on the same independent evaluation cases.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "python local-labs/deep-learning/lora.py\n# Requires FINETUNE_MODEL and LORA_TARGETS\n# Output explicitly identifies an initialized, untrained adapter",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A developer presents initialized adapter weights as a fine-tuned model. Another selects target module names from a different architecture and attaches no useful trainable projections. Training loss falls while test performance declines.",
+          "Inspect trainable parameter counts and gradient flow, run saved/reloaded equivalence and evaluate unknown/rare cases. Check data contamination and privacy behavior before serving an adapted model.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance distinguishes initialized, trained and evaluated artifacts in both filenames and reports. A trained adapter is promoted only if held-out gains justify its maintenance and rollback cost.",
+          "SDETs should demand executable evidence for each stage. Framework calls and decreasing training loss establish mechanics, while independent task and safety tests establish whether the adapted behavior meets the product contract.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A developer presents initialized adapter weights as a fine-tuned model. Another selects target module names from a different architecture and attaches no useful trainable projections. Training loss falls while test performance declines.",
+    "takeaway": "Acceptance distinguishes initialized, trained and evaluated artifacts in both filenames and reports.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply LoRA initialization, training and acceptance are separate stages to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance distinguishes initialized, trained and evaluated artifacts in both filenames and reports.",
+      "id": "p39-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects lora initialization, training and acceptance are separate stages to the shared CI quality platform.",
+        "A developer presents initialized adapter weights as a fine-tuned model.",
+        "The optional PEFT script requires a chosen compatible public checkpoint and target projection names.",
+        "Acceptance distinguishes initialized, trained and evaluated artifacts in both filenames and reports."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance distinguishes initialized, trained and evaluated artifacts in both filenames and reports."
+    },
+    "quiz": {
+      "question": "A candidate for lora initialization, training and acceptance are separate stages meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for lora initialization, training and acceptance are separate stages meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://huggingface.co/docs/peft/index",
+      "https://huggingface.co/docs/trl/sft_trainer"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p39-lora"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-production-016",
+      "bridge-production-017",
+      "bridge-phase-39-2",
+      "bridge-phase-39-3",
+      "bridge-phase-39-4",
+      "bridge-phase-39-5",
+      "bridge-phase-39-6",
+      "bridge-phase-39-7"
+    ]
+  }
+]

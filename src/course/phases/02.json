@@ -1,0 +1,531 @@
+[
+  {
+    "id": "numpy-arrays",
+    "phase": 2,
+    "module": "Numerical computing",
+    "title": "Arrays, shapes, and vectorized metrics",
+    "minutes": 26,
+    "objectives": [
+      "Interpret array shape and axes",
+      "Use boolean masks and aggregation",
+      "Understand broadcasting instead of guessing"
+    ],
+    "relevance": "Embedding batches and latency metrics use array operations. A wrong axis gives plausible but incorrect quality reports.",
+    "sections": [
+      {
+        "title": "Shape describes your contract",
+        "paragraphs": [
+          "A NumPy ndarray stores typed values in a multidimensional shape. A matrix shaped (runs, tests) has one row per run. sum(axis=0) reduces the run axis and produces one value per test. sum(axis=1) produces one value per run.",
+          "Vectorized operations apply across arrays efficiently. A boolean mask selects observations. Slices can share memory with the original array, so use .copy() when mutation should be isolated."
+        ],
+        "code": "import numpy as np\npassed = np.array([[1, 0, 1], [1, 1, 0]])\nprint(passed.shape)  # (2, 3)\nprint(passed.mean(axis=0))  # rate for each test"
+      },
+      {
+        "title": "Broadcasting rules",
+        "paragraphs": [
+          "NumPy compares trailing dimensions. Dimensions match when equal or when one is 1. An array of shape (3,) can be added to (2, 3); an array of shape (2,) cannot without reshaping to (2, 1).",
+          "The result may be valid mathematically but wrong semantically. Label axes before operations. Explicitly choose floating-point dtype before division or normalization; integer storage can truncate derived values."
+        ],
+        "code": "latency = np.array([[100., 200., 300.], [120., 220., 330.]])\nbaseline = np.array([100., 200., 300.])\nprint(latency / baseline)"
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "For a duration table shaped [builds, tests], axis=0 aggregates across builds and axis=1 aggregates across tests. Keep axis names in comments or variable names because an array does not retain the meaning of its coordinates automatically. A scalar, row vector and column vector have different broadcasting behavior.",
+          "Boolean masks select elements satisfying a condition; using a mask with the wrong shape can fail or select the wrong subset. Check dtype and finite values before computing statistics. Integer arrays are appropriate for IDs but floating-point arrays are needed for normalized metrics. Test a one-row table, a one-column table, empty arrays and NaN values. Compare vectorized output with a small explicit loop as an independent oracle."
+        ]
+      }
+    ],
+    "mistake": "Broadcasting a baseline along the wrong axis silently compares unrelated observations.",
+    "takeaway": "Write the meaning of each axis alongside its shape.",
+    "exercise": {
+      "id": "numpy-arrays-exercise",
+      "kind": "choice",
+      "prompt": "A passed matrix has shape (10 runs, 4 tests). Which expression returns four pass rates?",
+      "answer": "passed.mean(axis=0)",
+      "explanation": "Reducing axis 0 averages over runs and leaves the test axis.",
+      "hints": [
+        "Start with the invariant: interpret array shape and axes.",
+        "Consider this constraint: Broadcasting a baseline along the wrong axis silently compares unrelated observations.",
+        "Work through a tiny example before generalizing. Write the meaning of each axis alongside its shape.",
+        "Reducing axis 0 averages over runs and leaves the test axis."
+      ],
+      "options": [
+        "passed.mean(axis=0)",
+        "passed.mean(axis=1)",
+        "passed.sum()"
+      ]
+    },
+    "quiz": {
+      "question": "Can shapes (2, 3) and (2,) broadcast directly?",
+      "options": [
+        "Yes",
+        "No",
+        "Only with integer dtype"
+      ],
+      "answer": 1,
+      "explanation": "Their trailing dimensions 3 and 2 are incompatible."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://numpy.org/doc/stable/user/basics.broadcasting.html",
+      "https://numpy.org/doc/stable/user/absolute_beginners.html"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "p01-checkpoint"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-embeddings--vector-db-001",
+      "bridge-embeddings--vector-db-002",
+      "bridge-embeddings--vector-db-003",
+      "q-6",
+      "bridge-embeddings--vector-db-025",
+      "bridge-embeddings--vector-db-026",
+      "q-7",
+      "q-8"
+    ]
+  },
+  {
+    "id": "numpy-cosine",
+    "phase": 2,
+    "module": "Numerical computing",
+    "title": "Cosine similarity from first principles",
+    "minutes": 26,
+    "objectives": [
+      "Compute dot product and vector norms",
+      "Distinguish direction from magnitude",
+      "Handle zero vectors explicitly"
+    ],
+    "relevance": "Semantically similar failures may have different text. Vector similarity is a useful candidate signal, but it is not proof of the same root cause.",
+    "sections": [
+      {
+        "title": "A vector is a representation",
+        "paragraphs": [
+          "A vector is an ordered list of numeric coordinates. An embedding model learns representations whose geometry can capture useful relationships. The synthetic vectors in this lab are hand-designed for arithmetic practice; they are not real semantic embeddings.",
+          "The dot product sums pairwise coordinate products. A norm measures length. Cosine similarity divides the dot product by both lengths, so it compares direction. Cosine 1 means the same direction; 0 is orthogonal; -1 is opposite."
+        ],
+        "code": "import numpy as np\na = np.array([1., 2., 0.])\nb = np.array([2., 4., 0.])\nprint(np.dot(a, b))  # 10\nprint(np.linalg.norm(a))  # sqrt(5)"
+      },
+      {
+        "title": "Normalization and distance",
+        "paragraphs": [
+          "A unit vector is v / norm(v). For unit vectors the dot product equals cosine similarity. Squared Euclidean distance between unit vectors is 2 - 2*cosine, so they induce the same ranking. Unnormalized dot product also rewards magnitude.",
+          "A zero vector has no direction, so cosine is undefined. Reject it or apply a documented fallback. Do not divide by zero and hope NaN sorting will produce sensible retrieval results."
+        ]
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "Raw dot product rewards magnitude as well as direction. For a=[1,0], b=[10,1] and c=[1,0], b has a larger dot product than c but lower cosine similarity. This difference matters when an index is configured for dot distance while embeddings are not normalized.",
+          "A zero vector has no direction. The teaching implementation returns a declared zero score, while another application may reject it; either policy must be explicit and tested. Reject mismatched dimensions rather than letting zip silently truncate coordinates. In retrieval, keep document identity aligned with vector rows, and test identical, opposite, orthogonal and zero vectors. Geometric similarity remains evidence for ranking, not proof that two failure causes are the same."
+        ]
+      }
+    ],
+    "mistake": "Vectors from different models or dimensions are not comparable, even if their text looks related.",
+    "takeaway": "Similarity is a geometric candidate signal that still needs domain validation.",
+    "exercise": {
+      "id": "numpy-cosine-exercise",
+      "kind": "python",
+      "prompt": "Implement cosine(a, b) with NumPy. Raise ValueError for zero vectors or shape mismatch.",
+      "answer": "",
+      "explanation": "Use dot(a,b)/(norm(a)*norm(b)); check equal shapes and nonzero norms first.",
+      "hints": [
+        "Start with the invariant: compute dot product and vector norms.",
+        "Consider this constraint: Vectors from different models or dimensions are not comparable, even if their text looks related.",
+        "Work through a tiny example before generalizing. Similarity is a geometric candidate signal that still needs domain validation.",
+        "Use dot(a,b)/(norm(a)*norm(b)); check equal shapes and nonzero norms first."
+      ],
+      "starter": "import numpy as np\n\ndef cosine(a, b):\n    a, b = np.asarray(a, dtype=float), np.asarray(b, dtype=float)\n    return 0.0\n\nprint(cosine([1, 2, 0], [2, 4, 0]))",
+      "tests": "assert abs(cosine([1,2,0],[2,4,0])-1) < 1e-9\nassert abs(cosine([1,0],[0,1])) < 1e-9\nassert abs(cosine([1,0],[-1,0])+1) < 1e-9\nfor a,b in [([0,0],[1,0]),([1,2],[1,2,3])]:\n    try:\n        cosine(a,b)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"Reject undefined comparisons\")",
+      "solution": "import numpy as np\ndef cosine(a, b):\n    a, b = np.asarray(a, dtype=float), np.asarray(b, dtype=float)\n    if a.shape != b.shape:\n        raise ValueError(\"Shape mismatch\")\n    denom = np.linalg.norm(a) * np.linalg.norm(b)\n    if denom == 0:\n        raise ValueError(\"Zero vector\")\n    return float(np.dot(a, b) / denom)"
+    },
+    "quiz": {
+      "question": "When does dot product equal cosine similarity?",
+      "options": [
+        "Always",
+        "When both vectors have unit norm",
+        "When both vectors contain integers"
+      ],
+      "answer": 1,
+      "explanation": "Unit norms make the cosine denominator equal to one."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://numpy.org/doc/stable/reference/generated/numpy.dot.html",
+      "https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "numpy-arrays"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-embeddings--vector-db-001",
+      "bridge-embeddings--vector-db-002",
+      "bridge-embeddings--vector-db-003",
+      "q-6",
+      "bridge-embeddings--vector-db-025",
+      "bridge-embeddings--vector-db-026",
+      "q-7",
+      "q-8"
+    ]
+  },
+  {
+    "id": "numpy-sampling",
+    "phase": 2,
+    "module": "Numerical computing",
+    "title": "Sampling, masks, and reproducible experiments",
+    "minutes": 26,
+    "objectives": [
+      "Use a seeded random generator",
+      "Separate deterministic fixtures from statistical samples",
+      "Choose representative slices for evaluation"
+    ],
+    "relevance": "Reproducible synthetic CI history helps compare analyzer versions without depending on proprietary data.",
+    "sections": [
+      {
+        "title": "Random does not mean uncontrolled",
+        "paragraphs": [
+          "Use np.random.default_rng(seed) and keep the seed with the experiment. A fixed seed helps reproduce one sample but does not prove stability across samples. Sample multiple seeds when estimating uncertainty.",
+          "A mask such as durations > 5 identifies slow observations; np.percentile returns a tail summary. The mean can hide a small group of severe outliers, so retain raw observations and relevant segments."
+        ],
+        "code": "import numpy as np\nrng = np.random.default_rng(42)\ndurations = rng.lognormal(mean=1, sigma=0.5, size=100)\nprint(np.percentile(durations, 95))\nprint(durations[durations > 5].size)"
+      },
+      {
+        "title": "Representative samples",
+        "paragraphs": [
+          "Sampling only successful production interactions creates survivorship bias. Include unsuccessful requests, rare categories, long inputs, empty retrieval, and adversarial inputs in separately labeled slices.",
+          "Keep training, tuning, and final evaluation samples separate. Changing a prompt repeatedly against the final evaluation set effectively trains your decisions on that set."
+        ]
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "A random seed reproduces a pseudo-random sequence under a fixed implementation and data order; it does not make a sample representative. Uniform row sampling can underrepresent rare product defects or repeat many rows from one incident. Stratification preserves selected class proportions, while group sampling avoids splitting closely related incidents across partitions.",
+          "Report which sampling unit was used: run, test, incident or build. For uncertainty estimates over correlated runs, resample independent incidents rather than individual repeated observations. Keep a sealed holdout that was not inspected during iteration. Test that sampled IDs are valid, groups are disjoint where required and every necessary class has coverage. Reproducibility and representativeness are separate evaluation properties."
+        ]
+      }
+    ],
+    "mistake": "A fixed seed gives repeatability, not a guarantee that the sample represents production.",
+    "takeaway": "Version both the sampling method and the resulting evaluation dataset.",
+    "exercise": {
+      "id": "numpy-sampling-exercise",
+      "kind": "choice",
+      "prompt": "Your evaluation set contains only successful chatbot interactions. What is the main issue?",
+      "answer": "Survivorship bias",
+      "explanation": "Filtering for success removes precisely the failures you need to understand.",
+      "hints": [
+        "Start with the invariant: use a seeded random generator.",
+        "Consider this constraint: A fixed seed gives repeatability, not a guarantee that the sample represents production.",
+        "Work through a tiny example before generalizing. Version both the sampling method and the resulting evaluation dataset.",
+        "Filtering for success removes precisely the failures you need to understand."
+      ],
+      "options": [
+        "Too many dimensions",
+        "Survivorship bias",
+        "A low random seed"
+      ]
+    },
+    "quiz": {
+      "question": "What does a fixed seed provide?",
+      "options": [
+        "Representative data automatically",
+        "Repeatable sampling under the same implementation",
+        "Proof of statistical significance"
+      ],
+      "answer": 1,
+      "explanation": "Repeatability and representativeness are different properties."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://numpy.org/doc/stable/reference/random/generator.html"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "numpy-cosine"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-embeddings--vector-db-001",
+      "bridge-embeddings--vector-db-002",
+      "bridge-embeddings--vector-db-003",
+      "q-6",
+      "bridge-embeddings--vector-db-025",
+      "bridge-embeddings--vector-db-026",
+      "q-7",
+      "q-8"
+    ]
+  },
+  {
+    "id": "p02-matrix",
+    "phase": 2,
+    "module": "Numerical Computing With Numpy",
+    "title": "Matrix shapes and normalized batch similarity",
+    "minutes": 35,
+    "objectives": [
+      "Matrix shapes and normalized batch similarity",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects matrix shapes and normalized batch similarity with test contracts, failure triage, and evidence for release. Vectorized scoring is useful for transparent exact-retrieval reference results.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Embedding search can score many documents at once with a matrix product. If queries have shape [q,d] and documents [n,d], normalize each row and multiply queries by documents transposed to obtain [q,n]. Each output row is one query's score against every document.",
+          "The shared dimension d is a contract, not a value that can be reshaped arbitrarily. A transpose changes axes; reshape reorganizes the same flat storage. Confusing them can return the right dimensions with the wrong numerical relationships."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Compute row norms with axis=1 and keepdims=True, then divide using a zero-safe output. This broadcasts one norm per row across its d coordinates. Matrix multiplication @ performs a dot product along the shared dimension; elementwise * does not aggregate.",
+          "For queries [[1,0],[0,1]] and documents [[1,0],[1,1]], normalized scores are [[1,.707],[0,.707]]. Test against the manual cosine calculation before trusting a large batch. Keep dtype and finite-value checks at the boundary."
+        ],
+        "code": "import numpy as np\nq=np.array([[1.,0.],[0.,1.]])\nd=np.array([[1.,0.],[1.,1.]])\nd=d/np.linalg.norm(d,axis=1,keepdims=True)\nprint(q@d.T)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Normalizing the whole matrix by one global norm changes ranking assumptions. Dividing integer arrays in place can fail or truncate under an inappropriate dtype. An empty document collection requires a correctly shaped empty score matrix, not an index error.",
+          "Check dimension mismatch, zero rows, non-finite values and each result's query/document identity. Use small hand-computed matrices as an independent oracle."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Vectorized scoring is useful for transparent exact-retrieval reference results. Measure its runtime separately from embedding generation and compare numerical results with the single-vector implementation.",
+          "For SDETs, shapes and mathematical invariants are powerful tests: normalized nonzero rows have norm one, self-similarity is one and orthogonal similarity is zero. They can detect wrong axes without requiring a large model or provider account."
+        ]
+      }
+    ],
+    "mistake": "Normalizing the whole matrix by one global norm changes ranking assumptions. Dividing integer arrays in place can fail or truncate under an inappropriate dtype. An empty document collection requires a correctly shaped empty score matrix, not an index error.",
+    "takeaway": "Vectorized scoring is useful for transparent exact-retrieval reference results.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def batch_cosine(queries,docs):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def batch_cosine(queries,docs):\n    import numpy as np\n    q=np.asarray(queries,dtype=float);d=np.asarray(docs,dtype=float)\n    if q.ndim!=2 or d.ndim!=2 or q.shape[1]!=d.shape[1]:raise ValueError('shape')\n    qn=np.linalg.norm(q,axis=1,keepdims=True);dn=np.linalg.norm(d,axis=1,keepdims=True)\n    q=np.divide(q,qn,out=np.zeros_like(q),where=qn!=0);d=np.divide(d,dn,out=np.zeros_like(d),where=dn!=0)\n    return (q@d.T).tolist()",
+      "starter": "def batch_cosine(queries,docs):\n    return []",
+      "tests": "import math\nr=batch_cosine([[1,0],[0,1]],[[1,0],[1,1]])\nassert r[0][0]==1 and r[1][0]==0\nassert abs(r[0][1]-1/math.sqrt(2))<1e-9\nassert batch_cosine([[0,0]],[[1,2]])==[[0]]",
+      "id": "p02-matrix-exercise",
+      "hints": [
+        "Embedding search can score many documents at once with a matrix product.",
+        "Normalizing the whole matrix by one global norm changes ranking assumptions.",
+        "Compute row norms with axis=1 and keepdims=True, then divide using a zero-safe output.",
+        "Vectorized scoring is useful for transparent exact-retrieval reference results."
+      ],
+      "explanation": "def batch_cosine(queries,docs):\n    import numpy as np\n    q=np.asarray(queries,dtype=float);d=np.asarray(docs,dtype=float)\n    if q.ndim!=2 or d.ndim!=2 or q.shape[1]!=d.shape[1]:raise ValueError('shape')\n    qn=np.linalg.norm(q,axis=1,keepdims=True);dn=np.linalg.norm(d,axis=1,keepdims=True)\n    q=np.divide(q,qn,out=np.zeros_like(q),where=qn!=0);d=np.divide(d,dn,out=np.zeros_like(d),where=dn!=0)\n    return (q@d.T).tolist()"
+    },
+    "quiz": {
+      "question": "Which result shape scores q queries against n documents?",
+      "options": [
+        "[q,n]",
+        "[d,d]",
+        "[n,q,d]"
+      ],
+      "answer": 0,
+      "explanation": "The shared embedding dimension is contracted during matrix multiplication."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which result shape scores q queries against n documents?",
+      "options": [
+        "[q,n]",
+        "[d,d]",
+        "[n,q,d]"
+      ],
+      "answer": 0,
+      "explanation": "The shared embedding dimension is contracted during matrix multiplication."
+    },
+    "sources": [
+      "https://numpy.org/doc/stable/user/absolute_beginners.html",
+      "https://numpy.org/doc/stable/user/basics.broadcasting.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "numpy-sampling"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Matrix multiplication",
+      "Broadcasting"
+    ],
+    "interviewIds": [
+      "bridge-embeddings--vector-db-001",
+      "bridge-embeddings--vector-db-002",
+      "bridge-embeddings--vector-db-003",
+      "q-6",
+      "bridge-embeddings--vector-db-025",
+      "bridge-embeddings--vector-db-026",
+      "q-7",
+      "q-8"
+    ]
+  },
+  {
+    "id": "p02-checkpoint",
+    "phase": 2,
+    "module": "Numerical Computing With Numpy",
+    "title": "Phase 02 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 02 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 02 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Vectorized scoring is useful for transparent exact-retrieval reference results.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects matrix shapes and normalized batch similarity to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Compute row norms with axis=1 and keepdims=True, then divide using a zero-safe output. This broadcasts one norm per row across its d coordinates. Matrix multiplication @ performs a dot product along the shared dimension; elementwise * does not aggregate.",
+          "For queries [[1,0],[0,1]] and documents [[1,0],[1,1]], normalized scores are [[1,.707],[0,.707]]. Test against the manual cosine calculation before trusting a large batch. Keep dtype and finite-value checks at the boundary.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "import numpy as np\nq=np.array([[1.,0.],[0.,1.]])\nd=np.array([[1.,0.],[1.,1.]])\nd=d/np.linalg.norm(d,axis=1,keepdims=True)\nprint(q@d.T)",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Normalizing the whole matrix by one global norm changes ranking assumptions. Dividing integer arrays in place can fail or truncate under an inappropriate dtype. An empty document collection requires a correctly shaped empty score matrix, not an index error.",
+          "Check dimension mismatch, zero rows, non-finite values and each result's query/document identity. Use small hand-computed matrices as an independent oracle.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Vectorized scoring is useful for transparent exact-retrieval reference results. Measure its runtime separately from embedding generation and compare numerical results with the single-vector implementation.",
+          "For SDETs, shapes and mathematical invariants are powerful tests: normalized nonzero rows have norm one, self-similarity is one and orthogonal similarity is zero. They can detect wrong axes without requiring a large model or provider account.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "Normalizing the whole matrix by one global norm changes ranking assumptions. Dividing integer arrays in place can fail or truncate under an inappropriate dtype. An empty document collection requires a correctly shaped empty score matrix, not an index error.",
+    "takeaway": "Vectorized scoring is useful for transparent exact-retrieval reference results.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Matrix shapes and normalized batch similarity to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nVectorized scoring is useful for transparent exact-retrieval reference results.",
+      "id": "p02-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects matrix shapes and normalized batch similarity to the shared CI quality platform.",
+        "Normalizing the whole matrix by one global norm changes ranking assumptions.",
+        "Compute row norms with axis=1 and keepdims=True, then divide using a zero-safe output.",
+        "Vectorized scoring is useful for transparent exact-retrieval reference results."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nVectorized scoring is useful for transparent exact-retrieval reference results."
+    },
+    "quiz": {
+      "question": "A candidate for matrix shapes and normalized batch similarity meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for matrix shapes and normalized batch similarity meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://numpy.org/doc/stable/user/absolute_beginners.html",
+      "https://numpy.org/doc/stable/user/basics.broadcasting.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p02-matrix"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-embeddings--vector-db-001",
+      "bridge-embeddings--vector-db-002",
+      "bridge-embeddings--vector-db-003",
+      "q-6",
+      "bridge-embeddings--vector-db-025",
+      "bridge-embeddings--vector-db-026",
+      "q-7",
+      "q-8"
+    ]
+  }
+]

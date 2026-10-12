@@ -1,0 +1,36 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { runPython,runSQL,compareRows } from '../lib/runtimes';
+import { useProgress } from '../state/ProgressContext';
+const questionSource=[
+ ['Foundations','Related incidents appear in both train and test. How should you repair the experiment?',['Split by incident group before fitting preprocessing','Fit preprocessing on all rows','Increase model size'],0,false,'Group leakage makes test cases insufficiently independent.'],
+ ['Foundations','A classifier has TP=8, FP=2, FN=4. What is its recall?',['8/12','8/10','10/12'],0,false,'Recall is TP/(TP+FN).'],
+ ['Foundations','Why subtract the maximum logit before softmax?',['To avoid exponential overflow while preserving probabilities','To change the winning token','To remove model bias'],0,false,'A common offset cancels during normalization.'],
+ ['Foundations','What supports attribution in a prompt experiment?',['Paired cases with other versions held fixed','Different cases for every candidate','Selecting on the sealed test set'],0,false,'Control changed variables and compare the same cases.'],
+ ['RAG','Relevant authorized evidence is missing after context packing. Which stage needs investigation?',['Context budget and packing','Only model temperature','HTTP authentication headers'],0,false,'Retrieval success does not guarantee context retention.'],
+ ['RAG','What is MRR for first relevant evidence at rank 4?',['0.25','4','1'],0,false,'Reciprocal rank is 1/rank.'],
+ ['RAG','When should tenant permissions filter retrieval?',['Before evidence reaches ranking and generation','Only after producing the answer','Only inside a prompt'],0,true,'Application authorization prevents unauthorized context from entering the model.'],
+ ['Agents','A tool timeout follows a possibly completed write. What enables a safe retry?',['Persisted idempotency and effect status','Repeating until it succeeds','A more confident prompt'],0,true,'Timeout is ambiguous; duplicate effects require deterministic protection.'],
+ ['Agents','The same search repeats until the call budget is exhausted. What should happen?',['Application stops and records the loop/budget outcome','Agent resets its own budget','Tool access expands'],0,false,'Termination limits remain outside model control.'],
+ ['System design','A candidate improves mean quality but leaks a synthetic tenant canary. Release?',['Block: privacy is a hard invariant','Accept the higher average','Remove the security case'],0,true,'Safety violations cannot be offset by average quality.'],
+ ['System design','Which rollback restores a coupled AI contract?',['Compatible prompt, model, schema and index revisions','Only a dashboard tag','Only provider timeout'],0,false,'Artifacts need a compatible configuration set.'],
+ ['System design','How should a retrieved instruction to expose a secret be handled?',['Treat it as untrusted data and enforce tool/data permissions','Obey because it came from search','Hide it after tool execution'],0,true,'Retrieval is not an authorization source.']
+] as const;
+const questions=questionSource.map((q,i)=>{const shift=i%3;const options=[...q[2].slice(shift),...q[2].slice(0,shift)];return [q[0],q[1],options,(3-shift)%3,q[4],q[5]] as const;});
+const pythonTests=`assert summarize([{'status':'failed','duration':4},{'status':'passed','duration':2},{'status':'failed','duration':8}]) == {'failed':2,'slowest':8}\nassert summarize([])=={'failed':0,'slowest':0}\nassert summarize([{'status':'passed','duration':3}])=={'failed':0,'slowest':3}`;
+export default function FinalAssessment(){
+ const {setProgress}=useProgress();const [answers,setAnswers]=useState<Record<number,number>>({});
+ const [python,setPython]=useState('def summarize(runs):\n    # Return failed count and slowest duration; empty => zeros\n    return {}\n');const [sql,setSql]=useState('-- Return names of tests with at least three failed runs, ordered by name\n');
+ const [feedback,setFeedback]=useState('');const [busy,setBusy]=useState(false);const [report,setReport]=useState<NonNullable<ReturnType<typeof useProgress>["progress"]["finalAssessment"]>|undefined>();
+ async function submit(){
+  setBusy(true);setFeedback('Running Python and SQL behavior checks…');
+  try{
+   const py=await runPython(python,pythonTests).result;const query=await runSQL(sql);const sqlOk=query.ok&&compareRows(query.rows??[],[{name:'checkout'}]);
+   const correct=questions.map((q,i)=>answers[i]===q[3]);const safety=questions.every((q,i)=>!q[4]||correct[i]);const score=(py.ok?20:0)+(sqlOk?20:0)+correct.filter(Boolean).length*5;
+   const weak=[...new Set(questions.filter((_,i)=>!correct[i]).map(q=>q[0] as string))];if(!py.ok)weak.push('Python coding');if(!sqlOk)weak.push('SQL coding');if(!safety)weak.push('Safety invariants');
+   const result={score,passed:score>=80&&py.ok&&sqlOk&&safety,date:new Date().toISOString(),weakAreas:weak,python:py.ok,sql:sqlOk};setReport(result);setProgress(p=>({...p,finalAssessment:result}));
+   setFeedback(`Python: ${py.ok?'passed':py.output}\nSQL: ${sqlOk?'passed':query.output}\nScore ${score}/100. ${result.passed?'Passed.':'Review weak areas and retry.'}`);
+  }catch(e){setFeedback(String(e));}finally{setBusy(false);}
+ }
+ return <div className="page lesson-page"><div className="eyebrow">FINAL APPLIED ASSESSMENT</div><h1>Demonstrate the engineering contract.</h1><p>Two executed coding tasks and twelve scenario decisions. Pass at 80/100 with both coding tasks and every safety invariant correct. No live provider is used.</p><section className="panel"><h2>Python · 20 points</h2><p>Implement summarize(runs), returning a dictionary with failed (number of failed runs) and slowest (maximum duration, or 0 for an empty list).</p><textarea className="code-editor" aria-label="Final Python code" value={python} onChange={e=>{setPython(e.target.value);setReport(undefined);}} /></section><section className="panel"><h2>SQL · 20 points</h2><p>Using test_cases and test_runs, return the names of tests with at least three failed runs, ordered by name. Return one column named name.</p><textarea className="code-editor" aria-label="Final SQL code" value={sql} onChange={e=>{setSql(e.target.value);setReport(undefined);}} /></section>{questions.map((q,i)=><section className="panel" key={q[1]}><div className="section-label">{q[0]} · 5 points {q[4]?'· Safety invariant':''}</div><h3>{q[1]}</h3><fieldset className="options"><legend className="sr-only">Question {i+1}</legend>{[...q[2]].map((option,j)=><label key={option}><input type="radio" name={'final-'+i} checked={answers[i]===j} onChange={()=>{setAnswers(a=>({...a,[i]:j}));setReport(undefined);}}/>{option}</label>)}</fieldset>{report&&<p>{answers[i]===q[3]?'Correct.':'Review. '}{q[5]}</p>}</section>)}<button className="primary" disabled={busy||Object.keys(answers).length!==questions.length} onClick={()=>void submit()}>{busy?'Checking…':'Submit assessment'}</button><pre className="output" role="status">{feedback}</pre>{report&&<section className="panel"><h2>Assessment report · {report.score}/100</h2><p>{report.passed?'Passed':'Needs review'}</p><p>Weak areas: {report.weakAreas.join(', ')||'None identified by this assessment'}</p><Link to="/review">Build a review plan</Link><Link className="secondary" to="/settings">Completion record</Link></section>}</div>;
+}

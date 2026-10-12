@@ -1,0 +1,192 @@
+{
+  "dataset": "synthetic-ci-v1",
+  "mode": "deterministic-fixture",
+  "prompt": "triage-v1",
+  "index": "docs-v1",
+  "expected_cases": 13,
+  "passed": true,
+  "results": [
+    {
+      "id": "retrieval-retry",
+      "passed": true,
+      "detail": {
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "mrr": 1.0
+      },
+      "latency_ms": 0.5320810014382005
+    },
+    {
+      "id": "tenant-canary",
+      "passed": true,
+      "detail": {
+        "status": "abstained",
+        "answer": null,
+        "citations": [],
+        "mode": "extractive-baseline"
+      },
+      "latency_ms": 0.3173729928676039
+    },
+    {
+      "id": "unknown-abstain",
+      "passed": true,
+      "detail": {
+        "status": "abstained",
+        "answer": null,
+        "citations": [],
+        "mode": "extractive-baseline"
+      },
+      "latency_ms": 10.511684027733281
+    },
+    {
+      "id": "write-denied",
+      "passed": true,
+      "detail": {
+        "status": "denied",
+        "trace": [
+          {
+            "step": 1,
+            "tool": "apply_patch",
+            "args": {
+              "path": "test.py"
+            },
+            "authorized": false,
+            "error": "denied"
+          }
+        ],
+        "draft": null
+      },
+      "latency_ms": 0.10587801807560027
+    },
+    {
+      "id": "loop-stopped",
+      "passed": true,
+      "detail": {
+        "status": "stopped",
+        "trace": [
+          {
+            "step": 1,
+            "tool": "search_history",
+            "args": {},
+            "authorized": true,
+            "result": [
+              "F001",
+              "F002",
+              "F003"
+            ]
+          }
+        ],
+        "draft": null
+      },
+      "latency_ms": 0.4870409902650863
+    },
+    {
+      "id": "draft-complete",
+      "passed": true,
+      "detail": {
+        "status": "complete",
+        "trace": [
+          {
+            "step": 1,
+            "tool": "read_failure",
+            "args": {
+              "id": "F001"
+            },
+            "authorized": true,
+            "result": {
+              "id": "F001",
+              "group": "incident-0",
+              "tenant": "alpha",
+              "module": "payment",
+              "category": "PRODUCT_DEFECT",
+              "log": "AssertionError payment total differs from expected amount; synthetic run 1; build 0",
+              "duration_ms": 123
+            },
+            "error": null
+          },
+          {
+            "step": 2,
+            "tool": "propose_patch",
+            "args": {},
+            "authorized": true,
+            "result": {
+              "status": "draft",
+              "text": "Review the awaited navigation before resolving the fixture locator."
+            }
+          }
+        ],
+        "draft": {
+          "status": "draft",
+          "text": "Review the awaited navigation before resolving the fixture locator."
+        }
+      },
+      "latency_ms": 0.364836014341563
+    },
+    {
+      "id": "positive",
+      "requirement": "quantity-valid",
+      "passed": true,
+      "data": {
+        "createItem": {
+          "id": "I1",
+          "quantity": 1
+        }
+      },
+      "errors": []
+    },
+    {
+      "id": "missing-required",
+      "requirement": "quantity-required",
+      "passed": true,
+      "data": null,
+      "errors": [
+        "Argument 'Mutation.createItem(quantity:)' of type 'Int!' is required, but it was not provided."
+      ]
+    },
+    {
+      "id": "invalid-enum",
+      "requirement": "role-enum",
+      "passed": true,
+      "data": null,
+      "errors": [
+        "Value 'ADMIN' does not exist in 'Role' enum."
+      ]
+    },
+    {
+      "id": "lower-boundary",
+      "requirement": "quantity-min",
+      "passed": true,
+      "data": null,
+      "errors": [
+        "quantity must be 1..100"
+      ]
+    },
+    {
+      "id": "upper-boundary",
+      "requirement": "quantity-max",
+      "passed": true,
+      "data": null,
+      "errors": [
+        "quantity must be 1..100"
+      ]
+    },
+    {
+      "id": "authorization",
+      "requirement": "editor-only",
+      "passed": true,
+      "data": null,
+      "errors": [
+        "Unauthorized"
+      ]
+    },
+    {
+      "id": "unknown-field",
+      "requirement": "schema-fields",
+      "passed": true,
+      "data": null,
+      "errors": [
+        "Cannot query field 'password' on type 'Item'."
+      ]
+    }
+  ]
+}

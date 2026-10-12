@@ -1,0 +1,619 @@
+[
+  {
+    "id": "stats-descriptive",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Distributions, percentiles, and misleading averages",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish population from sample",
+      "Use median and p95 for skewed latency",
+      "Understand variance and standard deviation"
+    ],
+    "relevance": "Reliability reports need to describe the customer experience beyond a single average.",
+    "sections": [
+      {
+        "title": "Location and spread",
+        "paragraphs": [
+          "The population is the full set you care about; a sample is the subset you observe. The mean adds values and divides by count. The median is the midpoint after sorting. A few long timeouts can raise the mean far above most requests.",
+          "Variance summarizes squared deviations from the mean; standard deviation returns to the original unit. Sample variance commonly uses n-1 to estimate population variance. Percentiles summarize tails, but estimates depend on sample size and interpolation policy."
+        ],
+        "code": "import statistics\nlatency = [100, 110, 120, 125, 900]\nprint(statistics.mean(latency))  # 271\nprint(statistics.median(latency))  # 120"
+      },
+      {
+        "title": "Measure the distribution, not just one number",
+        "paragraphs": [
+          "Latency is often right-skewed: many fast responses and a few slow ones. A normal-distribution assumption may be a poor fit. Plot or inspect the observed distribution before choosing a method.",
+          "A p95 from 20 requests is fragile. Report sample count, workload, measurement window, and error rate. Excluding timeouts improves reported latency while hiding the worst outcomes; report them separately and state the censoring policy."
+        ]
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "Mean and median describe center, while variance and standard deviation describe spread. Percentiles describe thresholds in an ordered sample under a stated convention. A latency report should include sample count, failure count and tail statistics because dropping timed-out requests can make an outage appear faster.",
+          "Population variance divides by N when describing the full declared population; sample variance often uses N\u22121 when estimating population variance under appropriate assumptions. Neither formula fixes a biased sample. Compare cold and warm requests, input lengths and concurrency before attributing a latency shift to a model change. Use a small hand-computed sample to test calculations and retain raw durations for investigating tail events."
+        ]
+      }
+    ],
+    "mistake": "An average latency improvement can coexist with a worse tail and more timeouts.",
+    "takeaway": "Report central tendency, spread, tails, and failure count together.",
+    "exercise": {
+      "id": "stats-descriptive-exercise",
+      "kind": "choice",
+      "prompt": "Latencies are 100, 110, 120, 125, and 900 ms. What is the median?",
+      "answer": "120 ms",
+      "explanation": "Sort the five values and take the middle value.",
+      "hints": [
+        "Start with the invariant: distinguish population from sample.",
+        "Consider this constraint: An average latency improvement can coexist with a worse tail and more timeouts.",
+        "Work through a tiny example before generalizing. Report central tendency, spread, tails, and failure count together.",
+        "Sort the five values and take the middle value."
+      ],
+      "options": [
+        "271 ms",
+        "120 ms",
+        "900 ms"
+      ]
+    },
+    "quiz": {
+      "question": "Why is p95 from 20 observations uncertain?",
+      "options": [
+        "Percentiles are never useful",
+        "Very few observations inform the tail",
+        "The mean is always better"
+      ],
+      "answer": 1,
+      "explanation": "A small number of tail observations makes the estimate unstable."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://docs.python.org/3/library/statistics.html"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "p04-checkpoint"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-statistics-001",
+      "bridge-statistics-002",
+      "bridge-statistics-003",
+      "q-4",
+      "bridge-statistics-016",
+      "bridge-statistics-017",
+      "q-13",
+      "q-18"
+    ]
+  },
+  {
+    "id": "stats-probability",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Conditional probability and base rates",
+    "minutes": 26,
+    "objectives": [
+      "Distinguish P(alert|defect) from P(defect|alert)",
+      "Use base rates when interpreting classifiers",
+      "Recognize dependence between repeated outcomes"
+    ],
+    "relevance": "A failure triage model with impressive recall can still overwhelm engineers with false alerts when product defects are rare.",
+    "sections": [
+      {
+        "title": "A probability needs a denominator",
+        "paragraphs": [
+          "P(A|B) is the probability of A among cases where B occurred. It differs from P(B|A). Recall asks how many actual defects were flagged; precision asks how many flags were actual defects.",
+          "Suppose 1% of 10,000 failures are product defects. A detector catches 90 of 100 defects and falsely flags 5% of the 9,900 others, or 495 cases. Precision is 90/(90+495), about 15.4%, despite 90% recall."
+        ]
+      },
+      {
+        "title": "Bernoulli and binomial models",
+        "paragraphs": [
+          "A single binary outcome can be modeled as Bernoulli with probability p. The binomial counts successes in n independent trials with the same p. These assumptions matter: repeated chatbot turns from the same conversation can be correlated.",
+          "Repeated flaky-test runs under shared infrastructure may fail together during an outage. Treating them as independent evidence produces overly narrow confidence intervals. Resample or analyze at the independent unit, such as build or conversation."
+        ]
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "Suppose only 1% of runs are true product defects, a detector finds 90% of them, and it alerts on 5% of non-defects. Among 10,000 runs, about 90 alerts are true positives and 495 are false positives, so positive predictive value is only 90/585, about 15.4%. High sensitivity does not imply trustworthy alerts when the base rate is low.",
+          "Conditional probabilities depend on what is being conditioned on: P(alert|defect) differs from P(defect|alert). Bernoulli models describe one binary outcome and binomial models count independent trials with a common success probability. Related CI retries violate independence, so choose the sampling unit carefully. Test the Bayes calculation with explicit counts and consider human-review capacity when setting alert thresholds."
+        ]
+      }
+    ],
+    "mistake": "High recall does not guarantee that a positive prediction is likely to be a true defect.",
+    "takeaway": "Use the production base rate and analyze the correct independent unit.",
+    "exercise": {
+      "id": "stats-probability-exercise",
+      "kind": "choice",
+      "prompt": "A detector finds 90 true defects and produces 495 false alarms. Approximate precision?",
+      "answer": "15.4%",
+      "explanation": "Precision = true positives / all positive predictions = 90/585.",
+      "hints": [
+        "Start with the invariant: distinguish p(alert|defect) from p(defect|alert).",
+        "Consider this constraint: High recall does not guarantee that a positive prediction is likely to be a true defect.",
+        "Work through a tiny example before generalizing. Use the production base rate and analyze the correct independent unit.",
+        "Precision = true positives / all positive predictions = 90/585."
+      ],
+      "options": [
+        "90%",
+        "15.4%",
+        "99%"
+      ]
+    },
+    "quiz": {
+      "question": "Which independence assumption is most questionable?",
+      "options": [
+        "Different independently sampled requests",
+        "Ten turns from the same conversation",
+        "Separate randomized users"
+      ],
+      "answer": 1,
+      "explanation": "Turns share context and are likely correlated."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://www.itl.nist.gov/div898/handbook/eda/section3/eda366i.htm"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "stats-descriptive"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-statistics-001",
+      "bridge-statistics-002",
+      "bridge-statistics-003",
+      "q-4",
+      "bridge-statistics-016",
+      "bridge-statistics-017",
+      "q-13",
+      "q-18"
+    ]
+  },
+  {
+    "id": "stats-comparison",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Is 85% really better than 82%?",
+    "minutes": 30,
+    "objectives": [
+      "Separate effect size from uncertainty",
+      "Design paired model comparisons",
+      "Avoid interpreting p-values as truth probabilities"
+    ],
+    "relevance": "A small eval-score increase should not trigger a model migration unless the benefit is credible and useful.",
+    "sections": [
+      {
+        "title": "The missing information",
+        "paragraphs": [
+          "Model A scores 82% and B scores 85%. The observed difference is three percentage points. Without sample size, dataset composition, pairing, repeated runs, and uncertainty, you cannot judge whether the difference generalizes.",
+          "Evaluate both versions on the same held-out cases to reduce noise from case difficulty. Analyze per-case differences. A paired bootstrap resamples case IDs and recomputes the mean difference; keep conversational clusters together."
+        ]
+      },
+      {
+        "title": "Statistical versus practical significance",
+        "paragraphs": [
+          "A confidence interval expresses uncertainty under a sampling procedure; it is not a probability that this specific fixed parameter lies in the realized interval. A p-value measures how incompatible the observations are with a specified null model, not the chance that the null is true.",
+          "Predefine a minimum worthwhile effect and release constraints for latency, cost, safety, and critical slices. A statistically detectable one-point improvement may be worthless if it doubles cost. A non-significant result is not proof of equivalence."
+        ]
+      },
+      {
+        "title": "Experiment discipline",
+        "paragraphs": [
+          "A false positive (Type I error) rejects a true null. A false negative (Type II error) misses a real effect. Repeatedly checking many prompt variants until one passes increases false-positive risk.",
+          "State the hypothesis and stopping rule first. Keep a final untouched evaluation set, report all important slices, and investigate disagreements with human review. Never cherry-pick the most favorable judge configuration."
+        ]
+      }
+    ],
+    "mistake": "A higher point estimate alone does not establish a reliable or useful improvement.",
+    "takeaway": "Compare paired outcomes, uncertainty, practical effect, and release constraints.",
+    "exercise": {
+      "id": "stats-comparison-exercise",
+      "kind": "choice",
+      "prompt": "A scores 82%, B 85%. What is the best next step?",
+      "answer": "Inspect paired sample size, uncertainty, and critical slices",
+      "explanation": "The point difference is incomplete evidence. Use the same held-out cases and inspect uncertainty and operational tradeoffs.",
+      "hints": [
+        "Start with the invariant: separate effect size from uncertainty.",
+        "Consider this constraint: A higher point estimate alone does not establish a reliable or useful improvement.",
+        "Work through a tiny example before generalizing. Compare paired outcomes, uncertainty, practical effect, and release constraints.",
+        "The point difference is incomplete evidence. Use the same held-out cases and inspect uncertainty and operational tradeoffs."
+      ],
+      "options": [
+        "Ship B immediately",
+        "Inspect paired sample size, uncertainty, and critical slices",
+        "Assume no difference exists"
+      ]
+    },
+    "quiz": {
+      "question": "A p-value of 0.03 means what?",
+      "options": [
+        "The null has 3% probability of being true",
+        "The result is relatively incompatible with the specified null model",
+        "B is 97% accurate"
+      ],
+      "answer": 1,
+      "explanation": "It describes evidence under a null model, not a posterior probability."
+    },
+    "checkpoint": {
+      "question": "B improves mean score but worsens a safety-critical slice. What should happen?",
+      "options": [
+        "Ship based on the mean",
+        "Investigate and enforce the predefined safety gate",
+        "Delete that slice"
+      ],
+      "answer": 1,
+      "explanation": "A critical release constraint cannot be averaged away."
+    },
+    "sources": [
+      "https://www.itl.nist.gov/div898/handbook/prc/section1/prc1.htm"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "stats-probability"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-statistics-001",
+      "bridge-statistics-002",
+      "bridge-statistics-003",
+      "q-4",
+      "bridge-statistics-016",
+      "bridge-statistics-017",
+      "q-13",
+      "q-18"
+    ]
+  },
+  {
+    "id": "stats-bootstrap",
+    "phase": 5,
+    "module": "Statistics for quality",
+    "title": "Bootstrap evaluation differences",
+    "minutes": 26,
+    "objectives": [
+      "Resample paired cases with replacement",
+      "Compute an interval for score difference",
+      "State limitations of your evaluation sample"
+    ],
+    "relevance": "Resampling provides an accessible way to quantify uncertainty while preserving per-case model comparisons.",
+    "sections": [
+      {
+        "title": "The resampling idea",
+        "paragraphs": [
+          "A bootstrap treats your observed independent cases as an empirical population. Sample n case indices with replacement, calculate a statistic, repeat many times, and summarize the resulting distribution.",
+          "For paired evaluation, compute B-A for each case before resampling. Do not sample A and B independently when their scores correspond to the same cases. A percentile interval is useful for exploration but can be inaccurate in small or biased samples."
+        ],
+        "code": "import numpy as np\ndiff = np.array([0, 1, -1, 0, 1, 0, 1, 0], dtype=float)\nrng = np.random.default_rng(42)\nmeans = [rng.choice(diff, size=len(diff), replace=True).mean()\n         for _ in range(2000)]\nprint(np.percentile(means, [2.5, 97.5]))"
+      },
+      {
+        "title": "What an interval cannot fix",
+        "paragraphs": [
+          "Bootstrap does not repair a biased dataset, a miscalibrated judge, or leakage from tuning on evaluation cases. A narrow interval around a biased score is still misleading.",
+          "For latency, evaluate comparable workloads and resample independent sessions when requests share a session. For correctness, retain human-adjudicated failures and report uncertainty for critical slices separately."
+        ]
+      },
+      {
+        "title": "Engineering boundaries and independent checks",
+        "paragraphs": [
+          "Bootstrap intervals depend on the data representing the target population and on the resampling unit. Resampling individual retries from the same incident treats correlated observations as independent and can make intervals too narrow. A grouped bootstrap samples incidents, retaining their associated observations together.",
+          "A fixed seed permits a reproducible teaching result but does not establish interval coverage for every distribution or tiny sample. Compare paired candidate-minus-baseline scores within each case before resampling paired differences. Report effect size and interval, not only whether zero is excluded. Test one observation, constant observations and a skewed sample; explain which conclusions remain uncertain when the dataset is small or unrepresentative."
+        ]
+      }
+    ],
+    "mistake": "Resampling individual turns from one conversation breaks the independence assumption.",
+    "takeaway": "The independent sampling unit determines what confidence means.",
+    "exercise": {
+      "id": "stats-bootstrap-exercise",
+      "kind": "python",
+      "prompt": "Implement paired_differences(a, b): return a NumPy array of b-a. Reject unequal shapes.",
+      "answer": "",
+      "explanation": "Convert both inputs to arrays, assert shape equality, then subtract a from b.",
+      "hints": [
+        "Start with the invariant: resample paired cases with replacement.",
+        "Consider this constraint: Resampling individual turns from one conversation breaks the independence assumption.",
+        "Work through a tiny example before generalizing. The independent sampling unit determines what confidence means.",
+        "Convert both inputs to arrays, assert shape equality, then subtract a from b."
+      ],
+      "starter": "import numpy as np\n\ndef paired_differences(a, b):\n    return np.array([])\n\nprint(paired_differences([0, 1], [1, 1]))",
+      "tests": "import numpy as np\nassert np.array_equal(paired_differences([0,1],[1,1]), np.array([1,0]))\nassert np.array_equal(paired_differences([1,0],[0,1]), np.array([-1,1]))\ntry:\n    paired_differences([1],[1,0])\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError(\"Reject unequal shapes\")",
+      "solution": "import numpy as np\ndef paired_differences(a, b):\n    a, b = np.asarray(a), np.asarray(b)\n    if a.shape != b.shape:\n        raise ValueError(\"Shape mismatch\")\n    return b - a"
+    },
+    "quiz": {
+      "question": "What does bootstrap fail to repair?",
+      "options": [
+        "Sampling uncertainty",
+        "A biased evaluation dataset",
+        "The need for repeated resampling"
+      ],
+      "answer": 1,
+      "explanation": "Resampling preserves the original sample\u2019s bias."
+    },
+    "checkpoint": {
+      "question": "What should your quality gate measure?",
+      "options": [
+        "Only whether code runs",
+        "The lesson invariant and failure cases",
+        "Only execution speed"
+      ],
+      "answer": 1,
+      "explanation": "A useful gate tests behavior and boundary conditions, not merely successful execution."
+    },
+    "sources": [
+      "https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.choice.html"
+    ],
+    "isPhaseCheckpoint": false,
+    "prerequisites": [
+      "stats-comparison"
+    ],
+    "reviewed": "2026-10-10",
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-statistics-001",
+      "bridge-statistics-002",
+      "bridge-statistics-003",
+      "q-4",
+      "bridge-statistics-016",
+      "bridge-statistics-017",
+      "q-13",
+      "q-18"
+    ]
+  },
+  {
+    "id": "p05-experiments",
+    "phase": 5,
+    "module": "Statistics For Quality And AI Evaluation",
+    "title": "Confidence intervals, power, and A/B experiments",
+    "minutes": 35,
+    "objectives": [
+      "Confidence intervals, power, and A/B experiments",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects confidence intervals, power, and a/b experiments with test contracts, failure triage, and evidence for release. Evaluate the 82%-versus-85% claim using matched outcomes, confidence intervals, cost, latency, and critical risk slices.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A sample estimates a population; uncertainty depends on the sampling process and the independent unit. A 95% confidence procedure covers the fixed parameter in 95% of repeated samples under its assumptions. It does not assign 95% probability to this realized interval.",
+          "A hypothesis test compares evidence with a specified null model. Type I error rejects a true null; Type II error misses a real effect. Statistical power depends on effect size, noise, sample size, and the decision threshold."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Pre-register the minimum practical improvement, dataset slices, randomization unit, stopping rule, and safety constraints. Use a paired test when both models answer the same cases; randomize users or sessions for an online A/B test when turns share context.",
+          "For a proportion, a Wilson interval is often more stable near zero or one than the normal approximation. For paired differences, resample independent case or conversation IDs. State the method and assumptions with the score."
+        ],
+        "code": "import math\ndef wilson(successes,n,z=1.96):\n    if n <= 0: raise ValueError(\"positive sample size required\")\n    p=successes/n\n    center=(p+z*z/(2*n))/(1+z*z/n)\n    half=z*math.sqrt(p*(1-p)/n+z*z/(4*n*n))/(1+z*z/n)\n    return center-half,center+half\nprint(wilson(85,100))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Repeatedly testing many prompt variants until one appears significant raises false-positive risk. Looking only at overall mean hides subgroup regressions; correlation between prompt length and accuracy does not establish that longer prompts cause accuracy.",
+          "Check treatment assignment, missing outcomes, judge consistency, and sample ratio mismatch. Do not interpret an inconclusive result as proof of equivalence; define an equivalence margin and gather enough evidence for that question."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Evaluate the 82%-versus-85% claim using matched outcomes, confidence intervals, cost, latency, and critical risk slices. Report effect size in percentage points and say whether it crosses the predefined useful threshold.",
+          "Experiment discipline is a release skill: an SDET must distinguish a lucky benchmark run from a robust improvement. Retain all variants and the untouched final dataset in the experiment lineage."
+        ]
+      }
+    ],
+    "mistake": "Repeatedly testing many prompt variants until one appears significant raises false-positive risk. Looking only at overall mean hides subgroup regressions; correlation between prompt length and accuracy does not establish that longer prompts cause accuracy.",
+    "takeaway": "Evaluate the 82%-versus-85% claim using matched outcomes, confidence intervals, cost, latency, and critical risk slices.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement effect_pp(a, b): success proportions must be between 0 and 1; return B-A in percentage points.",
+      "answer": "",
+      "solution": "def effect_pp(a,b):\n    if not (0 <= a <= 1 and 0 <= b <= 1): raise ValueError(\"invalid proportion\")\n    return (b-a)*100",
+      "starter": "def effect_pp(a,b):\n    return 0",
+      "tests": "assert abs(effect_pp(.82,.85)-3)<1e-9\nassert abs(effect_pp(.9,.8)+10)<1e-9\ntry: effect_pp(-.1,.8)\nexcept ValueError: pass\nelse: raise AssertionError(\"reject invalid proportions\")",
+      "id": "p05-experiments-exercise",
+      "hints": [
+        "A sample estimates a population; uncertainty depends on the sampling process and the independent unit.",
+        "Repeatedly testing many prompt variants until one appears significant raises false-positive risk.",
+        "Pre-register the minimum practical improvement, dataset slices, randomization unit, stopping rule, and safety constraints.",
+        "Evaluate the 82%-versus-85% claim using matched outcomes, confidence intervals, cost, latency, and critical risk slices."
+      ],
+      "explanation": "def effect_pp(a,b):\n    if not (0 <= a <= 1 and 0 <= b <= 1): raise ValueError(\"invalid proportion\")\n    return (b-a)*100"
+    },
+    "quiz": {
+      "question": "A non-significant difference establishes what?",
+      "options": [
+        "Equivalence",
+        "Insufficient evidence under this test",
+        "No possible effect"
+      ],
+      "answer": 1,
+      "explanation": "Equivalence requires its own margin, assumptions, and adequate power."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A non-significant difference establishes what?",
+      "options": [
+        "Equivalence",
+        "Insufficient evidence under this test",
+        "No possible effect"
+      ],
+      "answer": 1,
+      "explanation": "Equivalence requires its own margin, assumptions, and adequate power."
+    },
+    "sources": [
+      "https://www.itl.nist.gov/div898/handbook/",
+      "https://docs.python.org/3/library/statistics.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "stats-bootstrap"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-statistics-001",
+      "bridge-statistics-002",
+      "bridge-statistics-003",
+      "q-4",
+      "bridge-statistics-016",
+      "bridge-statistics-017",
+      "q-13",
+      "q-18"
+    ]
+  },
+  {
+    "id": "p05-checkpoint",
+    "phase": 5,
+    "module": "Statistics For Quality And AI Evaluation",
+    "title": "Phase 05 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 05 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 05 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Evaluate the 82%-versus-85% claim using matched outcomes, confidence intervals, cost, latency, and critical risk slices.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects confidence intervals, power, and a/b experiments to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Pre-register the minimum practical improvement, dataset slices, randomization unit, stopping rule, and safety constraints. Use a paired test when both models answer the same cases; randomize users or sessions for an online A/B test when turns share context.",
+          "For a proportion, a Wilson interval is often more stable near zero or one than the normal approximation. For paired differences, resample independent case or conversation IDs. State the method and assumptions with the score.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "import math\ndef wilson(successes,n,z=1.96):\n    if n <= 0: raise ValueError(\"positive sample size required\")\n    p=successes/n\n    center=(p+z*z/(2*n))/(1+z*z/n)\n    half=z*math.sqrt(p*(1-p)/n+z*z/(4*n*n))/(1+z*z/n)\n    return center-half,center+half\nprint(wilson(85,100))",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Repeatedly testing many prompt variants until one appears significant raises false-positive risk. Looking only at overall mean hides subgroup regressions; correlation between prompt length and accuracy does not establish that longer prompts cause accuracy.",
+          "Check treatment assignment, missing outcomes, judge consistency, and sample ratio mismatch. Do not interpret an inconclusive result as proof of equivalence; define an equivalence margin and gather enough evidence for that question.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Evaluate the 82%-versus-85% claim using matched outcomes, confidence intervals, cost, latency, and critical risk slices. Report effect size in percentage points and say whether it crosses the predefined useful threshold.",
+          "Experiment discipline is a release skill: an SDET must distinguish a lucky benchmark run from a robust improvement. Retain all variants and the untouched final dataset in the experiment lineage.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "Repeatedly testing many prompt variants until one appears significant raises false-positive risk. Looking only at overall mean hides subgroup regressions; correlation between prompt length and accuracy does not establish that longer prompts cause accuracy.",
+    "takeaway": "Evaluate the 82%-versus-85% claim using matched outcomes, confidence intervals, cost, latency, and critical risk slices.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Confidence intervals, power, and A/B experiments to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nEvaluate the 82%-versus-85% claim using matched outcomes, confidence intervals, cost, latency, and critical risk slices.",
+      "id": "p05-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects confidence intervals, power, and a/b experiments to the shared CI quality platform.",
+        "Repeatedly testing many prompt variants until one appears significant raises false-positive risk.",
+        "Pre-register the minimum practical improvement, dataset slices, randomization unit, stopping rule, and safety constraints.",
+        "Evaluate the 82%-versus-85% claim using matched outcomes, confidence intervals, cost, latency, and critical risk slices."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nEvaluate the 82%-versus-85% claim using matched outcomes, confidence intervals, cost, latency, and critical risk slices."
+    },
+    "quiz": {
+      "question": "A candidate for confidence intervals, power, and a/b experiments meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for confidence intervals, power, and a/b experiments meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://www.itl.nist.gov/div898/handbook/",
+      "https://docs.python.org/3/library/statistics.html"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p05-experiments"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-statistics-001",
+      "bridge-statistics-002",
+      "bridge-statistics-003",
+      "q-4",
+      "bridge-statistics-016",
+      "bridge-statistics-017",
+      "q-13",
+      "q-18"
+    ]
+  }
+]

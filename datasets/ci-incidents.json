@@ -1,0 +1,1625 @@
+{
+  "version": "synthetic-ci-v1",
+  "records": [
+    {
+      "id": "F001",
+      "group": "incident-0",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 1; build 0",
+      "duration_ms": 123
+    },
+    {
+      "id": "F002",
+      "group": "incident-0",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 2; build 0",
+      "duration_ms": 146
+    },
+    {
+      "id": "F003",
+      "group": "incident-0",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 3; build 0",
+      "duration_ms": 169
+    },
+    {
+      "id": "F004",
+      "group": "incident-0",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 4; build 0",
+      "duration_ms": 192
+    },
+    {
+      "id": "F005",
+      "group": "incident-1",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 5; build 1",
+      "duration_ms": 215
+    },
+    {
+      "id": "F006",
+      "group": "incident-1",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 6; build 1",
+      "duration_ms": 238
+    },
+    {
+      "id": "F007",
+      "group": "incident-1",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 7; build 1",
+      "duration_ms": 261
+    },
+    {
+      "id": "F008",
+      "group": "incident-1",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 8; build 1",
+      "duration_ms": 284
+    },
+    {
+      "id": "F009",
+      "group": "incident-1",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 9; build 1",
+      "duration_ms": 307
+    },
+    {
+      "id": "F010",
+      "group": "incident-2",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 10; build 2",
+      "duration_ms": 330
+    },
+    {
+      "id": "F011",
+      "group": "incident-2",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 11; build 2",
+      "duration_ms": 353
+    },
+    {
+      "id": "F012",
+      "group": "incident-2",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 12; build 2",
+      "duration_ms": 376
+    },
+    {
+      "id": "F013",
+      "group": "incident-2",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 13; build 2",
+      "duration_ms": 399
+    },
+    {
+      "id": "F014",
+      "group": "incident-2",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 14; build 2",
+      "duration_ms": 422
+    },
+    {
+      "id": "F015",
+      "group": "incident-3",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 15; build 3",
+      "duration_ms": 445
+    },
+    {
+      "id": "F016",
+      "group": "incident-3",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 16; build 3",
+      "duration_ms": 468
+    },
+    {
+      "id": "F017",
+      "group": "incident-3",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 17; build 3",
+      "duration_ms": 100
+    },
+    {
+      "id": "F018",
+      "group": "incident-3",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 18; build 3",
+      "duration_ms": 123
+    },
+    {
+      "id": "F019",
+      "group": "incident-3",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 19; build 3",
+      "duration_ms": 146
+    },
+    {
+      "id": "F020",
+      "group": "incident-4",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 20; build 4",
+      "duration_ms": 169
+    },
+    {
+      "id": "F021",
+      "group": "incident-4",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 21; build 4",
+      "duration_ms": 192
+    },
+    {
+      "id": "F022",
+      "group": "incident-4",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 22; build 4",
+      "duration_ms": 215
+    },
+    {
+      "id": "F023",
+      "group": "incident-4",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 23; build 4",
+      "duration_ms": 238
+    },
+    {
+      "id": "F024",
+      "group": "incident-4",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 24; build 4",
+      "duration_ms": 261
+    },
+    {
+      "id": "F025",
+      "group": "incident-5",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 25; build 5",
+      "duration_ms": 284
+    },
+    {
+      "id": "F026",
+      "group": "incident-5",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 26; build 5",
+      "duration_ms": 307
+    },
+    {
+      "id": "F027",
+      "group": "incident-5",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 27; build 5",
+      "duration_ms": 330
+    },
+    {
+      "id": "F028",
+      "group": "incident-5",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 28; build 5",
+      "duration_ms": 353
+    },
+    {
+      "id": "F029",
+      "group": "incident-5",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 29; build 5",
+      "duration_ms": 376
+    },
+    {
+      "id": "F030",
+      "group": "incident-6",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 30; build 6",
+      "duration_ms": 399
+    },
+    {
+      "id": "F031",
+      "group": "incident-6",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 31; build 6",
+      "duration_ms": 422
+    },
+    {
+      "id": "F032",
+      "group": "incident-6",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 32; build 6",
+      "duration_ms": 445
+    },
+    {
+      "id": "F033",
+      "group": "incident-6",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 33; build 6",
+      "duration_ms": 468
+    },
+    {
+      "id": "F034",
+      "group": "incident-6",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 34; build 6",
+      "duration_ms": 100
+    },
+    {
+      "id": "F035",
+      "group": "incident-7",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 35; build 7",
+      "duration_ms": 123
+    },
+    {
+      "id": "F036",
+      "group": "incident-7",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 36; build 7",
+      "duration_ms": 146
+    },
+    {
+      "id": "F037",
+      "group": "incident-7",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 37; build 7",
+      "duration_ms": 169
+    },
+    {
+      "id": "F038",
+      "group": "incident-7",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 38; build 7",
+      "duration_ms": 192
+    },
+    {
+      "id": "F039",
+      "group": "incident-7",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 39; build 7",
+      "duration_ms": 215
+    },
+    {
+      "id": "F040",
+      "group": "incident-8",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 40; build 8",
+      "duration_ms": 238
+    },
+    {
+      "id": "F041",
+      "group": "incident-8",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 41; build 8",
+      "duration_ms": 261
+    },
+    {
+      "id": "F042",
+      "group": "incident-8",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 42; build 8",
+      "duration_ms": 284
+    },
+    {
+      "id": "F043",
+      "group": "incident-8",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 43; build 8",
+      "duration_ms": 307
+    },
+    {
+      "id": "F044",
+      "group": "incident-8",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 44; build 8",
+      "duration_ms": 330
+    },
+    {
+      "id": "F045",
+      "group": "incident-9",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 45; build 9",
+      "duration_ms": 353
+    },
+    {
+      "id": "F046",
+      "group": "incident-9",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 46; build 9",
+      "duration_ms": 376
+    },
+    {
+      "id": "F047",
+      "group": "incident-9",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 47; build 9",
+      "duration_ms": 399
+    },
+    {
+      "id": "F048",
+      "group": "incident-9",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 48; build 9",
+      "duration_ms": 422
+    },
+    {
+      "id": "F049",
+      "group": "incident-9",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 49; build 9",
+      "duration_ms": 445
+    },
+    {
+      "id": "F050",
+      "group": "incident-10",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 50; build 10",
+      "duration_ms": 468
+    },
+    {
+      "id": "F051",
+      "group": "incident-10",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 51; build 10",
+      "duration_ms": 100
+    },
+    {
+      "id": "F052",
+      "group": "incident-10",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 52; build 10",
+      "duration_ms": 123
+    },
+    {
+      "id": "F053",
+      "group": "incident-10",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 53; build 10",
+      "duration_ms": 146
+    },
+    {
+      "id": "F054",
+      "group": "incident-10",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 54; build 10",
+      "duration_ms": 169
+    },
+    {
+      "id": "F055",
+      "group": "incident-11",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 55; build 11",
+      "duration_ms": 192
+    },
+    {
+      "id": "F056",
+      "group": "incident-11",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 56; build 11",
+      "duration_ms": 215
+    },
+    {
+      "id": "F057",
+      "group": "incident-11",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 57; build 11",
+      "duration_ms": 238
+    },
+    {
+      "id": "F058",
+      "group": "incident-11",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 58; build 11",
+      "duration_ms": 261
+    },
+    {
+      "id": "F059",
+      "group": "incident-11",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 59; build 11",
+      "duration_ms": 284
+    },
+    {
+      "id": "F060",
+      "group": "incident-12",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 60; build 12",
+      "duration_ms": 307
+    },
+    {
+      "id": "F061",
+      "group": "incident-12",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 61; build 12",
+      "duration_ms": 330
+    },
+    {
+      "id": "F062",
+      "group": "incident-12",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 62; build 12",
+      "duration_ms": 353
+    },
+    {
+      "id": "F063",
+      "group": "incident-12",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 63; build 12",
+      "duration_ms": 376
+    },
+    {
+      "id": "F064",
+      "group": "incident-12",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 64; build 12",
+      "duration_ms": 399
+    },
+    {
+      "id": "F065",
+      "group": "incident-13",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 65; build 13",
+      "duration_ms": 422
+    },
+    {
+      "id": "F066",
+      "group": "incident-13",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 66; build 13",
+      "duration_ms": 445
+    },
+    {
+      "id": "F067",
+      "group": "incident-13",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 67; build 13",
+      "duration_ms": 468
+    },
+    {
+      "id": "F068",
+      "group": "incident-13",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 68; build 13",
+      "duration_ms": 100
+    },
+    {
+      "id": "F069",
+      "group": "incident-13",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 69; build 13",
+      "duration_ms": 123
+    },
+    {
+      "id": "F070",
+      "group": "incident-14",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 70; build 14",
+      "duration_ms": 146
+    },
+    {
+      "id": "F071",
+      "group": "incident-14",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 71; build 14",
+      "duration_ms": 169
+    },
+    {
+      "id": "F072",
+      "group": "incident-14",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 72; build 14",
+      "duration_ms": 192
+    },
+    {
+      "id": "F073",
+      "group": "incident-14",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 73; build 14",
+      "duration_ms": 215
+    },
+    {
+      "id": "F074",
+      "group": "incident-14",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 74; build 14",
+      "duration_ms": 238
+    },
+    {
+      "id": "F075",
+      "group": "incident-15",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 75; build 15",
+      "duration_ms": 261
+    },
+    {
+      "id": "F076",
+      "group": "incident-15",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 76; build 15",
+      "duration_ms": 284
+    },
+    {
+      "id": "F077",
+      "group": "incident-15",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 77; build 15",
+      "duration_ms": 307
+    },
+    {
+      "id": "F078",
+      "group": "incident-15",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 78; build 15",
+      "duration_ms": 330
+    },
+    {
+      "id": "F079",
+      "group": "incident-15",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 79; build 15",
+      "duration_ms": 353
+    },
+    {
+      "id": "F080",
+      "group": "incident-16",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 80; build 16",
+      "duration_ms": 376
+    },
+    {
+      "id": "F081",
+      "group": "incident-16",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 81; build 16",
+      "duration_ms": 399
+    },
+    {
+      "id": "F082",
+      "group": "incident-16",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 82; build 16",
+      "duration_ms": 422
+    },
+    {
+      "id": "F083",
+      "group": "incident-16",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 83; build 16",
+      "duration_ms": 445
+    },
+    {
+      "id": "F084",
+      "group": "incident-16",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 84; build 16",
+      "duration_ms": 468
+    },
+    {
+      "id": "F085",
+      "group": "incident-17",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 85; build 17",
+      "duration_ms": 100
+    },
+    {
+      "id": "F086",
+      "group": "incident-17",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 86; build 17",
+      "duration_ms": 123
+    },
+    {
+      "id": "F087",
+      "group": "incident-17",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 87; build 17",
+      "duration_ms": 146
+    },
+    {
+      "id": "F088",
+      "group": "incident-17",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 88; build 17",
+      "duration_ms": 169
+    },
+    {
+      "id": "F089",
+      "group": "incident-17",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 89; build 17",
+      "duration_ms": 192
+    },
+    {
+      "id": "F090",
+      "group": "incident-18",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 90; build 18",
+      "duration_ms": 215
+    },
+    {
+      "id": "F091",
+      "group": "incident-18",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 91; build 18",
+      "duration_ms": 238
+    },
+    {
+      "id": "F092",
+      "group": "incident-18",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 92; build 18",
+      "duration_ms": 261
+    },
+    {
+      "id": "F093",
+      "group": "incident-18",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 93; build 18",
+      "duration_ms": 284
+    },
+    {
+      "id": "F094",
+      "group": "incident-18",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 94; build 18",
+      "duration_ms": 307
+    },
+    {
+      "id": "F095",
+      "group": "incident-19",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 95; build 19",
+      "duration_ms": 330
+    },
+    {
+      "id": "F096",
+      "group": "incident-19",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 96; build 19",
+      "duration_ms": 353
+    },
+    {
+      "id": "F097",
+      "group": "incident-19",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 97; build 19",
+      "duration_ms": 376
+    },
+    {
+      "id": "F098",
+      "group": "incident-19",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 98; build 19",
+      "duration_ms": 399
+    },
+    {
+      "id": "F099",
+      "group": "incident-19",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 99; build 19",
+      "duration_ms": 422
+    },
+    {
+      "id": "F100",
+      "group": "incident-20",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 100; build 20",
+      "duration_ms": 445
+    },
+    {
+      "id": "F101",
+      "group": "incident-20",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 101; build 20",
+      "duration_ms": 468
+    },
+    {
+      "id": "F102",
+      "group": "incident-20",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 102; build 20",
+      "duration_ms": 100
+    },
+    {
+      "id": "F103",
+      "group": "incident-20",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 103; build 20",
+      "duration_ms": 123
+    },
+    {
+      "id": "F104",
+      "group": "incident-20",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 104; build 20",
+      "duration_ms": 146
+    },
+    {
+      "id": "F105",
+      "group": "incident-21",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 105; build 21",
+      "duration_ms": 169
+    },
+    {
+      "id": "F106",
+      "group": "incident-21",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 106; build 21",
+      "duration_ms": 192
+    },
+    {
+      "id": "F107",
+      "group": "incident-21",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 107; build 21",
+      "duration_ms": 215
+    },
+    {
+      "id": "F108",
+      "group": "incident-21",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 108; build 21",
+      "duration_ms": 238
+    },
+    {
+      "id": "F109",
+      "group": "incident-21",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 109; build 21",
+      "duration_ms": 261
+    },
+    {
+      "id": "F110",
+      "group": "incident-22",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 110; build 22",
+      "duration_ms": 284
+    },
+    {
+      "id": "F111",
+      "group": "incident-22",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 111; build 22",
+      "duration_ms": 307
+    },
+    {
+      "id": "F112",
+      "group": "incident-22",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 112; build 22",
+      "duration_ms": 330
+    },
+    {
+      "id": "F113",
+      "group": "incident-22",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 113; build 22",
+      "duration_ms": 353
+    },
+    {
+      "id": "F114",
+      "group": "incident-22",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 114; build 22",
+      "duration_ms": 376
+    },
+    {
+      "id": "F115",
+      "group": "incident-23",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 115; build 23",
+      "duration_ms": 399
+    },
+    {
+      "id": "F116",
+      "group": "incident-23",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 116; build 23",
+      "duration_ms": 422
+    },
+    {
+      "id": "F117",
+      "group": "incident-23",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 117; build 23",
+      "duration_ms": 445
+    },
+    {
+      "id": "F118",
+      "group": "incident-23",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 118; build 23",
+      "duration_ms": 468
+    },
+    {
+      "id": "F119",
+      "group": "incident-23",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 119; build 23",
+      "duration_ms": 100
+    },
+    {
+      "id": "F120",
+      "group": "incident-24",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 120; build 24",
+      "duration_ms": 123
+    },
+    {
+      "id": "F121",
+      "group": "incident-24",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 121; build 24",
+      "duration_ms": 146
+    },
+    {
+      "id": "F122",
+      "group": "incident-24",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 122; build 24",
+      "duration_ms": 169
+    },
+    {
+      "id": "F123",
+      "group": "incident-24",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 123; build 24",
+      "duration_ms": 192
+    },
+    {
+      "id": "F124",
+      "group": "incident-24",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 124; build 24",
+      "duration_ms": 215
+    },
+    {
+      "id": "F125",
+      "group": "incident-25",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 125; build 25",
+      "duration_ms": 238
+    },
+    {
+      "id": "F126",
+      "group": "incident-25",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 126; build 25",
+      "duration_ms": 261
+    },
+    {
+      "id": "F127",
+      "group": "incident-25",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 127; build 25",
+      "duration_ms": 284
+    },
+    {
+      "id": "F128",
+      "group": "incident-25",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 128; build 25",
+      "duration_ms": 307
+    },
+    {
+      "id": "F129",
+      "group": "incident-25",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 129; build 25",
+      "duration_ms": 330
+    },
+    {
+      "id": "F130",
+      "group": "incident-26",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 130; build 26",
+      "duration_ms": 353
+    },
+    {
+      "id": "F131",
+      "group": "incident-26",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 131; build 26",
+      "duration_ms": 376
+    },
+    {
+      "id": "F132",
+      "group": "incident-26",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 132; build 26",
+      "duration_ms": 399
+    },
+    {
+      "id": "F133",
+      "group": "incident-26",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 133; build 26",
+      "duration_ms": 422
+    },
+    {
+      "id": "F134",
+      "group": "incident-26",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 134; build 26",
+      "duration_ms": 445
+    },
+    {
+      "id": "F135",
+      "group": "incident-27",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 135; build 27",
+      "duration_ms": 468
+    },
+    {
+      "id": "F136",
+      "group": "incident-27",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 136; build 27",
+      "duration_ms": 100
+    },
+    {
+      "id": "F137",
+      "group": "incident-27",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 137; build 27",
+      "duration_ms": 123
+    },
+    {
+      "id": "F138",
+      "group": "incident-27",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 138; build 27",
+      "duration_ms": 146
+    },
+    {
+      "id": "F139",
+      "group": "incident-27",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 139; build 27",
+      "duration_ms": 169
+    },
+    {
+      "id": "F140",
+      "group": "incident-28",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 140; build 28",
+      "duration_ms": 192
+    },
+    {
+      "id": "F141",
+      "group": "incident-28",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 141; build 28",
+      "duration_ms": 215
+    },
+    {
+      "id": "F142",
+      "group": "incident-28",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 142; build 28",
+      "duration_ms": 238
+    },
+    {
+      "id": "F143",
+      "group": "incident-28",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 143; build 28",
+      "duration_ms": 261
+    },
+    {
+      "id": "F144",
+      "group": "incident-28",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 144; build 28",
+      "duration_ms": 284
+    },
+    {
+      "id": "F145",
+      "group": "incident-29",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 145; build 29",
+      "duration_ms": 307
+    },
+    {
+      "id": "F146",
+      "group": "incident-29",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 146; build 29",
+      "duration_ms": 330
+    },
+    {
+      "id": "F147",
+      "group": "incident-29",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 147; build 29",
+      "duration_ms": 353
+    },
+    {
+      "id": "F148",
+      "group": "incident-29",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 148; build 29",
+      "duration_ms": 376
+    },
+    {
+      "id": "F149",
+      "group": "incident-29",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 149; build 29",
+      "duration_ms": 399
+    },
+    {
+      "id": "F150",
+      "group": "incident-30",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 150; build 30",
+      "duration_ms": 422
+    },
+    {
+      "id": "F151",
+      "group": "incident-30",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 151; build 30",
+      "duration_ms": 445
+    },
+    {
+      "id": "F152",
+      "group": "incident-30",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 152; build 30",
+      "duration_ms": 468
+    },
+    {
+      "id": "F153",
+      "group": "incident-30",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 153; build 30",
+      "duration_ms": 100
+    },
+    {
+      "id": "F154",
+      "group": "incident-30",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 154; build 30",
+      "duration_ms": 123
+    },
+    {
+      "id": "F155",
+      "group": "incident-31",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 155; build 31",
+      "duration_ms": 146
+    },
+    {
+      "id": "F156",
+      "group": "incident-31",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 156; build 31",
+      "duration_ms": 169
+    },
+    {
+      "id": "F157",
+      "group": "incident-31",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 157; build 31",
+      "duration_ms": 192
+    },
+    {
+      "id": "F158",
+      "group": "incident-31",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 158; build 31",
+      "duration_ms": 215
+    },
+    {
+      "id": "F159",
+      "group": "incident-31",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 159; build 31",
+      "duration_ms": 238
+    },
+    {
+      "id": "F160",
+      "group": "incident-32",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 160; build 32",
+      "duration_ms": 261
+    },
+    {
+      "id": "F161",
+      "group": "incident-32",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 161; build 32",
+      "duration_ms": 284
+    },
+    {
+      "id": "F162",
+      "group": "incident-32",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 162; build 32",
+      "duration_ms": 307
+    },
+    {
+      "id": "F163",
+      "group": "incident-32",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 163; build 32",
+      "duration_ms": 330
+    },
+    {
+      "id": "F164",
+      "group": "incident-32",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 164; build 32",
+      "duration_ms": 353
+    },
+    {
+      "id": "F165",
+      "group": "incident-33",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 165; build 33",
+      "duration_ms": 376
+    },
+    {
+      "id": "F166",
+      "group": "incident-33",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "PRODUCT_DEFECT",
+      "log": "AssertionError payment total differs from expected amount; synthetic run 166; build 33",
+      "duration_ms": 399
+    },
+    {
+      "id": "F167",
+      "group": "incident-33",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "PRODUCT_DEFECT",
+      "log": "HTTP 500 application checkout violates inventory invariant; synthetic run 167; build 33",
+      "duration_ms": 422
+    },
+    {
+      "id": "F168",
+      "group": "incident-33",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "PRODUCT_DEFECT",
+      "log": "Order API returns duplicate transaction for same key; synthetic run 168; build 33",
+      "duration_ms": 445
+    },
+    {
+      "id": "F169",
+      "group": "incident-33",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "AUTOMATION_DEFECT",
+      "log": "NoSuchElement stale locator after page markup change; synthetic run 169; build 33",
+      "duration_ms": 468
+    },
+    {
+      "id": "F170",
+      "group": "incident-34",
+      "tenant": "beta",
+      "module": "catalog",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Assertion helper compares wrong field in test script; synthetic run 170; build 34",
+      "duration_ms": 100
+    },
+    {
+      "id": "F171",
+      "group": "incident-34",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "AUTOMATION_DEFECT",
+      "log": "Test fixture race accesses page before awaited navigation; synthetic run 171; build 34",
+      "duration_ms": 123
+    },
+    {
+      "id": "F172",
+      "group": "incident-34",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "ENVIRONMENT",
+      "log": "Connection refused database dependency unavailable; synthetic run 172; build 34",
+      "duration_ms": 146
+    },
+    {
+      "id": "F173",
+      "group": "incident-34",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "ENVIRONMENT",
+      "log": "DNS resolution failed for synthetic staging host; synthetic run 173; build 34",
+      "duration_ms": 169
+    },
+    {
+      "id": "F174",
+      "group": "incident-34",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "ENVIRONMENT",
+      "log": "Runner disk full while starting service container; synthetic run 174; build 34",
+      "duration_ms": 192
+    },
+    {
+      "id": "F175",
+      "group": "incident-35",
+      "tenant": "beta",
+      "module": "payment",
+      "category": "TEST_DATA",
+      "log": "Invalid seeded account missing required profile; synthetic run 175; build 35",
+      "duration_ms": 215
+    },
+    {
+      "id": "F176",
+      "group": "incident-35",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "TEST_DATA",
+      "log": "Expired synthetic token in test data fixture; synthetic run 176; build 35",
+      "duration_ms": 238
+    },
+    {
+      "id": "F177",
+      "group": "incident-35",
+      "tenant": "alpha",
+      "module": "auth",
+      "category": "TEST_DATA",
+      "log": "Duplicate fixture key violates data uniqueness; synthetic run 177; build 35",
+      "duration_ms": 261
+    },
+    {
+      "id": "F178",
+      "group": "incident-35",
+      "tenant": "alpha",
+      "module": "payment",
+      "category": "UNKNOWN",
+      "log": "Unhandled failure with no supporting log; synthetic run 178; build 35",
+      "duration_ms": 284
+    },
+    {
+      "id": "F179",
+      "group": "incident-35",
+      "tenant": "alpha",
+      "module": "catalog",
+      "category": "UNKNOWN",
+      "log": "Conflicting observations require incident review; synthetic run 179; build 35",
+      "duration_ms": 307
+    },
+    {
+      "id": "F180",
+      "group": "incident-36",
+      "tenant": "beta",
+      "module": "auth",
+      "category": "UNKNOWN",
+      "log": "Trace truncated before cause is recorded; synthetic run 180; build 36",
+      "duration_ms": 330
+    }
+  ]
+}

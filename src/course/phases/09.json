@@ -1,0 +1,671 @@
+[
+  {
+    "id": "p09-lifecycle",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Pretraining, instruction tuning and grounded generation",
+    "minutes": 35,
+    "objectives": [
+      "Pretraining, instruction tuning and grounded generation",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects pretraining, instruction tuning and grounded generation with test contracts, failure triage, and evidence for release. Build a release dataset with known failures, unknown failures and conflicting evidence.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Pretraining learns a next-token distribution from many sequences. Instruction tuning trains responses to instructions, while preference or reward-based alignment changes which responses are favored. These stages can improve behavior without making the model an authoritative database. A foundation model can be adapted to many tasks; a task classifier produces a narrower output contract.",
+          "At inference, the decoder repeatedly predicts a distribution for the next token and appends a selected token. A fluent explanation of a CI failure can still invent an owner because the training objective rewards plausible sequences rather than verified access to your repository."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Separate system behavior, user request and untrusted retrieved evidence in the request. Supply current failure records with stable evidence IDs, require an UNKNOWN classification when insufficient evidence exists, and validate typed output. Keep an independent deterministic source lookup for citations.",
+          "The local provider adapter records model, prompt version, token counts and finish reason. Live mode uses environment credentials; offline fixtures are explicitly labeled and never described as a live LLM result."
+        ],
+        "code": "result={'category':'UNKNOWN','evidence_ids':[],'needs_review':True}\nassert result['category']!='UNKNOWN' or result['needs_review']",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A team interprets low temperature as factual accuracy. Repeatedly generating a fabricated owner demonstrates the mistake: stable errors are still errors. Another team treats retrieval text as instructions, enabling indirect prompt injection.",
+          "Test missing evidence, contradictory records, stale documentation and refused requests. Score factual claims separately from JSON validity. A valid schema can carry unsupported facts."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Build a release dataset with known failures, unknown failures and conflicting evidence. Verify that classifications are supported, citations resolve and uncertainty triggers escalation. Report abstention rate alongside accepted-answer accuracy.",
+          "Use prompting for behavior, RAG for changing knowledge and fine-tuning for repeated task patterns only after evaluation establishes a need. Version these decisions so a regression can be attributed to a particular change."
+        ]
+      }
+    ],
+    "mistake": "A team interprets low temperature as factual accuracy. Repeatedly generating a fabricated owner demonstrates the mistake: stable errors are still errors. Another team treats retrieval text as instructions, enabling indirect prompt injection.",
+    "takeaway": "Build a release dataset with known failures, unknown failures and conflicting evidence.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement valid_decision(result): UNKNOWN requires needs_review=True; any other category requires at least one evidence_id.",
+      "answer": "",
+      "solution": "def valid_decision(result):\n    return result.get('needs_review') is True if result.get('category')=='UNKNOWN' else bool(result.get('evidence_ids'))",
+      "starter": "def valid_decision(result):\n    return False",
+      "tests": "assert valid_decision({'category':'UNKNOWN','needs_review':True})\nassert not valid_decision({'category':'UNKNOWN','needs_review':False})\nassert not valid_decision({'category':'PRODUCT_DEFECT','evidence_ids':[]})",
+      "id": "p09-lifecycle-exercise",
+      "hints": [
+        "Pretraining learns a next-token distribution from many sequences.",
+        "A team interprets low temperature as factual accuracy.",
+        "Separate system behavior, user request and untrusted retrieved evidence in the request.",
+        "Build a release dataset with known failures, unknown failures and conflicting evidence."
+      ],
+      "explanation": "def valid_decision(result):\n    return result.get('needs_review') is True if result.get('category')=='UNKNOWN' else bool(result.get('evidence_ids'))"
+    },
+    "quiz": {
+      "question": "Does instruction tuning guarantee factual answers?",
+      "options": [
+        "No: external evidence and evaluation remain necessary",
+        "Yes: a fluent answer is verified",
+        "Only if temperature is zero"
+      ],
+      "answer": 0,
+      "explanation": "Training changes response behavior; it does not verify current application facts."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Does instruction tuning guarantee factual answers?",
+      "options": [
+        "No: external evidence and evaluation remain necessary",
+        "Yes: a fluent answer is verified",
+        "Only if temperature is zero"
+      ],
+      "answer": 0,
+      "explanation": "Training changes response behavior; it does not verify current application facts."
+    },
+    "sources": [
+      "https://huggingface.co/docs/transformers/generation_strategies",
+      "https://developers.openai.com/api/docs/guides/text"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p08-checkpoint"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Pretraining",
+      "Instruction tuning",
+      "Hallucination"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-006",
+      "bridge-transformers--llm-007",
+      "bridge-transformers--llm-008",
+      "bridge-phase-09-3",
+      "bridge-phase-09-4",
+      "bridge-phase-09-5",
+      "bridge-phase-09-6",
+      "bridge-phase-09-7"
+    ]
+  },
+  {
+    "id": "p09-decoding",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Temperature, top-p and repeatability",
+    "minutes": 35,
+    "objectives": [
+      "Temperature, top-p and repeatability",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects temperature, top-p and repeatability with test contracts, failure triage, and evidence for release. The decoding calculator exposes temperature and nucleus membership.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Temperature rescales logits before softmax. Lower positive temperature concentrates probability on high-logit tokens; higher temperature spreads it. Top-p keeps the smallest ranked prefix whose cumulative probability reaches p, then renormalizes before sampling. These operations change selection behavior, not the truth of a claim.",
+          "Greedy decoding chooses an argmax, yet provider behavior can still vary with model revisions, tie breaking and execution. Reproducibility means controlling and recording the relevant configuration, then measuring the remaining variation."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Take probabilities [0.6,0.3,0.1]. At p=0.8 the nucleus includes the first two tokens because 0.6 is insufficient and 0.9 reaches the threshold. Their renormalized probabilities are two-thirds and one-third. Sort by descending probability before accumulating.",
+          "For classification, prefer a typed enum with explicit abstention and measure class stability across repeated calls. For test generation, allow variation but measure requirement coverage and executable correctness. Keep generation parameters in the experiment manifest."
+        ],
+        "code": "def nucleus(probs,p):\n    ranked=sorted(enumerate(probs),key=lambda x:-x[1])\n    selected=[];mass=0\n    for i,v in ranked:\n        selected.append(i);mass+=v\n        if mass>=p:break\n    return selected",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "Selecting every token below probability p confuses a per-token threshold with cumulative mass. Applying temperature to already normalized probabilities without the correct transformation changes the distribution incorrectly.",
+          "Repeat the same input enough times to estimate variability and record request configuration. Never mark a test flaky merely because wording changes if the semantic contract remains satisfied."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "The decoding calculator exposes temperature and nucleus membership. Implement the nucleus rule with deterministic ordering, check p in (0,1], and test p=1 as a boundary. Record the preserved probability mass before normalization.",
+          "An AI regression gate should test supported claims, forbidden actions and schema rather than exact prose. Exact comparisons remain appropriate for deterministic application outputs such as canonical enums and sorted IDs."
+        ]
+      }
+    ],
+    "mistake": "Selecting every token below probability p confuses a per-token threshold with cumulative mass. Applying temperature to already normalized probabilities without the correct transformation changes the distribution incorrectly.",
+    "takeaway": "The decoding calculator exposes temperature and nucleus membership.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement nucleus(probs,p), returning ranked token indices through cumulative p. Reject p outside (0,1].",
+      "answer": "",
+      "solution": "def nucleus(probs,p):\n    if not 0<p<=1: raise ValueError('p')\n    out=[];mass=0\n    for i,v in sorted(enumerate(probs),key=lambda x:-x[1]):\n        out.append(i);mass+=v\n        if mass>=p: break\n    return out",
+      "starter": "def nucleus(probs,p):\n    return []",
+      "tests": "assert nucleus([.6,.3,.1],.8)==[0,1]\nassert nucleus([.1,.8,.1],.7)==[1]\ntry: nucleus([1],0); assert False\nexcept ValueError: pass",
+      "id": "p09-decoding-exercise",
+      "hints": [
+        "Temperature rescales logits before softmax.",
+        "Selecting every token below probability p confuses a per-token threshold with cumulative mass.",
+        "Take probabilities [0.6,0.3,0.1].",
+        "The decoding calculator exposes temperature and nucleus membership."
+      ],
+      "explanation": "def nucleus(probs,p):\n    if not 0<p<=1: raise ValueError('p')\n    out=[];mass=0\n    for i,v in sorted(enumerate(probs),key=lambda x:-x[1]):\n        out.append(i);mass+=v\n        if mass>=p: break\n    return out"
+    },
+    "quiz": {
+      "question": "At top-p=.8 for [.6,.3,.1], which tokens remain?",
+      "options": [
+        "The first two",
+        "Only the first",
+        "All tokens smaller than .8"
+      ],
+      "answer": 0,
+      "explanation": "Cumulative mass must reach .8; .6+.3=.9 is the smallest sufficient prefix."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: At top-p=.8 for [.6,.3,.1], which tokens remain?",
+      "options": [
+        "The first two",
+        "Only the first",
+        "All tokens smaller than .8"
+      ],
+      "answer": 0,
+      "explanation": "Cumulative mass must reach .8; .6+.3=.9 is the smallest sufficient prefix."
+    },
+    "sources": [
+      "https://huggingface.co/docs/transformers/generation_strategies",
+      "https://developers.openai.com/api/docs/guides/text"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p09-lifecycle"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Temperature",
+      "Top-p",
+      "Logit"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-006",
+      "bridge-transformers--llm-007",
+      "bridge-transformers--llm-008",
+      "bridge-phase-09-3",
+      "bridge-phase-09-4",
+      "bridge-phase-09-5",
+      "bridge-phase-09-6",
+      "bridge-phase-09-7"
+    ],
+    "demo": "decoding"
+  },
+  {
+    "id": "p09-selection",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Model selection: quality, context, latency and cost",
+    "minutes": 35,
+    "objectives": [
+      "Model selection",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects model selection: quality, context, latency and cost with test contracts, failure triage, and evidence for release. Compare candidates on a held-out set and choose a Pareto frontier: no candidate simultaneously improves quality, cost and latency over another.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Choose models against a workload contract rather than a popularity ranking. A failure classifier needs enum accuracy, calibration and low latency; a complex investigation needs multi-step evidence use and safe tools. Context capacity is an input/output budget, not a promise that every token is equally usable. Distracting evidence can reduce quality before the nominal limit is reached.",
+          "Reasoning-oriented models may spend additional computation or tokens internally. Compare observed end-to-end latency and billed usage using the provider's returned accounting, rather than assuming all models have identical controls or output behavior."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Create a paired benchmark over fixed cases with model ID, provider, prompt hash, tokenizer revision, retrieval version and generation parameters. Measure accepted accuracy, abstention, p95 latency, rate-limit frequency and cost per accepted task. Account for failed requests and retries.",
+          "Cost=(input_tokens*input_rate + output_tokens*output_rate)/1_000_000 when rates are quoted per million. Treat cached-token discounts and reasoning usage according to returned provider fields. Store rates as dated configuration rather than hardcoded current facts."
+        ],
+        "code": "def cost(input_tokens,output_tokens,input_rate,output_rate):\n    return (input_tokens*input_rate+output_tokens*output_rate)/1_000_000\nassert cost(1000,500,2,8)==.006",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A cheaper model doubles retries and review labor, raising cost per useful answer. A bigger context includes unauthorized documents, increasing both security risk and price. A cache keyed only by user question returns one tenant's answer to another.",
+          "Test cache scope using tenant, principal permissions, prompt/model versions and index generation. Distinguish cold and warm latency, and retest after a provider revision even when the public alias stays unchanged."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Compare candidates on a held-out set and choose a Pareto frontier: no candidate simultaneously improves quality, cost and latency over another. State constraints first, then reject candidates that violate safety or latency limits.",
+          "Use the cost calculator to estimate per-call and monthly spend, then replace estimates with measured usage from the local benchmark. A release decision includes uncertainty and a rollback model, not only an average score."
+        ]
+      }
+    ],
+    "mistake": "A cheaper model doubles retries and review labor, raising cost per useful answer. A bigger context includes unauthorized documents, increasing both security risk and price. A cache keyed only by user question returns one tenant's answer to another.",
+    "takeaway": "Compare candidates on a held-out set and choose a Pareto frontier: no candidate simultaneously improves quality, cost and latency over another.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement cost_usd(input_tokens,output_tokens,input_rate,output_rate) for rates per million. Reject negative quantities.",
+      "answer": "",
+      "solution": "def cost_usd(input_tokens,output_tokens,input_rate,output_rate):\n    if min(input_tokens,output_tokens,input_rate,output_rate)<0: raise ValueError('negative')\n    return (input_tokens*input_rate+output_tokens*output_rate)/1000000",
+      "starter": "def cost_usd(input_tokens,output_tokens,input_rate,output_rate):\n    return 0",
+      "tests": "assert abs(cost_usd(1000,500,2,8)-.006)<1e-12\ntry: cost_usd(-1,0,1,1); assert False\nexcept ValueError: pass",
+      "id": "p09-selection-exercise",
+      "hints": [
+        "Choose models against a workload contract rather than a popularity ranking.",
+        "A cheaper model doubles retries and review labor, raising cost per useful answer.",
+        "Create a paired benchmark over fixed cases with model ID, provider, prompt hash, tokenizer revision, retrieval version and generation parameters.",
+        "Compare candidates on a held-out set and choose a Pareto frontier: no candidate simultaneously improves quality, cost and latency over another."
+      ],
+      "explanation": "def cost_usd(input_tokens,output_tokens,input_rate,output_rate):\n    if min(input_tokens,output_tokens,input_rate,output_rate)<0: raise ValueError('negative')\n    return (input_tokens*input_rate+output_tokens*output_rate)/1000000"
+    },
+    "quiz": {
+      "question": "Which cost measure captures retries and abstentions?",
+      "options": [
+        "Cost per accepted task",
+        "Price per token alone",
+        "Prompt character count"
+      ],
+      "answer": 0,
+      "explanation": "Useful-task economics include all attempts and the rate of accepted outcomes."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: Which cost measure captures retries and abstentions?",
+      "options": [
+        "Cost per accepted task",
+        "Price per token alone",
+        "Prompt character count"
+      ],
+      "answer": 0,
+      "explanation": "Useful-task economics include all attempts and the rate of accepted outcomes."
+    },
+    "sources": [
+      "https://huggingface.co/docs/transformers/generation_strategies",
+      "https://developers.openai.com/api/docs/guides/text"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p09-decoding"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Context window",
+      "Token budget",
+      "Pareto frontier"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-006",
+      "bridge-transformers--llm-007",
+      "bridge-transformers--llm-008",
+      "bridge-phase-09-3",
+      "bridge-phase-09-4",
+      "bridge-phase-09-5",
+      "bridge-phase-09-6",
+      "bridge-phase-09-7"
+    ],
+    "demo": "cost"
+  },
+  {
+    "id": "p09-variability",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Non-determinism: contract stability versus wording changes",
+    "minutes": 35,
+    "objectives": [
+      "Non-determinism",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects non-determinism: contract stability versus wording changes with test contracts, failure triage, and evidence for release. Acceptance describes the semantic contract, sampling policy and observed variation.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "Repeated LLM calls can differ because of sampling, provider/model revisions and execution details. A test should distinguish harmless surface variation from changes in the task contract. Two paraphrased supported answers can both pass; two different classification enums cannot both satisfy the same fixed label expectation.",
+          "Low temperature often reduces sampling variation but does not prove exact repeatability or factual accuracy. Stable hallucinations are still wrong."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Repeat a fixed case with recorded provider/model, prompt, retrieval and generation settings. Normalize only fields whose equivalence is justified, such as whitespace in presentation text; retain canonical category, citations and tool actions unchanged. Measure accepted-decision agreement and per-run correctness.",
+          "For semantic answers, apply a calibrated rubric to each response and inspect disagreements. Report repetitions and variability alongside the average rather than selecting the best-looking sample."
+        ],
+        "code": "outputs=['ENVIRONMENT','ENVIRONMENT','UNKNOWN']\nagreement=max(outputs.count(x) for x in set(outputs))/len(outputs)\nassert agreement==2/3",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A suite compares exact prose and marks safe paraphrases flaky. Another normalizes away changed evidence IDs, making unsupported answers look equivalent. A team reruns a failing case until it passes and reports only the success.",
+          "Retain every attempt and define a pass policy before running. Test normalization with meaningful counterexamples and separate provider instability from deterministic application defects."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance describes the semantic contract, sampling policy and observed variation. For high-risk decisions, explicit review or abstention may be appropriate when repeated accepted outputs disagree.",
+          "SDETs bring familiar flake discipline: reproduce the variation, identify its layer and avoid masking a real regression with retries. AI variability changes the oracle, not the need for transparent evidence."
+        ]
+      }
+    ],
+    "mistake": "A suite compares exact prose and marks safe paraphrases flaky. Another normalizes away changed evidence IDs, making unsupported answers look equivalent. A team reruns a failing case until it passes and reports only the success.",
+    "takeaway": "Acceptance describes the semantic contract, sampling policy and observed variation.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def agreement(outputs):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def agreement(outputs):\n    if not outputs:return 0\n    return max(outputs.count(x) for x in set(outputs))/len(outputs)",
+      "starter": "def agreement(outputs):\n    return 0",
+      "tests": "assert agreement(['A','A','B'])==2/3\nassert agreement(['A','A'])==1\nassert agreement([])==0",
+      "id": "p09-variability-exercise",
+      "hints": [
+        "Repeated LLM calls can differ because of sampling, provider/model revisions and execution details.",
+        "A suite compares exact prose and marks safe paraphrases flaky.",
+        "Repeat a fixed case with recorded provider/model, prompt, retrieval and generation settings.",
+        "Acceptance describes the semantic contract, sampling policy and observed variation."
+      ],
+      "explanation": "def agreement(outputs):\n    if not outputs:return 0\n    return max(outputs.count(x) for x in set(outputs))/len(outputs)"
+    },
+    "quiz": {
+      "question": "What should repeated quality measurements retain?",
+      "options": [
+        "Every attempt and the predeclared pass policy",
+        "Only the best response",
+        "Only exact wording matches"
+      ],
+      "answer": 0,
+      "explanation": "Discarding failed attempts biases the measured quality and stability."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What should repeated quality measurements retain?",
+      "options": [
+        "Every attempt and the predeclared pass policy",
+        "Only the best response",
+        "Only exact wording matches"
+      ],
+      "answer": 0,
+      "explanation": "Discarding failed attempts biases the measured quality and stability."
+    },
+    "sources": [
+      "https://huggingface.co/docs/transformers/generation_strategies",
+      "https://developers.openai.com/api/docs/guides/text"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p09-selection"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Decision stability",
+      "Sampling variability"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-006",
+      "bridge-transformers--llm-007",
+      "bridge-transformers--llm-008",
+      "bridge-phase-09-3",
+      "bridge-phase-09-4",
+      "bridge-phase-09-5",
+      "bridge-phase-09-6",
+      "bridge-phase-09-7"
+    ]
+  },
+  {
+    "id": "p09-context-failures",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Context degradation, stale knowledge and explicit abstention",
+    "minutes": 35,
+    "objectives": [
+      "Context degradation, stale knowledge and explicit abstention",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects context degradation, stale knowledge and explicit abstention with test contracts, failure triage, and evidence for release. Acceptance reports supported-claim rate and abstention behavior by evidence slice.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "A model's training knowledge can be stale, and long context can contain distractions or contradictions. The context limit is an operational budget, not a promise of perfect use of every included fact. A support answer should use current authorized evidence and state uncertainty when no reliable source supports the claim.",
+          "Instruction priority defines behavior, while evidence supplies facts. Retrieved text can contain instructions or outdated rules; relevance alone does not establish freshness or trust."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Build cases with a current guide, an obsolete contradictory guide, missing evidence and a malicious instruction embedded in a relevant document. Version sources, filter deleted/unauthorized records and pack current evidence with clear IDs. Require an explicit abstained/review status when support is inadequate.",
+          "Compare answer support before and after adding irrelevant context, holding model and prompt fixed. Record retained evidence IDs and token usage to distinguish retrieval failure from context degradation."
+        ],
+        "code": "current=[d for d in documents if not d['deleted'] and d['version']==required_version]\nstatus='abstained' if not current else 'candidate'",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A larger context budget includes an obsolete rule and changes a correct answer. A session summary turns uncertainty into certainty. A cache returns an answer from a previous index generation.",
+          "Test contradiction, freshness, truncation and revocation. Avoid a repair loop that simply asks for a more confident response; it cannot create missing evidence."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance reports supported-claim rate and abstention behavior by evidence slice. Current knowledge is maintained through retrieval/source governance, while prompt/model evaluation measures use of that evidence.",
+          "For SDETs, a no-answer case can be a successful test. The service should fail the user task truthfully rather than produce a fabricated answer that appears to satisfy a shallow text assertion."
+        ]
+      }
+    ],
+    "mistake": "A larger context budget includes an obsolete rule and changes a correct answer. A session summary turns uncertainty into certainty. A cache returns an answer from a previous index generation.",
+    "takeaway": "Acceptance reports supported-claim rate and abstention behavior by evidence slice.",
+    "exercise": {
+      "kind": "python",
+      "prompt": "Implement the function in the editor. def select_current(docs,tenant,version):. Use the worked contract, handle the stated boundary cases, and inspect the behavior checks.",
+      "answer": "",
+      "solution": "def select_current(docs,tenant,version):\n    return sorted(d['id'] for d in docs if d['tenant']==tenant and d['version']==version and not d.get('deleted'))",
+      "starter": "def select_current(docs,tenant,version):\n    return []",
+      "tests": "docs=[{'id':'A','tenant':'x','version':2},{'id':'B','tenant':'x','version':1},{'id':'C','tenant':'x','version':2,'deleted':True}]\nassert select_current(docs,'x',2)==['A']\nassert select_current(docs,'y',2)==[]",
+      "id": "p09-context-failures-exercise",
+      "hints": [
+        "A model's training knowledge can be stale, and long context can contain distractions or contradictions.",
+        "A larger context budget includes an obsolete rule and changes a correct answer.",
+        "Build cases with a current guide, an obsolete contradictory guide, missing evidence and a malicious instruction embedded in a relevant document.",
+        "Acceptance reports supported-claim rate and abstention behavior by evidence slice."
+      ],
+      "explanation": "def select_current(docs,tenant,version):\n    return sorted(d['id'] for d in docs if d['tenant']==tenant and d['version']==version and not d.get('deleted'))"
+    },
+    "quiz": {
+      "question": "What is a correct result when authorized evidence is absent?",
+      "options": [
+        "Explicit abstention or review",
+        "An invented plausible answer",
+        "A fabricated citation"
+      ],
+      "answer": 0,
+      "explanation": "Truthful uncertainty is part of the application contract."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: What is a correct result when authorized evidence is absent?",
+      "options": [
+        "Explicit abstention or review",
+        "An invented plausible answer",
+        "A fabricated citation"
+      ],
+      "answer": 0,
+      "explanation": "Truthful uncertainty is part of the application contract."
+    },
+    "sources": [
+      "https://huggingface.co/docs/transformers/generation_strategies",
+      "https://developers.openai.com/api/docs/guides/text"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p09-variability"
+    ],
+    "isPhaseCheckpoint": false,
+    "glossaryTerms": [
+      "Stale knowledge",
+      "Context degradation"
+    ],
+    "interviewIds": [
+      "bridge-transformers--llm-006",
+      "bridge-transformers--llm-007",
+      "bridge-transformers--llm-008",
+      "bridge-phase-09-3",
+      "bridge-phase-09-4",
+      "bridge-phase-09-5",
+      "bridge-phase-09-6",
+      "bridge-phase-09-7"
+    ]
+  },
+  {
+    "id": "p09-checkpoint",
+    "phase": 9,
+    "module": "Large Language Model Fundamentals",
+    "title": "Phase 09 checkpoint: apply, break and evaluate",
+    "minutes": 35,
+    "objectives": [
+      "Phase 09 checkpoint",
+      "Implement the worked example and validate its boundary conditions",
+      "Use the diagnostic evidence to explain a release decision"
+    ],
+    "relevance": "In the fictional CI quality platform, this skill connects phase 09 checkpoint: apply, break and evaluate with test contracts, failure triage, and evidence for release. Acceptance reports supported-claim rate and abstention behavior by evidence slice.",
+    "sections": [
+      {
+        "title": "Problem and intuition",
+        "paragraphs": [
+          "This phase checkpoint connects context degradation, stale knowledge and explicit abstention to the shared CI quality platform. Begin with the input contract, identify the expected output, and state which facts are known from fixtures versus inferred. Your task is to produce a reviewable decision, not merely repeat the definition.",
+          "Read the phase's worked examples before attempting the assessment. An accepted result must preserve authorized evidence, handle the demonstrated failure mode and explain what would invalidate the decision. Keep a field note containing the fixture ID and your reasoning."
+        ]
+      },
+      {
+        "title": "Implement the mechanism",
+        "paragraphs": [
+          "Build cases with a current guide, an obsolete contradictory guide, missing evidence and a malicious instruction embedded in a relevant document. Version sources, filter deleted/unauthorized records and pack current evidence with clear IDs. Require an explicit abstained/review status when support is inadequate.",
+          "Compare answer support before and after adding irrelevant context, holding model and prompt fixed. Record retained evidence IDs and token usage to distinguish retrieval failure from context degradation.",
+          "Apply this mechanism to a synthetic incident in the shared fixture set. Preserve input/output identities so a reviewer can reproduce the result. Use the earlier lessons' implementation checks rather than assuming the checkpoint example is correct."
+        ],
+        "code": "current=[d for d in documents if not d['deleted'] and d['version']==required_version]\nstatus='abstained' if not current else 'candidate'",
+        "language": "python"
+      },
+      {
+        "title": "Break it and diagnose it",
+        "paragraphs": [
+          "A larger context budget includes an obsolete rule and changes a correct answer. A session summary turns uncertainty into certainty. A cache returns an answer from a previous index generation.",
+          "Test contradiction, freshness, truncation and revocation. Avoid a repair loop that simply asks for a more confident response; it cannot create missing evidence.",
+          "Construct a counterexample that fails the intended invariant, then describe how the same test would catch a future regression. State which layer owns the correction: data, numerical code, API validation, retrieval, policy or evaluation."
+        ]
+      },
+      {
+        "title": "Evaluate and apply",
+        "paragraphs": [
+          "Acceptance reports supported-claim rate and abstention behavior by evidence slice. Current knowledge is maintained through retrieval/source governance, while prompt/model evaluation measures use of that evidence.",
+          "For SDETs, a no-answer case can be a successful test. The service should fail the user task truthfully rather than produce a fabricated answer that appears to satisfy a shallow text assertion.",
+          "The checkpoint memo is assessed with an explicit evidence checklist. Its keyword checks confirm required topics are present; they do not establish the technical truth of your design. Review the worked approach and retain executable evidence where the phase includes code."
+        ]
+      }
+    ],
+    "mistake": "A larger context budget includes an obsolete rule and changes a correct answer. A session summary turns uncertainty into certainty. A cache returns an answer from a previous index generation.",
+    "takeaway": "Acceptance reports supported-claim rate and abstention behavior by evidence slice.",
+    "exercise": {
+      "kind": "rubric",
+      "prompt": "Apply Context degradation, stale knowledge and explicit abstention to a synthetic CI incident. Write a memo with the input contract, an implementation decision, a failure counterexample, a test/evaluation result, and a release or review decision.",
+      "answer": "",
+      "criteria": [
+        {
+          "label": "Input contract",
+          "terms": [
+            "input",
+            "contract"
+          ]
+        },
+        {
+          "label": "Implementation evidence",
+          "terms": [
+            "implementation",
+            "evidence"
+          ]
+        },
+        {
+          "label": "Counterexample and test",
+          "terms": [
+            "failure",
+            "test"
+          ]
+        },
+        {
+          "label": "Decision",
+          "terms": [
+            "release",
+            "review"
+          ]
+        }
+      ],
+      "solution": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance reports supported-claim rate and abstention behavior by evidence slice.",
+      "id": "p09-checkpoint-exercise",
+      "hints": [
+        "This phase checkpoint connects context degradation, stale knowledge and explicit abstention to the shared CI quality platform.",
+        "A larger context budget includes an obsolete rule and changes a correct answer.",
+        "Build cases with a current guide, an obsolete contradictory guide, missing evidence and a malicious instruction embedded in a relevant document.",
+        "Acceptance reports supported-claim rate and abstention behavior by evidence slice."
+      ],
+      "explanation": "Start with an input contract tied to a fixture ID. Explain the implementation using the phase mechanism. Provide evidence from a behavior check or evaluated example. Include a failure counterexample and the test that catches it. Finish with a release or review decision justified by the stated evidence.\n\nAcceptance reports supported-claim rate and abstention behavior by evidence slice."
+    },
+    "quiz": {
+      "question": "A candidate for context degradation, stale knowledge and explicit abstention meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "checkpoint": {
+      "question": "Integrated decision: A candidate for context degradation, stale knowledge and explicit abstention meets the happy path but fails the phase's documented counterexample. What is the defensible decision?",
+      "options": [
+        "Hold release, preserve the failing case and fix the responsible boundary",
+        "Release because the happy path passed",
+        "Delete the failing case to improve the score"
+      ],
+      "answer": 0,
+      "explanation": "The failing counterexample disproves the claimed contract. Retain it as regression evidence and rerun the corrected boundary."
+    },
+    "sources": [
+      "https://huggingface.co/docs/transformers/generation_strategies",
+      "https://developers.openai.com/api/docs/guides/text"
+    ],
+    "reviewed": "2026-10-10",
+    "prerequisites": [
+      "p09-context-failures"
+    ],
+    "isPhaseCheckpoint": true,
+    "glossaryTerms": [],
+    "interviewIds": [
+      "bridge-transformers--llm-006",
+      "bridge-transformers--llm-007",
+      "bridge-transformers--llm-008",
+      "bridge-phase-09-3",
+      "bridge-phase-09-4",
+      "bridge-phase-09-5",
+      "bridge-phase-09-6",
+      "bridge-phase-09-7"
+    ]
+  }
+]
